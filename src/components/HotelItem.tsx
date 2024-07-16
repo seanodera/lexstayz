@@ -1,5 +1,6 @@
 import {MdOutlineBathroom, MdOutlineBathtub, MdPersonOutline} from "react-icons/md";
 import {IoBedOutline} from "react-icons/io5";
+import Link from "next/link";
 
 
 export default function HotelItem({hotel}: {
@@ -11,7 +12,7 @@ export default function HotelItem({hotel}: {
     }
 }) {
     const {poster, name, id, location, price, bed, bath, rating, maxGuests} = hotel;
-    return <div className={'rounded-xl'}>
+    return <Link href={`/stay/${id}`} className={'rounded-xl'}>
         <img src={poster} alt={name} className={'rounded-xl aspect-square w-full'}/>
         <div className={'flex items-center justify-between py-4'}>
             <div>
@@ -27,5 +28,5 @@ export default function HotelItem({hotel}: {
             <span className={'flex items-center gap-2 font-light px-3 md:border-e border-gray-400'}><IoBedOutline/> {bed} Beds</span>
             <span className={'flex items-center gap-2 font-light px-3'}><MdOutlineBathtub/> {bath} Baths</span>
         </div>
-    </div>
+    </Link>
 }
