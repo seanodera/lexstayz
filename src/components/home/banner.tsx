@@ -9,7 +9,7 @@ export default function Banner() {
         <div className={'h-full w-full flex flex-col justify-between'}>
             <div className={'flex justify-between items-end h-full py-16'}>
                 <div className={'h-full'}>
-                    vertical thing
+                    [vertical selector]
                 </div>
                 <span className={'text-9xl'}>Nairobi</span>
             </div>

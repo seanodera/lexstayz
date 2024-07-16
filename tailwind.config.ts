@@ -1,18 +1,19 @@
 import type { Config } from "tailwindcss";
 
+
 const primaryColor = {
-  '50': '#fff6ec',
-  '100': '#ffebd3',
-  '200': '#ffd2a5',
-  '300': '#ffb26d',
-  '400': '#ff8632',
-  '500': '#ff640a',
-  '600': '#ff4a00',
-  '700': '#cc3202',
-  '800': '#a1280b',
-  '900': '#82240c',
-  '950': '#460f04',
-  DEFAULT: '#ff4a00'
+  '50': '#eef0ff',
+  '100': '#dfe4ff',
+  '200': '#c5ccff',
+  '300': '#a2a9ff',
+  '400': '#7f7efb',
+  '500': '#584cf4',
+  '600': '#5b41ea',
+  '700': '#4d34ce',
+  '800': '#3f2da6',
+  '900': '#372c83',
+  '950': '#221a4c',
+  DEFAULT: '#584cf4'
 };
 
 const config: Config = {
@@ -25,6 +26,7 @@ const config: Config = {
     extend: {
       colors: {
         primary: primaryColor,
+        dark: primaryColor[950],
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",

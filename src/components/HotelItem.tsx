@@ -18,7 +18,7 @@ export default function HotelItem({hotel}: {
                 <h3 className={'text-xl font-semibold'}>{name}</h3>
                 <h3 className={'text-lg font-light text-gray-400'}>{location.city}, {location.country}</h3>
             </div>
-            <div className={'text-end text-primary text-xl'}>{'$'} {price.toLocaleString(undefined, {
+            <div className={'text-end text-primary text-xl text-nowrap'}>{'$'} {price.toLocaleString(undefined, {
                 minimumFractionDigits: 2, maximumFractionDigits: 2
             })}</div>
         </div>
