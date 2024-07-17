@@ -23,10 +23,10 @@ export default function HotelItem({hotel}: {
                 minimumFractionDigits: 2, maximumFractionDigits: 2
             })}</div>
         </div>
-        <div className={'flex items-center'}>
-            <span className={'flex items-center gap-2 font-light pe-3 md:border-e border-gray-400'}><MdPersonOutline/> {maxGuests} Guests</span>
-            <span className={'flex items-center gap-2 font-light px-3 md:border-e border-gray-400'}><IoBedOutline/> {bed} Beds</span>
-            <span className={'flex items-center gap-2 font-light px-3'}><MdOutlineBathtub/> {bath} Baths</span>
+        <div className={'flex items-center flex-wrap'}>
+            <span className={'text-nowrap flex items-center gap-2 font-light pe-3 border-e border-gray-400'}><MdPersonOutline/> {maxGuests} Guests</span>
+            <span className={'text-nowrap flex items-center gap-2 font-light px-3 max-md:border-e lg:border-e border-gray-400'}><IoBedOutline/> {bed} Beds</span>
+            <span className={'text-nowrap flex items-center gap-2 font-light max-md:px-3 md:pe-3 lg:px-3'}><MdOutlineBathtub/> {bath} Baths</span>
         </div>
     </Link>
 }

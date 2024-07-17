@@ -26,10 +26,10 @@ export default function Destination() {
         }
     ]
     const [activeTabIndex, setActiveTabIndex] = useState(0);
-    return <section className={'md:px-16 px-7 py-12 bg-white border-t border-gray-200'}>
+    return <section className={' lg:px-16  py-12 bg-white border-t border-gray-200'}>
         <div
-            className="text-lg text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700">
-            <ul className="flex flex-wrap -mb-px">
+            className="max-lg:px-7 text-lg text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700">
+            <ul className="flex flex-nowrap overflow-x-scroll -mb-px">
                 {
                     tabs.map((tab, index) => <li key={index} className="me-2">
                         <span onClick={() => setActiveTabIndex(index)}
@@ -39,7 +39,7 @@ export default function Destination() {
                 }
             </ul>
         </div>
-        <div className={'grid grid-cols-4 gap-8 py-8 text-black'}>
+        <div className={'max-lg:px-7 grid md:grid-cols-3 lg:grid-cols-4 gap-8 py-8 text-black'}>
             {hotelsData.map((hotel, index) => <HotelItem key={index} hotel={hotel}/> )}
         </div>
 

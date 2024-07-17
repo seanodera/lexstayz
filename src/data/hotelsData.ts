@@ -8,9 +8,9 @@ function hotelsDataGenerator(){
             name: 'The ' + faker.person.lastName() + ' Inn',
             price: faker.number.int({max: 1000}),
             rating: faker.number.int({max: 1000})/ 100,
-            bath: faker.number.int({max: 10}),
-            bed: faker.number.int({max: 10}),
-            maxGuests: faker.number.int({max: 10}),
+            bath: faker.number.int({max: 10, min: 1}),
+            bed: faker.number.int({max: 10, min: 1}),
+            maxGuests: faker.number.int({max: 10, min: 1}),
             location: {
                 city: faker.location.city(),
                 country: faker.location.country(),
