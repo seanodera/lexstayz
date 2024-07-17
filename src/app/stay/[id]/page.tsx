@@ -92,6 +92,11 @@ export default function Stay() {
                         {stay.rooms.map((room, index) => <RoomComponent room={room} stay={stay} key={index} />)}
                     </div>
                 </div>
+
+                <div>
+                    <h3 className={'text-2xl font-semibold my-2'}>Reviews</h3>
+                    <div className={'grid grid-cols-1 md:grid-cols-2 gap-8'}></div>
+                </div>
             </div>
             <div className={'max-lg:hidden lg:ps-12 col-span-1 md:col-span-2 lg:col-span-1'}>
                 <div className={''}>

@@ -11,6 +11,7 @@ function hotelsDataGenerator(){
             bath: faker.number.int({max: 10, min: 1}),
             bed: faker.number.int({max: 10, min: 1}),
             maxGuests: faker.number.int({max: 10, min: 1}),
+            description: faker.lorem.paragraph(8),
             location: {
                 city: faker.location.city(),
                 country: faker.location.country(),
