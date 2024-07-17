@@ -92,6 +92,11 @@ export default function Stay() {
                         {stay.rooms.map((room, index) => <RoomComponent room={room} stay={stay} key={index} />)}
                     </div>
                 </div>
+
+                <div>
+                    <h3 className={'text-2xl font-semibold my-2'}>Reviews</h3>
+                    <div className={'grid grid-cols-1 md:grid-cols-2 gap-8'}></div>
+                </div>
             </div>
             <div className={'max-lg:hidden lg:ps-12 col-span-1 md:col-span-2 lg:col-span-1'}>
                 <div className={''}>
@@ -121,7 +126,7 @@ export function RoomComponent({room, stay, className = ''}: {room: any, stay: an
         <div className={'text-lg font-medium'}>Beds</div>
         <div className={'flex items-center gap-2 mb-4'}>
             {
-                room.beds.map((bed : any, index : number) => <div
+                room.beds.map((bed : any, index : number) => <div key={index}
                     className={'p-3 text-center border border-gray-500 shadow-md rounded'}>
                     <span
                         className={'mx-auto'}>{(bed.type.toLowerCase() === 'king' || bed.type.toLowerCase() === 'double') ?
