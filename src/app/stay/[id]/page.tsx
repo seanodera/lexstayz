@@ -71,8 +71,8 @@ export default function Stay() {
                 <MdOutlineDashboard/> Show all photos
             </div>
         </div>
-        <div className={'grid grid-cols-2 md:grid-cols-5 lg:grid-cols-3 gap-4 pt-8'}>
-            <div className={'col-span-2 md:col-span-3 lg:col-span-2'}>
+        <div className={'grid grid-cols-2 lg:grid-cols-3 gap-4 pt-8'}>
+            <div className={'col-span-2'}>
                 <h3 className={'font-semibold text-xl'}>{stay.type} in {stay.location.city}, {stay.location.country}</h3>
                 <div className={'flex items-center my-4'}>
                     <span
@@ -87,55 +87,53 @@ export default function Stay() {
                     <p className={'max-lg:line-clamp-5 '}>{stay.description}</p>
                 </div>
                 <div>
-                    <h3 className={'text-2xl font-semibold'}>Available Rooms</h3>
-                    <div className={'grid grid-cols-2 gap-8'}>
-                        {stay.rooms.map((room, index) => <div className={'p-8 first:px-0'} key={index}>
-                            <img className={'aspect-video rounded-xl object-cover'} src={room.poster} alt={room.name}/>
-                            <div className={'my-4 flex md:justify-between'}><h3
-                                className={'text-xl font-medium'}>{room.name}</h3>  <span
-                                className={'font-medium text-primary text-xl'}>{'$'} {stay.price.toLocaleString(undefined, {
-                                minimumFractionDigits: 2, maximumFractionDigits: 2
-                            })} <span className={'font-light text-sm'}>/night</span></span></div>
-                            <div className={'flex flex-wrap gap-2 my-4'}>{room.amenities.map((amenity, index) =>
-                                <div
-                                    className={'border border-gray-500 shadow-md rounded py-1 px-3 text-balance text-sm'}
-                                    key={index}>{amenity}</div>)}</div>
-                            <div className={'text-lg font-medium'}>Beds</div>
-                            <div className={'flex items-center gap-2 mb-4'}>
-                                {
-                                    room.beds.map((bed, index) => <div className={'p-3 text-center border border-gray-500 shadow-md rounded'}>
-                                        <span className={'mx-auto'}>{(bed.type.toLowerCase() === 'king' || bed.type.toLowerCase() === 'double')? <IoBedOutline size={28}/> : <LuBedSingle size={28}/>}</span>
-                                        {bed.type} Bed x {bed.number}
-                                    </div>)
-                                }
-                            </div>
-                            <div>
-
-                            </div>
-                            <div className={'rounded-xl text-center py-3 bg-primary text-white font-medium'}>Reserve
-                            </div>
-                        </div>)}
+                    <h3 className={'text-2xl font-semibold my-2'}>Available Rooms</h3>
+                    <div className={'grid grid-cols-1 md:grid-cols-2 gap-8'}>
+                        {stay.rooms.map((room, index) => <RoomComponent room={room} stay={stay} key={index} />)}
                     </div>
                 </div>
             </div>
-            <div className={'max-md:hidden lg:ps-12 col-span-1 md:col-span-2 lg:col-span-1'}>
-                <div className={'rounded-2xl flex flex-col gap-4 p-8 shadow-md bg-primary-50 text-dark'}>
-                    <span className={'font-semibold text-xl'}>{'$'} {stay.price.toLocaleString(undefined, {
-                        minimumFractionDigits: 2, maximumFractionDigits: 2
-                    })} <span className={'font-light text-sm'}>night</span></span>
-                    <div className={'grid grid-cols-1 lg:grid-cols-2 rounded-xl'}>
-                        <div className={'p-4 border border-black rounded-tl-xl max-lg:rounded-tr-xl'}><h6
-                            className={'font-semibold'}>Check In</h6></div>
-                        <div className={'p-4 border border-black lg:rounded-tr-xl'}><h6
-                            className={'font-semibold'}>Check Out</h6></div>
-                        <div className={'p-4 border border-black rounded-b-xl lg:col-span-2'}><h6
-                            className={'font-bold'}>Guests</h6>
-                        </div>
-                    </div>
-                    <div className={'rounded-xl text-center py-3 bg-primary text-white font-medium'}>Reserve</div>
+            <div className={'max-lg:hidden lg:ps-12 col-span-1 md:col-span-2 lg:col-span-1'}>
+                <div className={''}>
+                    <h3 className={'text-2xl font-semibold mb-2'}>Featured Room</h3>
+                    {stay.rooms.slice(0, 1).map((room, index) => <RoomComponent room={room} stay={stay} key={index}
+                                                                                className={'shadow-md bg-primary-50 text-dark rounded-2xl p-4'}/>)}
                 </div>
 
             </div>
         </div>
     </div>;
+}
+
+export function RoomComponent({room, stay, className = ''}: {room: any, stay: any, className?: string}) {
+
+    return <div className={`${className? className : 'rounded-2xl p-4 shadow-md'}`}>
+        <img className={'aspect-video rounded-xl object-cover'} src={room.poster} alt={room.name}/>
+        <div className={'my-4 flex md:justify-between'}><h3
+            className={'text-xl font-medium'}>{room.name}</h3>  <span
+            className={'font-medium text-primary text-xl'}>{'$'} {stay.price.toLocaleString(undefined, {
+            minimumFractionDigits: 2, maximumFractionDigits: 2
+        })} <span className={'font-light text-sm'}>/night</span></span></div>
+        <div className={'flex flex-wrap gap-2 my-4'}>{room.amenities.map((amenity : string, index : number) =>
+            <div
+                className={'border border-gray-500 shadow-md rounded py-1 px-3 text-balance text-sm'}
+                key={index}>{amenity}</div>)}</div>
+        <div className={'text-lg font-medium'}>Beds</div>
+        <div className={'flex items-center gap-2 mb-4'}>
+            {
+                room.beds.map((bed : any, index : number) => <div
+                    className={'p-3 text-center border border-gray-500 shadow-md rounded'}>
+                    <span
+                        className={'mx-auto'}>{(bed.type.toLowerCase() === 'king' || bed.type.toLowerCase() === 'double') ?
+                        <IoBedOutline size={28}/> : <LuBedSingle size={28}/>}</span>
+                    {bed.type} Bed x {bed.number}
+                </div>)
+            }
+        </div>
+        <div>
+
+        </div>
+        <div className={'rounded-xl text-center py-3 bg-primary text-white font-medium'}>Reserve
+        </div>
+    </div>
 }
