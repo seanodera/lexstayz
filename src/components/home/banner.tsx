@@ -14,10 +14,10 @@ export default function Banner() {
             </div>
             <div className={'grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4'}>
                 <div className={'col-span-2 md:col-span-4 rounded-full backdrop-blur-lg border border-gray-500 px-4 py-2'}><Input className={'w-full border-0 decoration-0 bg-transparent text-white font-thin'} placeholder={'Where do you want to go?'}/></div>
-                <div className={'col-span-1 lg:col-span-1 rounded-full backdrop-blur-lg border border-gray-500 px-4 py-2'}><Input className={'w-full border-0 decoration-0 bg-transparent text-white font-thin overflow-hidden'} placeholder={'Budget'}/></div>
-                <div className={'col-span-1 lg:col-span-1 rounded-full backdrop-blur-lg border border-gray-500 px-4 py-2'}><Input className={'w-full border-0 decoration-0 bg-transparent text-white font-thin overflow-hidden'} placeholder={'Guests'}/></div>
-                <div className={'col-span-1 lg:col-span-1 rounded-full backdrop-blur-lg border border-gray-500 px-4 py-2'}><Input className={'w-full border-0 decoration-0 bg-transparent text-white font-thin overflow-hidden'} placeholder={'Bedrooms'}/></div>
-                <div className={'col-span-1 lg:col-span-1 rounded-full backdrop-blur-lg border border-gray-500 px-4 py-2'}><Input className={'w-full border-0 decoration-0 bg-transparent text-white font-thin overflow-hidden'} placeholder={'Bathrooms'}/></div>
+                <div className={'col-span-1 lg:col-span-1 rounded-full backdrop-blur-lg border border-gray-500 px-4 py-2'}><Input className={'w-full border-0 decoration-0 bg-transparent text-white font-thin overflow-hidden'} type={'number'} prefix={'$'} step={.01} placeholder={'Budget'}/></div>
+                <div className={'col-span-1 lg:col-span-1 rounded-full backdrop-blur-lg border border-gray-500 px-4 py-2'}><Input className={'w-full border-0 decoration-0 bg-transparent text-white font-thin overflow-hidden'} type={'number'} step={1}  placeholder={'Guests'}/></div>
+                <div className={'col-span-1 lg:col-span-1 rounded-full backdrop-blur-lg border border-gray-500 px-4 py-2'}><Input className={'w-full border-0 decoration-0 bg-transparent text-white font-thin overflow-hidden'} type={'number'} step={1} placeholder={'Bedrooms'}/></div>
+                <div className={'col-span-1 lg:col-span-1 rounded-full backdrop-blur-lg border border-gray-500 px-4 py-2'}><Input className={'w-full border-0 decoration-0 bg-transparent text-white font-thin overflow-hidden'} type={'number'} step={1} placeholder={'Bathrooms'}/></div>
             </div>
         </div>
     </section>
