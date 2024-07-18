@@ -20,7 +20,7 @@ export default function Navbar() {
             window.removeEventListener("scroll", navBarTop);
         };
     }, []);
-    return <div className={`w-full lg:px-24 px-7 flex items-center justify-between backdrop-blur-sm py-3 fixed top-0 left-0 z-50 ${pathName === '/'? windowHeight >= 100 ? 'bg-white text-dark': ' ' : 'bg-white text-dark'} transition-all duration-300 ease-linear`}>
+    return <div className={`w-full lg:px-24 px-7 flex items-center justify-between backdrop-blur-sm py-3 fixed top-0 left-0 z-50 ${pathName === '/'? windowHeight >= 100 ? 'bg-white text-dark': ' ' : 'bg-white text-dark shadow-md shadow-primary-50'} transition-all duration-300 ease-linear`}>
         <nav className={'max-lg:hidden flex flex-col gap-1'}>
             {/*<Link href="/">Home</Link>*/}
             {/*<Link href="/">Destination</Link>*/}

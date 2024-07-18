@@ -15,12 +15,12 @@ export default function ContactForm() {
                 <Input className={'block border border-gray-500 rounded py-1 px-2 w-full'} placeholder="Last Name" required />
             </Field>
         </div>
-        <Field className={'md:w-1/2 pe-4'}>
+        <Field className={'md:w-1/2 md:pe-4'}>
             <Label className={'block font-semibold'}>Email</Label>
             <Input className={'block border border-gray-500 rounded py-1 px-2 w-full'} placeholder="Email" required />
             <small className={'font-light'}>Confirmation goes to this email</small>
         </Field>
-        <Field className={'md:w-1/2 pe-4'}>
+        <Field className={'md:w-1/2 md:pe-4'}>
             <Label className={'block font-semibold'}>Country</Label>
             <Select className={'block border border-gray-500 rounded py-1 px-2 w-full'}>
                 <option>Cyprus</option>
@@ -28,7 +28,7 @@ export default function ContactForm() {
                 <option>Kenya</option>
             </Select>
         </Field>
-        <Field className={'md:w-1/2 pe-4'}>
+        <Field className={'md:w-1/2 md:pe-4'}>
             <Label className={'block font-semibold'}>Phone Number</Label>
             <Input className={'block border border-gray-500 rounded py-1 px-2 w-full'} placeholder="Phone" required />
         </Field>

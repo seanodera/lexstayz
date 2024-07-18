@@ -59,10 +59,10 @@ export default function Page() {
     return (<div className={'bg-white py-24 lg:px-16 px-7 text-dark'}>
         <div className={'grid grid-cols-1 lg:grid-cols-4 max-lg:gap-8 gap-4 '}>
             <div className={'col-span-1 lg:col-span-3 flex flex-col gap-8'}>
-                <div className={'border border-gray-200 rounded-xl p-8 shadow-md'}>
+                <div className={'border border-gray-200 rounded-xl p-4 md:p-8 shadow-md'}>
                     <ContactForm/>
                 </div>
-                <div className={'border border-gray-200 rounded-xl p-8 shadow-md'}><SpecialRequests/></div>
+                <div className={'border border-gray-200 rounded-xl p-4 md:p-8 shadow-md'}><SpecialRequests/></div>
                 <Link href={'/checkout'}
                       className={'hidden max-lg:block py-3 text-center bg-primary rounded-xl font-medium text-white'}>Checkout</Link>
             </div>

@@ -10,6 +10,8 @@ import hotelsData from "@/data/hotelsData";
 import HotelsData from "@/data/hotelsData";
 import HotelItem from "@/components/HotelItem";
 import {IoMdGlobe} from "react-icons/io";
+import {useAppSelector} from "@/hooks/hooks";
+import {selectAllStays} from "@/slices/bookingSlice";
 
 export default function Destination() {
     const tabs = [
@@ -28,6 +30,7 @@ export default function Destination() {
 
     ]
     const [activeTabIndex, setActiveTabIndex] = useState(0);
+    const stays = useAppSelector(selectAllStays)
     return <section className={' lg:px-16  py-12 bg-white border-t border-gray-200'}>
         <div
             className="max-lg:px-7 text-lg text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700">
@@ -41,8 +44,8 @@ export default function Destination() {
                 }
             </ul>
         </div>
-        <div className={'max-lg:px-7 grid md:grid-cols-3 lg:grid-cols-4 gap-8 py-8 text-black'}>
-            {hotelsData.map((hotel, index) => <HotelItem key={index} hotel={hotel}/> )}
+        <div className={'max-lg:px-4 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 py-8 text-black'}>
+            {stays.map((hotel:any, index:number) => <HotelItem key={index} hotel={hotel}/> )}
         </div>
 
     </section>
