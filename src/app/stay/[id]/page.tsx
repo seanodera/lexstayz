@@ -1,15 +1,10 @@
 'use client'
 import {faker} from "@faker-js/faker";
-import {AiOutlineMenu} from "react-icons/ai";
 import {MdOutlineBathtub, MdOutlineDashboard, MdPersonOutline} from "react-icons/md";
 import {IoBedOutline} from "react-icons/io5";
-import CustomDatePicker from "@/components/DatePicker";
 import {useState} from "react";
-import {LuBedSingle} from "react-icons/lu";
 import RoomComponent from "@/components/roomComponent";
 import DateComponent from "@/components/DateComponent";
-import DatePicker from "react-datepicker";
-import GuestComponent from "@/components/stay/guestComponent";
 import Link from "next/link";
 
 
@@ -62,8 +57,6 @@ export default function Stay() {
         poster: faker.image.urlLoremFlickr({category: 'HotelRoom'}),
         images: [faker.image.urlLoremFlickr({category: 'HotelRoom'}), faker.image.urlLoremFlickr({category: 'HotelRoom'}), faker.image.urlLoremFlickr({category: 'HotelRoom'}), faker.image.urlLoremFlickr({category: 'HotelRoom'})]
     }
-    const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-    const [cart, setCart] = useState([])
 
 
     return <div className={'lg:px-24 px-7 py-24 bg-white text-dark'}>
@@ -132,7 +125,7 @@ export default function Stay() {
                 <div className={''}>
                     <h3 className={'text-2xl font-semibold mb-2'}>Cart</h3>
                     <div className={'rounded-2xl bg-dark text-white p-4'}>
-                        <Link href={'/checkout'} className={'rounded-xl text-center py-3 bg-primary text-white font-medium w-full'}>Confirm Reservation
+                        <Link href={'/checkout'} className={'block rounded-xl text-center py-3 bg-primary text-white font-medium w-full'}>Confirm Reservation
                         </Link>
                     </div>
                 </div>

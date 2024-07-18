@@ -63,7 +63,7 @@ export default function CheckoutPage() {
             </div>
             <div className={'col-span-1 lg:col-span-1 flex flex-col gap-8'}>
                 <div className={'border border-gray-200 rounded-xl p-4 shadow-md'}>
-                    <img src={stay.poster} className={'rounded-xl aspect-video object-cover mb-4'}/>
+                    <img src={stay.poster} className={'rounded-xl aspect-video object-cover mb-4'} alt={stay.name}/>
                     <h3 className={'text-xl font-semibold'}>{stay.name}</h3>
                     <h3 className={'font-light text-gray-400 line-clamp-1'}>{stay.location.city}, {stay.location.country}</h3>
                 </div>
@@ -88,7 +88,7 @@ export default function CheckoutPage() {
                     <div className={'ps-4'}>
                         <span className={'text-primary'}>4</span> x Garden Room
                     </div>
-                    <Link href={`/stay/${stay.id}`} className={'block w-full text-primary text-center py-2 hover:bg-primary hover:text-white my-2 rounded-xl'}>Change Selection</Link>
+                    <Link href={`/stay/${stay.id}`} className={'block text-primary text-center py-2 hover:bg-primary hover:text-white my-2 rounded-xl'}>Change Selection</Link>
                 </div>
 
             </div>
