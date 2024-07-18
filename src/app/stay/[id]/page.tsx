@@ -125,7 +125,7 @@ export default function Stay() {
                 <div className={''}>
                     <h3 className={'text-2xl font-semibold mb-2'}>Cart</h3>
                     <div className={'rounded-2xl bg-dark text-white p-4'}>
-                        <Link href={'/checkout'} className={'block rounded-xl text-center py-3 bg-primary text-white font-medium w-full'}>Confirm Reservation
+                        <Link href={'/booking-confirmation'} className={'block rounded-xl text-center py-3 bg-primary text-white font-medium w-full'}>Confirm Reservation
                         </Link>
                     </div>
                 </div>
