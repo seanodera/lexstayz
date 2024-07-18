@@ -1,9 +1,14 @@
+'use client'
 import {IoBedOutline} from "react-icons/io5";
 import {LuBedSingle} from "react-icons/lu";
+import ReservationDialog from "@/components/stay/reservationDialog";
+import {useState} from "react";
+import {Select} from "@headlessui/react";
 
 
 export default function RoomComponent({room, stay, className = ''}: {room: any, stay: any, className?: string}) {
-
+    const [open, setOpen] = useState(false);
+    console.log(open)
     return <div className={`${className? className : 'rounded-2xl p-4 shadow-md'}`}>
         <img className={'aspect-video rounded-xl object-cover'} src={room.poster} alt={room.name}/>
         <div className={'my-4 flex md:justify-between'}><h3
@@ -27,10 +32,15 @@ export default function RoomComponent({room, stay, className = ''}: {room: any, 
                 </div>)
             }
         </div>
-        <div>
+        <div className={'flex items-center gap-2'}>
+            <div className={'rounded-xl'}><Select className={'rounded-xl border border-primary py-3 px-3 text-start bg-transparent'}>
+                {Array.from({ length: 11 }, (_, i) => <option value={i} key={i}>{i} {(i === 1)? 'Room':'Rooms'}</option> )}
+            </Select></div>
+            <button className={'rounded-xl text-center py-3 bg-primary text-white font-medium w-full'}
+                    onClick={() => setOpen(true)}>Reserve
+            </button>
+        </div>
 
-        </div>
-        <div className={'rounded-xl text-center py-3 bg-primary text-white font-medium'}>Reserve
-        </div>
+        <ReservationDialog isOpen={open} setIsOpen={setOpen} room={room} stay={stay}/>
     </div>
 }

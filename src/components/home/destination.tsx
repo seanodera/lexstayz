@@ -4,26 +4,28 @@
 import {useTabs} from "@/hooks/use-tabs";
 import {useState} from "react";
 import {Framer} from '@/lib/framer';
-import {MdOutlineHotel, MdOutlineVilla} from "react-icons/md";
+import {MdOutlineBathroom, MdOutlineHotel, MdOutlineVilla} from "react-icons/md";
 import {AiOutlineApartment} from "react-icons/ai";
 import hotelsData from "@/data/hotelsData";
 import HotelsData from "@/data/hotelsData";
 import HotelItem from "@/components/HotelItem";
+import {IoMdGlobe} from "react-icons/io";
 
 export default function Destination() {
     const tabs = [
         {
-            Icon: MdOutlineVilla,
-            name: "Villa",
-        },
-        {
-            Icon: AiOutlineApartment,
-            name: "Apartment",
+            Icon: IoMdGlobe,
+            name: 'All'
         },
         {
             Icon: MdOutlineHotel,
-            name: "Hotel",
-        }
+            name: "Hotels",
+        },
+        {
+            Icon: MdOutlineVilla,
+            name: "Homes",
+        },
+
     ]
     const [activeTabIndex, setActiveTabIndex] = useState(0);
     return <section className={' lg:px-16  py-12 bg-white border-t border-gray-200'}>
