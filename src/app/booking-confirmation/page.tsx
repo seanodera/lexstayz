@@ -46,7 +46,7 @@ export default function Page() {
                                     until {dateReader({})} 00:00
                                 </div>
                                 <div className={'flex justify-between'}>
-                                    <span className={'font-medium'}>If you cancel, you'll pay</span>
+                                    <span className={'font-medium'}>If you cancel, you&apos;ll pay</span>
                                     <span className={'text-primary'}>$ 30.00</span>
                                 </div>
                             </div>
