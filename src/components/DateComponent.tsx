@@ -6,6 +6,8 @@ import 'react-datepicker/dist/react-datepicker.css';
 import '@/styles/datepicker.css';
 import {addDays} from "date-fns";
 import {AiOutlineCalendar} from "react-icons/ai";
+import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
+import {selectDates, updateDates} from "@/slices/bookingSlice";
 
 const isSameDay = (date1: Date, date2: Date) => {
     return date1.getFullYear() === date2.getFullYear() &&
@@ -23,15 +25,18 @@ export default function DateComponent({className = '', onChange}: {
     onChange?: (startDate: Date | null, endDate: Date | null | undefined) => void
 }) {
     const today = new Date();
-    const [startDate, setStartDate] = useState<Date | null>(today);
-    const [endDate, setEndDate] = useState<Date | null | undefined>(addDays(today,1));
+    const dates = useAppSelector(selectDates)
+    const [startDate, setStartDate] = useState<Date | null>(dates.startDate);
+    const [endDate, setEndDate] = useState<Date | null | undefined>(dates.endDate);
+    const dispatch = useAppDispatch()
+
 
 
     const handleDateChange = (dates: [Date | null, Date | null]) => {
         const [start, end] = dates;
         setStartDate(start);
         setEndDate(end);
-
+        dispatch(updateDates({startDate: start, endDate: end}));
         if (onChange !== undefined) {
             onChange(start, end);
         }
