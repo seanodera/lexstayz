@@ -59,7 +59,7 @@ export default function Stay() {
                     </div>
                     <div className="max-lg:hidden lg:ps-12 col-span-1 md:col-span-2 lg:col-span-1">
                         <FeaturedRoom stay={stay} />
-                        <CartSummary />
+                        <CartSummary stay={stay} />
                     </div>
                 </div>
                 <MobileCartSummary dates={dates} />
