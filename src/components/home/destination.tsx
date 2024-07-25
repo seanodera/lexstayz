@@ -1,13 +1,11 @@
 'use client'
 
 
-import {useTabs} from "@/hooks/use-tabs";
+
 import {useState} from "react";
-import {Framer} from '@/lib/framer';
+
 import {MdOutlineBathroom, MdOutlineHotel, MdOutlineVilla} from "react-icons/md";
-import {AiOutlineApartment} from "react-icons/ai";
-import hotelsData from "@/data/hotelsData";
-import HotelsData from "@/data/hotelsData";
+
 import HotelItem from "@/components/HotelItem";
 import {IoMdGlobe} from "react-icons/io";
 import {useAppSelector} from "@/hooks/hooks";
