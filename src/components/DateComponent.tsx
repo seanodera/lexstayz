@@ -36,7 +36,7 @@ export default function DateComponent({className = '', onChange}: {
         const [start, end] = dates;
         setStartDate(start);
         setEndDate(end);
-        dispatch(updateDates({startDate: start, endDate: end}));
+       // dispatch(updateDates({startDate: start, endDate: end}));
         if (onChange !== undefined) {
             onChange(start, end);
         }
