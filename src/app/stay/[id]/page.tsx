@@ -34,10 +34,9 @@ export default function Stay() {
     const currentId = useAppSelector(selectCurrentId);
 
     useEffect(() => {
-        if (currentId !== params) {
-            dispatch(resetBooking(0));
-            dispatch(setCurrentStayFromId(params));
-        }
+
+            dispatch(setCurrentStayFromId(params.toString()));
+
     }, [dispatch, params]);
 
     const stay = useAppSelector(selectCurrentStay);

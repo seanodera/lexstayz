@@ -42,11 +42,11 @@ export default function DateComponent({className = '', onChange}: {
         }
     };
 
-
+    console.log(dates)
 
     return <Popover className={'relative'}>
         <PopoverButton className={`flex items-center gap-3 ${className}`}><AiOutlineCalendar size={20}/> {startDate && endDate
-            ? `${startDate.toDateString()} - ${endDate.toDateString()}`
+            ? `${startDate?.toString()} - ${endDate?.toString()}`
             : 'Select dates'}</PopoverButton>
         <PopoverPanel anchor="bottom start" className="bg-white p-8 flex flex-col h-fit w-fit">
             <DatePicker selected={startDate}

@@ -7,14 +7,14 @@ export default function Banner() {
         backgroundImage: 'url("/assets/banner.jpg")',
     }}>
         <div className={'h-full w-full flex flex-col justify-between'}>
-            <div className={'md:flex justify-between items-end h-full max-md:py-16'}>
+            <div className={'md:flex justify-end items-end h-full max-md:py-16'}>
                 <div className={'hidden h-full flex-col gap-4 justify-center  bg-transparent bg-gradient-to-b from-transparent via-primary-100 to-transparent bg-[size:2px_auto] bg-repeat-y bg-left ps-2'}>
                     <div className={'w-max rounded-full bg-dark bg-opacity-30 backdrop-blur-lg border border-gray-300 text-white px-4 py-1 '}>Nairobi </div>
                     <div className={'w-max rounded-full bg-dark bg-opacity-30 backdrop-blur-lg border border-white px-5 py-1 text-xl ms-3'}>Nairobi </div>
                     <div className={'w-max rounded-full bg-dark bg-opacity-30 backdrop-blur-lg border border-gray-300 text-white px-4 py-1 '}>Nairobi </div>
                 </div>
 
-                <span className={'max-md:hidden md:text-6xl lg:text-9xl'}>Nairobi</span>
+                <div className={'text-end max-md:hidden md:text-6xl lg:text-9xl'}>Nairobi</div>
             </div>
             <SearchComponent/>
         </div>

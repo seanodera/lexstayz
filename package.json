@@ -12,6 +12,7 @@
     "@headlessui/react": "^2.1.2",
     "country-data": "^0.0.31",
     "date-fns": "^3.6.0",
+    "firebase": "^10.12.4",
     "framer-motion": "^11.3.4",
     "next": "14.2.5",
     "react": "^18",

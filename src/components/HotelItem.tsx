@@ -21,10 +21,10 @@ export default function HotelItem({hotel}: {
                 <h3 className={'text-sm md:text-xl font-semibold'}>{name}</h3>
                     <h3 className={'font-light text-gray-400 line-clamp-1'}>{location.city}, {location.country}</h3>
                 </div>
-                <div
-                    className={'lg:text-end text-primary  md:font-semibold lg:text-xl text-nowrap'}>{'$'} {price.toLocaleString(undefined, {
-                    minimumFractionDigits: 2, maximumFractionDigits: 2
-                })}</div>
+                {/*<div*/}
+                {/*    className={'lg:text-end text-primary  md:font-semibold lg:text-xl text-nowrap'}>{'$'} {price.toLocaleString(undefined, {*/}
+                {/*    minimumFractionDigits: 2, maximumFractionDigits: 2*/}
+                {/*})}</div>*/}
             </div>
             <div className={'max-md:text-sm'}>
                 <p className={'line-clamp-3'}>{description}</p>
