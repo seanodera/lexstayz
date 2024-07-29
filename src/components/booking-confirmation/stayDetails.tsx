@@ -1,7 +1,8 @@
+import {Image} from "antd";
 
 const StayDetails = ({ stay }: any) => (
     <div className="border border-gray-200 rounded-xl p-4 shadow-md col-span-1 md:col-span-2 lg:col-span-1 max-lg:grid grid-cols-10 gap-2">
-        <img
+        <Image
             src={stay.poster}
             className="rounded-xl aspect-square md:aspect-video object-cover md:mb-4 max-lg:col-span-3"
             alt={stay.name}

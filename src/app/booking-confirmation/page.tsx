@@ -11,15 +11,31 @@ import BookingDetails from "@/components/booking-confirmation/bookingDetails";
 import BookingSummary from "@/components/booking-confirmation/bookingSummary";
 import {Select} from "@headlessui/react";
 import {AiFillCheckCircle, AiOutlineCheckCircle} from "react-icons/ai";
+import {selectCurrentUser} from "@/slices/authenticationSlice";
+import {useEffect} from "react";
+import {getAuth} from "firebase/auth";
+import {message} from "antd";
 
 export default function Page() {
     const stay = useAppSelector(selectCurrentStay);
+    const userDetails = useAppSelector(selectCurrentUser)
+    const [messageApi, contextHolder] = message.useMessage()
+        useEffect(() => {
+            const user = getAuth().currentUser
+            if (user){
+                if (user.uid !==userDetails.uid){
 
+                }
+            } else {
+
+            }
+        }, []);
     if (!stay || stay.id === undefined) {
         return <div></div>;
     } else {
         return (
             <div className="bg-white py-24 lg:px-16 px-7 text-dark">
+                {contextHolder}
                 <div className="grid grid-cols-1 lg:grid-cols-4 max-lg:gap-8 gap-4">
                     <div className="col-span-1 lg:col-span-3 flex flex-col gap-8">
                         <div className="border border-gray-200 rounded-xl p-4 md:p-8 shadow-md">

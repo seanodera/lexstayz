@@ -6,6 +6,8 @@ import {useEffect, useState} from "react";
 import {Select} from "@headlessui/react";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import {selectCart, updateCart} from "@/slices/bookingSlice";
+import {Card, Image} from "antd";
+
 
 
 export default function RoomComponent({room, stay, className = ''}: { room: any, stay: any, className?: string }) {
@@ -57,7 +59,7 @@ export default function RoomComponent({room, stay, className = ''}: { room: any,
     }
 
     return <div className={`${(roomIndex !== -1) && 'shadow-primary'} ${className ? className : 'rounded-2xl p-4 shadow-md'}`}>
-        <img className={'aspect-video rounded-xl object-cover'} src={room.poster} alt={room.name}/>
+        <Image className={'aspect-video rounded-xl object-cover'} src={room.poster} alt={room.name}/>
         <div className={'my-4 flex justify-between'}><h3
             className={'text-xl font-medium'}>{room.name}</h3>  <span
             className={'font-medium text-primary text-xl'}>{'$'} {room.price.toLocaleString(undefined, {

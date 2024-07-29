@@ -78,10 +78,29 @@ export const dateReader = ({date = Date.now(), month = true, years = true, weekD
 }
 
 export async function getCountry() {
-    let data = await fetch('https://api.country.is');
-    let result = await data.json();
-    console.log(data.json());
-    return countries[result.country].name;
+    try {
+        // Fetch the client's IP address
+        const ipResponse = await fetch('https://api.ipify.org?format=json');
+        const ipData = await ipResponse.json();
+        const ip = ipData.ip;
+
+        // Fetch the country using the IP address
+        const countryResponse = await fetch(`https://ipapi.co/${ip}/json/`);
+        const countryData = await countryResponse.json();
+        const countryCode = countryData.country;
+
+        // Get country information from country-data package
+        const country = countries[countryCode];
+
+        return {
+            name: country.name,
+            emoji: country.emoji,
+            currency: country.currencies[0]
+        };
+    } catch (error) {
+        console.error("Error fetching country data: ", error);
+        return undefined;
+    }
 }
 
 export function serviceCountries() {
@@ -89,20 +108,20 @@ export function serviceCountries() {
     return list.map((e) => countries[e])
 }
 
-export async function createFile({url}: { url: string }) {
+export async function createFile({url, name = 'image'}: { url: string, name?: string }) {
     let response = await fetch(url);
     let data = await response.blob();
     let metadata = {
         type: 'image/jpeg'
     };
     // ... do something with the file or return it
-    return new File([data], "picture.jpg", metadata);
+    return new File([data], `${name}.jpg`, metadata);
 }
 
 export function toMoneyFormat(amount: number ) {
 
     return amount.toLocaleString(undefined, {
-        minimumFractionDigits: 2, maximumFractionDigits: 2
+        minimumFractionDigits: 2, maximumFractionDigits: 2,
     });
 }
 
@@ -124,3 +143,34 @@ export const generatePastMonths = (numMonths: number) => {
 
     return months;
 };
+
+function getRandomSubarray(arr: Array<any>, size: number) {
+    let shuffled = arr.slice(0), i = arr.length, temp, index;
+    while (i--) {
+        index = Math.floor((i + 1) * Math.random());
+        temp = shuffled[ index ];
+        shuffled[ index ] = shuffled[ i ];
+        shuffled[ i ] = temp;
+    }
+    return shuffled.slice(0, size);
+}
+
+
+export const getExchangeRate = async (fromCurrency:string, toCurrency:string) => {
+    try {
+        const response = await fetch(`https://open.er-api.com/v6/latest/${fromCurrency}`);
+        const data = await response.json();
+        console.log(data)
+        //https://www.exchangerate-api.com/docs/free
+        const exchangeRate = data.rates[toCurrency];
+        if (!exchangeRate) {
+            throw new Error(`Unable to find exchange rate for ${toCurrency}`);
+        }
+        return exchangeRate;
+    } catch (error) {
+        console.error("Error fetching exchange rate: ", error);
+        return null;
+    }
+};
+
+
