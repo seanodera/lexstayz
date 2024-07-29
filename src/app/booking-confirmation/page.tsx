@@ -4,7 +4,7 @@ import Link from "next/link";
 import {dateReader} from "@/lib/utils";
 import ContactForm from "@/components/booking-confirmation/contactForm";
 import SpecialRequests from "@/components/booking-confirmation/specialRequests";
-import {useAppSelector} from "@/hooks/hooks";
+import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import {selectCurrentStay} from "@/slices/bookingSlice";
 import StayDetails from "@/components/booking-confirmation/stayDetails";
 import BookingDetails from "@/components/booking-confirmation/bookingDetails";
@@ -15,22 +15,38 @@ import {selectCurrentUser} from "@/slices/authenticationSlice";
 import {useEffect} from "react";
 import {getAuth} from "firebase/auth";
 import {message} from "antd";
+import {useRouter} from "next/navigation";
+import {createBooking} from "@/slices/confirmBookingSlice";
 
 export default function Page() {
     const stay = useAppSelector(selectCurrentStay);
     const userDetails = useAppSelector(selectCurrentUser)
-    const [messageApi, contextHolder] = message.useMessage()
+    const [messageApi, contextHolder] = message.useMessage();
+    const dispatch = useAppDispatch()
+    const router = useRouter()
         useEffect(() => {
+            if (!stay){
+                router.push('/')
+            }
             const user = getAuth().currentUser
             if (user){
-                if (user.uid !==userDetails.uid){
 
-                }
             } else {
 
             }
         }, []);
+
+    function handSubmit(event: any){
+        event.preventDefault();
+
+        // @ts-ignore
+        dispatch(createBooking()).then((value) => {
+            console.log(value)
+            router.push('/checkout')
+        })
+    }
     if (!stay || stay.id === undefined) {
+
         return <div></div>;
     } else {
         return (
@@ -80,10 +96,10 @@ export default function Page() {
                             <StayDetails stay={stay}/>
                             <BookingDetails stay={stay}/>
                             <BookingSummary stay={stay}/>
-                            <Link href="/checkout"
+                            <button onClick={handSubmit}
                                   className="block max-lg:hidden py-3 text-center bg-primary rounded-xl font-medium text-white">
                                 Checkout
-                            </Link>
+                            </button>
                         </div>
                     </div>
                 </div>

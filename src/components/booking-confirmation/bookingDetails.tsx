@@ -2,14 +2,15 @@
 import {dateReader} from "@/lib/utils";
 import {addDays} from "date-fns";
 import Link from "next/link";
-import {useAppSelector} from "@/hooks/hooks";
+import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import {selectCart, selectDates} from "@/slices/bookingSlice";
 import {useEffect, useState} from "react";
+import {convertCart, updateBookingData} from "@/slices/confirmBookingSlice";
 
 const BookingDetails = ({stay}: any) => {
     const dates = useAppSelector(selectDates);
     const cart = useAppSelector(selectCart);
-
+    const dispatch = useAppDispatch()
     const [totalRooms, setTotalRooms] = useState(0);
     useEffect(() => {
         let _totalRooms = 0;
@@ -17,7 +18,14 @@ const BookingDetails = ({stay}: any) => {
             _totalRooms += value.numRooms;
         });
         setTotalRooms(_totalRooms);
-    }, [cart]);
+        dispatch(convertCart(cart));
+        dispatch(updateBookingData({
+            numGuests: 0,
+            checkInDate: dates.startDate,
+            checkOutDate: dates.endDate,
+        }))
+    }, [cart, dates]);
+
     return (
         <div className="border border-gray-200 rounded-xl p-4 shadow-md shadow-primary">
             <h3 className="text-xl font-semibold">Your Booking Details</h3>

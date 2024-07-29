@@ -1,9 +1,11 @@
+'use client'
 import {Field, Fieldset, Input, Label, Legend, Select} from "@headlessui/react";
 import {countries} from "country-data";
-import {useAppSelector} from "@/hooks/hooks";
+import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import {selectCurrentUser} from "@/slices/authenticationSlice";
 import {useEffect, useState} from "react";
 import {getCountry} from "@/lib/utils";
+import {updateContact} from "@/slices/confirmBookingSlice";
 
 
 export default function ContactForm() {
@@ -13,6 +15,7 @@ export default function ContactForm() {
     const [email, setEmail] = useState('')
     const [country, setCountry] = useState('')
     const [phoneNumber, setPhoneNumber] = useState('')
+    const dispatch = useAppDispatch();
 
     useEffect(() => {
         if (userDetails){
@@ -29,6 +32,15 @@ export default function ContactForm() {
         }
         fetchCountry()
     }, [userDetails]);
+    useEffect(() => {
+        dispatch(updateContact({
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            country: country,
+            phone: phoneNumber,
+        }))
+    }, [country, email, firstName, lastName, phoneNumber]);
     return <Fieldset className={'space-y-4'}>
         <Legend className="text-lg font-bold">Enter your Details</Legend>
         <div className={'grid grid-cols-2 gap-8 '}>

@@ -1,23 +1,23 @@
 // components/BookingSummary.tsx
 import {getCountry, getExchangeRate, toMoneyFormat} from "@/lib/utils";
-import {useAppSelector} from "@/hooks/hooks";
-import {selectCart} from "@/slices/bookingSlice";
+import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
+import {selectCart, selectDates} from "@/slices/bookingSlice";
 import {useEffect, useState} from "react";
 import {message} from "antd";
-import {Simulate} from "react-dom/test-utils";
-import error = Simulate.error;
-import {countries} from "country-data";
+import {setBookingStay, updateCostData} from "@/slices/confirmBookingSlice";
 
 const BookingSummary = ({ stay }: any) => {
     const cart = useAppSelector(selectCart);
+    const dates = useAppSelector(selectDates);
     const [subTotal, setSubTotal] = useState(0);
     const [exchangeRate, setExchangeRate] = useState(0)
     const [currency,setCurrency] = useState('USD')
     const [messageApi, contextHolder] = message.useMessage();
+    const dispatch =useAppDispatch()
     useEffect(() => {
         let _subTotal = 0;
         cart.forEach((value: any) => {
-            _subTotal += value.numRooms * stay.rooms.find((stay: any) => stay.id === value.roomId).price;
+            _subTotal += value.numRooms * stay.rooms.find((stay: any) => stay.id === value.roomId).price * dates.length ;
         });
         setSubTotal(_subTotal);
     }, [cart]);
@@ -40,6 +40,12 @@ const BookingSummary = ({ stay }: any) => {
         };
        fetchExchangeRate()
     });
+    useEffect(()=>{
+        dispatch(setBookingStay(stay))
+        dispatch(updateCostData(
+            {price: subTotal, currency: currency, usedRate: exchangeRate}
+        ))
+    },[currency, exchangeRate, subTotal])
     return (
         <div className="border border-gray-200 rounded-xl p-4 shadow-md shadow-primary">
             <h3 className="text-xl font-semibold">Price Summary</h3>

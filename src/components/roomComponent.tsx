@@ -37,6 +37,8 @@ export default function RoomComponent({room, stay, className = ''}: { room: any,
             if (roomIndex !== -1) {
                 // Update the existing room entry in the cart
                 newCart[roomIndex] = {
+                    name: room.name,
+                    price: room.price,
                     numRooms: numRooms,
                     roomId: room.id,
                     stayId: stay.id
@@ -44,6 +46,8 @@ export default function RoomComponent({room, stay, className = ''}: { room: any,
             } else {
                 // Add a new room entry to the cart
                 newCart.push({
+                    name: room.name,
+                    price: room.price,
                     numRooms: numRooms,
                     roomId: room.id,
                     stayId: stay.id
