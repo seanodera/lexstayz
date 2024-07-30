@@ -28,6 +28,7 @@ export default function ContextProvider({children}: { children: React.ReactNode 
 
                 // @ts-ignore
                 dispatch(fetchStaysAsync());
+                // @ts-ignore
                 dispatch(fetchBookingsAsync())
             }
             if (user) {

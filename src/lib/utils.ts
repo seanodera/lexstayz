@@ -59,7 +59,7 @@ export const dayStringShort = ({num}: { num: any }) => {
     return days[num];
 }
 
-export const dateReader = ({date = Date.now(), month = true, years = true, weekDay = false} :{date?: Date | number, month?: boolean , years?: boolean , weekDay?: boolean}) => {
+export const dateReader = ({date = Date.now(), month = true, years = true, weekDay = false} :{date?: Date | number| string, month?: boolean , years?: boolean , weekDay?: boolean}) => {
 
     let _date = new Date(date);
     let dateString = '';
