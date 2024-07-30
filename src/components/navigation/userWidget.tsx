@@ -14,9 +14,11 @@ export default function UserWidget() {
     const router = useRouter()
     function handleLogout(e:any){
         console.log('Signing out')
-        signOut(auth);
-        dispatch(logoutUser({}))
-        router.push('/')
+        signOut(auth).then(() => {
+            dispatch(logoutUser({}))
+            router.push('/')
+        });
+
     }
     return <div className={''}>
         <Dropdown menu={{

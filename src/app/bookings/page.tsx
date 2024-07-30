@@ -58,19 +58,19 @@ export default function Page() {
         <div className={'pt-24 lg:px-24 px-7'}>
             <h1>Bookings</h1>
             <h2 className={`font-semibold ${upcoming.length === 0? 'hidden' : ''}`}>Upcoming</h2>
-            <div>
+            <div className={'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-4 lg:gap-8'}>
                 {upcoming.map((booking, index) => (
                     <BookingItem booking={booking} key={index}/>
                 ))}
             </div>
             <h2 className={`font-semibold ${ongoing.length === 0? 'hidden' : '' }`}>Ongoing</h2>
-            <div>
+            <div className={'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-4 lg:gap-8'}>
                 {ongoing.map((booking, index) => (
                     <BookingItem booking={booking} key={index}/>
                 ))}
             </div>
             <h2 className={`font-semibold ${previous.length === 0? 'hidden' : ''}`}>Previous Bookings</h2>
-            <div className={'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-4 lg:gap-8'}>
+            <div className={'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-4 lg:gap-8'}>
                 {previous.map((booking, index) => (
                     <BookingItem booking={booking} key={index}/>
                 ))}

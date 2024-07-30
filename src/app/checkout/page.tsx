@@ -12,6 +12,6 @@ export default function Page() {
         icon={<CheckCircleOutlined/>} title={'Booking Request Sent'}
         status={'success'}
         subTitle={'Your booking has been received successfully. Please wait for the host to accept your booking.'}
-        extra={<Button type={'primary'} ghost>View Bookings</Button>}/>
+        extra={<Button href={'/bookings'} type={'primary'} ghost>View Bookings</Button>}/>
     </div>
 }
