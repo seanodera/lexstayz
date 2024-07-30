@@ -9,7 +9,7 @@ import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import Navbar from "@/components/Navbar";
 import LoadingScreen from "@/components/LoadingScreen";
 import {selectHasRun} from "@/slices/staysSlice";
-import {fetchBookingsAsync} from "@/slices/bookingSlice";
+import {fetchBookingsAsync, selectHasBookingRun} from "@/slices/bookingSlice";
 
 export const authRoutes = ['/login', '/register', '/forgot-password', '/reset-password', '/user-information']
 
@@ -20,7 +20,7 @@ export default function AuthenticationProvider({ children }: { children: ReactNo
     const pathname = usePathname();
     const router = useRouter();
     const isAuthRoute = authRoutes.includes(pathname);
-    const hasBookingsRun = useAppSelector(selectHasRun);
+    const hasBookingsRun = useAppSelector(selectHasBookingRun);
     console.log('Authentication Provider')
     useEffect(() => {
         const initializeAuth = async () => {
@@ -51,10 +51,11 @@ export default function AuthenticationProvider({ children }: { children: ReactNo
         }
         const user = getAuth().currentUser
         if (user && !hasBookingsRun){
+            console.log('bookings')
             // @ts-ignore
             dispatch(fetchBookingsAsync());
         }
-    }, []);
+    });
     return <Suspense fallback={null}>
         <div>
             <Navbar/>
