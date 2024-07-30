@@ -10,9 +10,7 @@ import Link from "next/link";
 
 
 export default function Banner(){
-    const onChange = (currentSlide: number) => {
-        console.log(currentSlide);
-    };
+
     const stays = useAppSelector(selectAllStays)
     return <section>
         <Carousel arrows autoplay>
@@ -32,7 +30,7 @@ export default function Banner(){
                             </div>
                             <p className={'line-clamp-5'}>{stay.description}</p>
                             <div>
-                                <Link href={''} className={'block bg-primary rounded px-4 py-2 w-max text-white'}>See More</Link>
+                                <Link href={`/stay/${stay.id}`} className={'block bg-primary rounded px-4 py-2 w-max text-white'}>See More</Link>
                             </div>
                         </div>
                     </div>
