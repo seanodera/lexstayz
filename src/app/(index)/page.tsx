@@ -7,7 +7,9 @@ export default function Home() {
   return (
     <div className={'bg-white'}>
       <Banner/>
-        <SearchComponent/>
+        <div className={'xl:hidden'}>
+          <SearchComponent/>
+        </div>
         <Destination/>
     </div>
   );

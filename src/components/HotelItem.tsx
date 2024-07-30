@@ -12,7 +12,7 @@ export default function HotelItem({hotel}: {
     }
 }) {
     const {poster, name, id, location, price, bed, bath, rating, maxGuests, description} = hotel;
-    return <Link href={`/stay/${id}`} className={'rounded-xl max-md:grid grid-cols-3 gap-3 max-md:shadow max-md:px-4 max-md:py-2 p-4 transition-all duration-300 ease-in-out  hover:shadow-md'}>
+    return <Link href={`/stay/${id}`} className={'text-current rounded-xl max-md:grid grid-cols-3 gap-3 max-md:shadow max-md:px-4 max-md:py-2 p-4 transition-all duration-300 ease-in-out  hover:shadow-md'}>
         <div className={'flex flex-col justify-center'}><img src={poster} alt={name}
                   className={'rounded-xl aspect-square w-full object-cover'}/></div>
         <div className={'col-span-2'}>
