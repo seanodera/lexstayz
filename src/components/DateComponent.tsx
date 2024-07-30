@@ -26,8 +26,8 @@ export default function DateComponent({className = '', onChange}: {
 }) {
     const today = new Date();
     const dates = useAppSelector(selectDates)
-    const [startDate, setStartDate] = useState<Date | null>(dates.startDate);
-    const [endDate, setEndDate] = useState<Date | null | undefined>(dates.endDate);
+    const [startDate, setStartDate] = useState<Date | null>(new Date(dates.startDate));
+    const [endDate, setEndDate] = useState<Date | null | undefined>(new Date(dates.endDate));
     const dispatch = useAppDispatch()
 
 
