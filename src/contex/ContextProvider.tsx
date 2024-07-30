@@ -23,26 +23,35 @@ export default function ContextProvider({children}: { children: React.ReactNode 
     const router = useRouter();
     useEffect(() => {
         const fetchData = async () => {
+            const user = getAuth().currentUser;
             if (!hasRun) {
-                const user = getAuth().currentUser;
-                if (user) {
-                    if (currentUser.uid !== user.uid){
-                        const userDetails = await getUserDetails(user.uid);
-                        if (userDetails){
-                            dispatch(loginUser(userDetails));
-                        } else {
-                            router.push('/user-information')
-                        }
-                    } else {
 
-                    }
-                }
                 // @ts-ignore
                 dispatch(fetchStaysAsync());
             }
+            if (user) {
+                if (currentUser.uid !== user.uid){
+                    const userDetails = await getUserDetails(user.uid);
+                    if (userDetails){
+                        dispatch(loginUser(userDetails));
+                    } else {
+                        router.push('/user-information')
+                    }
+                } else {
+
+                }
+            }
         };
         fetchData()
-    },)
+    })
+    useEffect(()=> {
+        const user = getAuth().currentUser;
+        if (user){
+            if (!currentUser.uid){
+
+            }
+        }
+    })
     if (isLoading) {
         return <div className={'h-screen w-screen'}>
             <LoadingScreen/>

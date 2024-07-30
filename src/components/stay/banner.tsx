@@ -1,6 +1,11 @@
+'use client'
 import {MdOutlineDashboard} from "react-icons/md";
+import {useState} from "react";
+import {ShowImagesDialog} from "@/components/stay/showImages";
 
-export default function Banner({stay}: { stay: { name: string, poster: string } }) {
+export default function Banner({stay}: { stay: { name: string, poster: string, images: string[] } }) {
+    const [showImages, setShowImages] = useState(false);
+
     return (
         <div>
             <h3 className="font-semibold text-3xl mb-4">{stay.name}</h3>
@@ -12,11 +17,17 @@ export default function Banner({stay}: { stay: { name: string, poster: string } 
                     backgroundRepeat: 'no-repeat',
                     backgroundPosition: 'center',
                 }}>
-                <div
+                <button
+                    onClick={(event) => {
+                        event.preventDefault();
+                        setShowImages(true);
+                    }}
+                    type="button"
                     className="rounded-xl px-3 py-1 text-nowrap flex gap-2 bg-white text-dark items-center text-lg border-dark">
                     <MdOutlineDashboard/> Show all photos
-                </div>
+                </button>
             </div>
+            <ShowImagesDialog open={showImages} setOpen={setShowImages} images={stay.images}/>
         </div>
     );
 }

@@ -9,9 +9,20 @@ import ContextProvider from "@/contex/ContextProvider";
 // antd theme
 const theme = {
     token: {
-        colorPrimary: '#584cf4', // Your custom primary color
+        colorPrimary: "#584cf4",
+        colorInfo: "#584cf4",
     },
 };
+
+const darkTheme = {
+    token: {
+        colorPrimary: "#584cf4",
+        colorInfo: "#584cf4",
+        wireframe: false,
+        colorBgBase: "#221a4c"
+    },
+    algorithm: "dark"
+}
 
 export const metadata: Metadata = {
     title: "Lexstayz",
@@ -25,7 +36,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-        <body className={'min-h-screen bg-white'}><StoreProvider><AntdRegistry>
+        <body className={'min-h-screen bg-[#f5f5f5]'}><StoreProvider><AntdRegistry>
             <ConfigProvider theme={theme}><ContextProvider>
                 <div>{children}</div>
             </ContextProvider></ConfigProvider> </AntdRegistry></StoreProvider>
