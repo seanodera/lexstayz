@@ -3,7 +3,7 @@ import {MdOutlineDashboard} from "react-icons/md";
 import {useState} from "react";
 import {ShowImagesDialog} from "@/components/stay/showImages";
 
-export default function Banner({stay}: { stay: { name: string, poster: string, images: string[] } }) {
+export default function Banner({stay}: { stay: any }) {
     const [showImages, setShowImages] = useState(false);
 
     return (
