@@ -7,10 +7,11 @@ import dayjs from "dayjs";
 import {differenceInDays} from "date-fns";
 import {dateReader} from "@/lib/utils";
 import {selectStayById} from "@/slices/staysSlice";
+import Link from "next/link";
 
 export default function BookingItem({booking}: {booking: any}){
     const stay = useAppSelector((state: any) => selectStayById(state, booking.accommodationId))
-    return <div className={'block md:space-y-4 gap-2 bg-white rounded-xl p-4'}>
+    return <Link href={`/bookings/${booking.id}`} className={'block md:space-y-4 gap-2 bg-white rounded-xl p-4'}>
         <Image src={stay?.poster} alt={''} className={'rounded-xl h-full object-cover aspect-video '}/>
         <div className={'mt-2'}>
             <div className={'flex justify-between items-center gap-2'}>
@@ -34,5 +35,5 @@ export default function BookingItem({booking}: {booking: any}){
                 </div>
             </div>
         </div>
-    </div>
+    </Link>
 }

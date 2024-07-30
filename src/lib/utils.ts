@@ -38,7 +38,7 @@ export const monthInt = ({month}: { month: string }) => {
     return finalIndex;
 }
 
-export const timeFromDate = ({date, am_pm = true}: {date: Date, am_pm: boolean}) => {
+export const timeFromDate = ({date, am_pm = true}: {date: Date | number| string | any, am_pm: boolean}) => {
     let _date = new Date(date);
 
     if (am_pm){
