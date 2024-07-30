@@ -1,10 +1,10 @@
 'use client'
 import DateComponent from "@/components/DateComponent";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
-import {selectDates, updateDates} from "@/slices/bookingSlice";
 import {Button, DatePicker} from "antd";
 import {RangePickerProps} from "antd/es/date-picker";
 import dayjs from "dayjs";
+import {selectDates, updateDates} from "@/slices/staysSlice";
 
 const { RangePicker } = DatePicker;
 

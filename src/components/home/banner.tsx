@@ -3,10 +3,11 @@ import {Input} from "@headlessui/react";
 import DateComponent from "@/components/DateComponent";
 import {Button, Carousel, Divider, Rate} from "antd";
 import {useAppSelector} from "@/hooks/hooks";
-import {selectAllStays} from "@/slices/bookingSlice";
+
 import {StarFilled} from "@ant-design/icons";
 import {Stay} from "@/lib/types";
 import Link from "next/link";
+import {selectAllStays} from "@/slices/staysSlice";
 
 
 export default function Banner(){

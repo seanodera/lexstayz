@@ -3,11 +3,13 @@ import {ReactNode, Suspense, useEffect, useState} from "react";
 import {usePathname, useRouter} from "next/navigation";
 import {loginUser, logoutUser, selectCurrentUser} from "@/slices/authenticationSlice";
 import {auth} from "@/lib/firebase";
-import {browserLocalPersistence, onAuthStateChanged, setPersistence} from "firebase/auth";
+import {browserLocalPersistence, getAuth, onAuthStateChanged, setPersistence} from "firebase/auth";
 import {getUserDetails} from "@/data/usersData";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import Navbar from "@/components/Navbar";
 import LoadingScreen from "@/components/LoadingScreen";
+import {selectHasRun} from "@/slices/staysSlice";
+import {fetchBookingsAsync} from "@/slices/bookingSlice";
 
 export const authRoutes = ['/login', '/register', '/forgot-password', '/reset-password', '/user-information']
 
@@ -18,6 +20,7 @@ export default function AuthenticationProvider({ children }: { children: ReactNo
     const pathname = usePathname();
     const router = useRouter();
     const isAuthRoute = authRoutes.includes(pathname);
+    const hasBookingsRun = useAppSelector(selectHasRun);
     console.log('Authentication Provider')
     useEffect(() => {
         const initializeAuth = async () => {
@@ -45,6 +48,11 @@ export default function AuthenticationProvider({ children }: { children: ReactNo
         };
         if (!userLoaded){
             initializeAuth();
+        }
+        const user = getAuth().currentUser
+        if (user && !hasBookingsRun){
+            // @ts-ignore
+            dispatch(fetchBookingsAsync());
         }
     }, []);
     return <Suspense fallback={null}>

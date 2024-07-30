@@ -1,10 +1,11 @@
 // components/BookingSummary.tsx
 import {getCountry, getExchangeRate, toMoneyFormat} from "@/lib/utils";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
-import {selectCart, selectDates} from "@/slices/bookingSlice";
+import {selectCart} from "@/slices/bookingSlice";
 import {useEffect, useState} from "react";
 import {message} from "antd";
 import {setBookingStay, updateCostData} from "@/slices/confirmBookingSlice";
+import {selectDates} from "@/slices/staysSlice";
 
 const BookingSummary = ({ stay }: any) => {
     const cart = useAppSelector(selectCart);

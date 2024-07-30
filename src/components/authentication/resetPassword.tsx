@@ -49,7 +49,7 @@ function ResetPassWordWrappedComponent(){
                 try {
                     await passwordReset(oobCode as string, password);
                     messageApi.success("Password reset successfully");
-                    router.push('/login'); // redirect to login after successful reset
+                    router.push('/login');
                 } catch (error) {
                     messageApi.error("Failed to reset password. Please try again.");
                 }

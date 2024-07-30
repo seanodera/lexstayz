@@ -10,10 +10,7 @@ import { useParams } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import {
     resetBooking, selectCart,
-    selectCurrentId,
-    selectCurrentStay,
-    selectDates,
-    setCurrentStayFromId
+
 } from "@/slices/bookingSlice";
 
 
@@ -26,6 +23,7 @@ import MobileCartSummary from "@/components/stay/MobileCartSummary";
 import CartSummary from "@/components/stay/cartSummary";
 import FeaturedRoom from "@/components/stay/featuredRoom";
 import AvailableRooms from "@/components/stay/availableRooms";
+import {selectCurrentId, selectCurrentStay, selectDates, setCurrentStayFromId} from "@/slices/staysSlice";
 
 
 export default function Stay() {

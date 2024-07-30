@@ -3,9 +3,10 @@ import {dateReader} from "@/lib/utils";
 import {addDays} from "date-fns";
 import Link from "next/link";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
-import {selectCart, selectDates} from "@/slices/bookingSlice";
+import {selectCart} from "@/slices/bookingSlice";
 import {useEffect, useState} from "react";
 import {convertCart, updateBookingData} from "@/slices/confirmBookingSlice";
+import {selectDates} from "@/slices/staysSlice";
 
 const BookingDetails = ({stay}: any) => {
     const dates = useAppSelector(selectDates);

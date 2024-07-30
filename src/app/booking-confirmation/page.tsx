@@ -5,7 +5,7 @@ import {dateReader} from "@/lib/utils";
 import ContactForm from "@/components/booking-confirmation/contactForm";
 import SpecialRequests from "@/components/booking-confirmation/specialRequests";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
-import {selectCurrentStay} from "@/slices/bookingSlice";
+
 import StayDetails from "@/components/booking-confirmation/stayDetails";
 import BookingDetails from "@/components/booking-confirmation/bookingDetails";
 import BookingSummary from "@/components/booking-confirmation/bookingSummary";
@@ -17,6 +17,7 @@ import {getAuth} from "firebase/auth";
 import {message} from "antd";
 import {useRouter} from "next/navigation";
 import {createBooking} from "@/slices/confirmBookingSlice";
+import {selectCurrentStay} from "@/slices/staysSlice";
 
 export default function Page() {
     const stay = useAppSelector(selectCurrentStay);

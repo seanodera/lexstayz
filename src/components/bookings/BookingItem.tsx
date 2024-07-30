@@ -1,12 +1,12 @@
 'use client'
 
 import {useAppSelector} from "@/hooks/hooks";
-import {selectStayById} from "@/slices/bookingSlice";
 import {Card, Divider, Image} from "antd";
 import {getTag} from "@/components/common";
 import dayjs from "dayjs";
 import {differenceInDays} from "date-fns";
 import {dateReader} from "@/lib/utils";
+import {selectStayById} from "@/slices/staysSlice";
 
 export default function BookingItem({booking}: {booking: any}){
     const stay = useAppSelector((state: any) => selectStayById(state, booking.accommodationId))

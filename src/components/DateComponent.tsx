@@ -7,7 +7,8 @@ import '@/styles/datepicker.css';
 import {addDays} from "date-fns";
 import {AiOutlineCalendar} from "react-icons/ai";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
-import {selectDates, updateDates} from "@/slices/bookingSlice";
+import {selectDates} from "@/slices/staysSlice";
+
 
 const isSameDay = (date1: Date, date2: Date) => {
     return date1.getFullYear() === date2.getFullYear() &&

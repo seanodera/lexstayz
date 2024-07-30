@@ -9,7 +9,8 @@ import {MdOutlineBathroom, MdOutlineHotel, MdOutlineVilla} from "react-icons/md"
 import HotelItem from "@/components/HotelItem";
 import {IoMdGlobe} from "react-icons/io";
 import {useAppSelector} from "@/hooks/hooks";
-import {selectAllStays} from "@/slices/bookingSlice";
+import {selectAllStays} from "@/slices/staysSlice";
+
 
 export default function Destination() {
     const tabs = [

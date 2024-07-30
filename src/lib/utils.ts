@@ -46,7 +46,7 @@ export const timeFromDate = ({date, am_pm = true}: {date: Date, am_pm: boolean})
         let minutes: string | number = _date.getMinutes();
         let ampm = hours >= 12 ? 'PM' : 'AM';
         hours = hours % 12;
-        hours = hours ? hours : 12; // the hour '0' should be '12'
+        hours = hours ? hours : 12;
         minutes = minutes < 10 ? '0'+minutes : minutes;
         return hours + ':' + minutes + ' ' + ampm;
     } else {
