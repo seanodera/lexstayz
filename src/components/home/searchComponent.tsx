@@ -27,7 +27,7 @@ export default function SearchComponent(){
 
     return (
         <div className={'py-8 md:px-24 px-7 flex justify-center'}>
-            <Space.Compact className={'w-2/3'}>
+            <Space.Compact className={'bg-white rounded-lg'}>
                 <Input
                     className={'w-1/3'}
                     addonBefore={<SearchOutlined />}
