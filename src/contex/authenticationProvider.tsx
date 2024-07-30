@@ -41,7 +41,7 @@ export default function AuthenticationProvider({ children }: { children: ReactNo
                     if (!isAuthRoute) {
                         setUserLoaded(false)
                         dispatch(logoutUser({}));
-                        router.push('/login');
+                        router.push('/');
                     }
                 }
             });

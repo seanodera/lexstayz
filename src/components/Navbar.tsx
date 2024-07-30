@@ -31,7 +31,7 @@ export default function Navbar() {
         <Link href={'/'} className={'text-3xl font-semibold block'}><img className={`${pathName === '/' ? windowHeight >= 100 ? 'h-12' : ' h-16' : 'h-12'} transition-all duration-300 ease-linear`}
                                                                          src={`/logo/${pathName === '/' ? windowHeight >= 100 ? 'lexstayz-high-resolution-logo-transparent.png' : 'lexstayz-high-resolution-logo-white-transparent.png' : 'lexstayz-high-resolution-logo-transparent.png'}`}
                                                                          alt={'logo'}/></Link>
-        {(userDetails.uid) ? <UserWidget/> : <button
-            className={`py-1 px-4 rounded-full border text-lg font-medium w-max h-max ${(windowHeight < 100 && pathName === '/' ? ' border-white text-white hover:bg-white hover:text-dark' : 'border-black text-black hover:bg-dark hover:text-white')}`}>Login</button>}
+        {(userDetails.uid) ? <UserWidget/> : <Link href={'/login'}
+            className={`py-1 px-4 rounded-xl border text-lg font-medium w-max h-max ${(windowHeight < 100 && pathName === '/' ? ' border-white text-white hover:bg-white hover:text-dark' : 'border-black text-black hover:bg-primary hover:text-white')}`}>Login</Link>}
     </div>
 }

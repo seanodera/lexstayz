@@ -1,11 +1,23 @@
-import {useAppSelector} from "@/hooks/hooks";
-import {selectCurrentUser} from "@/slices/authenticationSlice";
+'use client'
+import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
+import {logoutUser, selectCurrentUser} from "@/slices/authenticationSlice";
 import {Avatar, Dropdown} from "antd";
 import Link from "next/link";
+import {signOut} from "firebase/auth";
+import {auth} from "@/lib/firebase";
+import {useRouter} from "next/navigation";
 
 
 export default function UserWidget() {
     const userDetails = useAppSelector(selectCurrentUser)
+    const dispatch = useAppDispatch()
+    const router = useRouter()
+    function handleLogout(e:any){
+        console.log('Signing out')
+        signOut(auth);
+        dispatch(logoutUser({}))
+        router.push('/')
+    }
     return <div className={''}>
         <Dropdown menu={{
             items: [
@@ -19,8 +31,9 @@ export default function UserWidget() {
                 },
                 {
                     key: 2,
-                    label: <Link href={'/logout'}>Logout</Link>,
+                    label: 'Logout',
                     danger: true,
+                    onClick:handleLogout
                 }
             ]
         }}>
