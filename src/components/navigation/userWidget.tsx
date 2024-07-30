@@ -11,17 +11,21 @@ export default function UserWidget() {
             items: [
                 {
                     key: 0,
-                    label: <Link href={'/profile'}>Profile</Link>
+                    label: <Link href={'/bookings'}>Bookings</Link>
                 },
                 {
                     key: 1,
+                    label: <Link href={'/profile'}>Profile</Link>
+                },
+                {
+                    key: 2,
                     label: <Link href={'/logout'}>Logout</Link>,
                     danger: true,
                 }
             ]
         }}>
             <div className={'flex gap-1 items-center text-current'}><Avatar shape={'circle'}
-                         className={'bg-primary'}> {userDetails.firstName.charAt(0)}{userDetails.lastName.charAt(0)}</Avatar>{userDetails.firstName} {userDetails.lastName}
+                         className={'bg-primary'}> {userDetails.firstName.charAt(0)}{userDetails.lastName.charAt(0)}</Avatar><div className={'hidden md:block'}>{userDetails.firstName} {userDetails.lastName}</div>
             </div>
         </Dropdown>
     </div>

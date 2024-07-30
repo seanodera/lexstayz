@@ -3,7 +3,7 @@ import Navbar from "@/components/Navbar";
 import {useEffect} from "react";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import 'antd/dist/reset.css';
-import {fetchStaysAsync, selectHasRun, selectIsLoading, setAllStays} from "@/slices/bookingSlice";
+import {fetchBookingsAsync, fetchStaysAsync, selectHasRun, selectIsLoading, setAllStays} from "@/slices/bookingSlice";
 import Preloader from "@/components/preloader/preloader";
 import LoadingScreen from "@/components/LoadingScreen";
 import AuthenticationProvider, {authRoutes} from "@/contex/authenticationProvider";
@@ -28,6 +28,7 @@ export default function ContextProvider({children}: { children: React.ReactNode 
 
                 // @ts-ignore
                 dispatch(fetchStaysAsync());
+                dispatch(fetchBookingsAsync())
             }
             if (user) {
                 if (currentUser.uid !== user.uid){

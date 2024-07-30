@@ -1,10 +1,15 @@
-import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {addDays, differenceInDays} from "date-fns";
-import {getStaysFirebase} from "@/data/hotelsData";
+'use client'
+
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { addDays, differenceInDays } from "date-fns";
+import { getStaysFirebase } from "@/data/hotelsData";
+import { getBookings } from "@/data/bookingData";
+import { RootState } from "@/data/store"; // Ensure you have a RootState type defined in your store
 
 export interface Stay {
     id: string;
     rooms: any[];
+
     [key: string]: any;
 }
 
@@ -13,8 +18,6 @@ interface Dates {
     endDate: string;
     length: number;
 }
-
-
 
 interface BookingState {
     cart: any[];
@@ -30,6 +33,7 @@ interface BookingState {
     errorMessage: string;
     hasRun: boolean;
 }
+
 const initialState: BookingState = {
     cart: [],
     currentStay: {} as Stay,
@@ -48,6 +52,7 @@ const initialState: BookingState = {
     errorMessage: '',
     hasRun: false
 };
+
 export const fetchStaysAsync = createAsyncThunk(
     'booking/fetchStays',
     async () => {
@@ -56,6 +61,10 @@ export const fetchStaysAsync = createAsyncThunk(
     }
 );
 
+export const fetchBookingsAsync = createAsyncThunk('booking/fetchBookings', async () => {
+    const bookings = await getBookings();
+    return bookings;
+})
 
 const bookingSlice = createSlice({
     name: "booking",
@@ -89,7 +98,7 @@ const bookingSlice = createSlice({
         },
     },
     extraReducers: (builder) => {
-        builder            .addCase(fetchStaysAsync.pending, (state) => {
+        builder.addCase(fetchStaysAsync.pending, (state) => {
             state.isLoading = true;
             state.hasError = false;
             state.errorMessage = '';
@@ -103,19 +112,36 @@ const bookingSlice = createSlice({
                 state.isLoading = false;
                 state.hasError = true;
                 state.errorMessage = action.error.message || 'Failed to fetch stays';
+            })
+            .addCase(fetchBookingsAsync.pending, (state, action) => {
+                state.isLoading = true;
+                state.hasError = false;
+                state.errorMessage = '';
+            })
+            .addCase(fetchBookingsAsync.fulfilled, (state, action) => {
+                state.bookings = action.payload;
+                state.isLoading = false;
+            })
+            .addCase(fetchBookingsAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.hasError = true;
+                state.errorMessage = action.error.message || 'Failed to fetch stays';
             });
     }
 })
 
-export const selectCurrentStay = (state: any) => state.booking.currentStay;
-export const selectCart = (state: any) => state.booking.cart;
-export const selectCurrentId = (state: any) => state.booking.currentId;
-export const selectAllStays = (state: any) => state.booking.stays;
-export const selectDates = (state: any) => state.booking.dates;
-export const selectIsLoading = (state: any) => state.booking.isLoading;
-export const selectHasError = (state: any) => state.booking.hasError;
-export const selectErrorMessage = (state: any) => state.booking.errorMessage;
-export const selectHasRun = (state: any) => state.booking.hasRun;
+export const selectCurrentStay = (state: RootState) => state.booking.currentStay;
+export const selectCart = (state: RootState) => state.booking.cart;
+export const selectCurrentId = (state: RootState) => state.booking.currentId;
+export const selectAllStays = (state: RootState) => state.booking.stays;
+export const selectDates = (state: RootState) => state.booking.dates;
+export const selectIsLoading = (state: RootState) => state.booking.isLoading;
+export const selectHasError = (state: RootState) => state.booking.hasError;
+export const selectErrorMessage = (state: RootState) => state.booking.errorMessage;
+export const selectHasRun = (state: RootState) => state.booking.hasRun;
+export const selectBookings = (state: RootState) => state.booking.bookings;
+export const selectStayById = (state: RootState, id: string | number) => state.booking.stays.find((stay) => stay.id === id);
+
 export const {
     resetBooking,
     setCurrentStay,

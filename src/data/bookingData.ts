@@ -1,7 +1,7 @@
 import {Stay} from "@/lib/types";
 import {auth, firestore} from "@/lib/firebase";
 import {writeBatch} from "@firebase/firestore";
-import {doc} from "firebase/firestore";
+import {collection, doc, getDocs} from "firebase/firestore";
 
 export function getCurrentUser() {
     const user = auth.currentUser;
@@ -56,5 +56,23 @@ async function createBookingFirebase({stay, checkInDate, checkOutDate, rooms, pa
         await batch.commit();
     } catch (error){
         console.log(error)
+    }
+}
+
+export async function getBookings() {
+    try {
+        let bookings: any = []
+        const user = getCurrentUser()
+        const bookingsRef = collection(firestore, 'user', user.uid, 'bookings')
+        const snapshot = await getDocs(bookingsRef)
+
+        snapshot.docs.forEach((document) => {
+            bookings.push(document.data())
+        })
+
+        return bookings;
+    } catch (error) {
+        console.log(error)
+        return [];
     }
 }
