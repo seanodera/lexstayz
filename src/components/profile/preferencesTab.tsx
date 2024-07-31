@@ -1,6 +1,7 @@
 import {Card} from "antd";
 
 
-export default function PaymentMethods(){
+export default function PreferencesTab(){
+
     return <Card></Card>
 }

@@ -5,11 +5,13 @@ import {Button, DatePicker} from "antd";
 import {RangePickerProps} from "antd/es/date-picker";
 import dayjs from "dayjs";
 import {selectDates, updateDates} from "@/slices/staysSlice";
+import {selectConfirmBooking, updateBookingData} from "@/slices/confirmBookingSlice";
 
 const { RangePicker } = DatePicker;
 
 export default function StayDate() {
-    const dispatch = useAppDispatch()
+    const dispatch = useAppDispatch();
+    const booking = useAppSelector(selectConfirmBooking)
     const dates = useAppSelector(selectDates)
     const disabledDate: RangePickerProps['disabledDate'] = (current) => {
         // Can not select days before today and today
@@ -31,6 +33,11 @@ export default function StayDate() {
                             startDate: dayjs(value[0]).toString(),
                             endDate: dayjs(value[1]).toString(),
                             length: 0
+                        }))
+                        dispatch(updateBookingData({
+                            numGuests: booking.numGuests,
+                            checkInDate: dayjs(value[0]).toString(),
+                            checkOutDate: dayjs(value[1]).toString(),
                         }))
                     }
                 }}

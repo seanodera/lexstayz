@@ -55,7 +55,7 @@ export default function Page() {
     }, [bookings]);
 
     return (
-        <div className={'pt-24 lg:px-24 px-7'}>
+        <div className={'pt-24 lg:px-24 px-7 space-y-4'}>
             <h1>Bookings</h1>
             <h2 className={`font-semibold ${upcoming.length === 0? 'hidden' : ''}`}>Upcoming</h2>
             <div className={'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-4 lg:gap-8'}>

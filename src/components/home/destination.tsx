@@ -33,15 +33,22 @@ export default function Destination() {
     ]
     const [activeTabIndex, setActiveTabIndex] = useState(0);
     const stays = useAppSelector(selectAllStays)
+
     return <section className={' lg:px-16  py-12 bg-white border-t border-gray-200'}>
         <Tabs size={'large'} items={tabs.map((value) => {
+            let data = [...stays]
+            if (value.name === 'Hotels'){
+                data = stays.filter((item) => item.type.toLowerCase() === 'hotel')
+            } else if (value.name === 'Homes'){
+                data = stays.filter((item) => item.type.toLowerCase() === 'home')
+            }
             return {
                 key: value.key,
                 icon: <value.Icon/>,
                 label: value.name,
                 children: <div
                     className={'max-lg:px-4 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 py-8 text-black'}>
-                    {stays.map((hotel: any, index: number) => <HotelItem key={index} hotel={hotel}/>)}
+                    {data.map((hotel: any, index: number) => <HotelItem key={index} hotel={hotel}/>)}
                 </div>
             }
         })}/>

@@ -42,9 +42,9 @@ export default function SearchComponent(){
 
     return (
         <div className={'py-8 md:px-24 xl:p-0 px-7 flex justify-center w-full'}>
-            <Space.Compact className={'xl:bg-black max-xl:bg-white xl:bg-opacity-60 xl:text-white rounded-lg xl:w-full'}>
+            <Space.Compact className={'xl:bg-black max-xl:bg-white xl:bg-opacity-60 xl:text-white rounded-lg xl:w-full max-md:flex max-md:flex-col max-md:w-full max-md:space-y-4'}>
                 <Input
-                    className={'w-1/3 bg-transparent xl:text-white rounded-l-lg '}
+                    className={'md:w-1/3 bg-transparent xl:text-white rounded-l-lg max-md:rounded-lg'}
                     classNames={{
                         input: 'bg-transparent xl:text-white xl:placeholder-gray-400',
 
@@ -55,7 +55,7 @@ export default function SearchComponent(){
                 <RangePicker
                     disabledDate={disabledDate}
                     size={'large'}
-                    className={'w-1/3 bg-transparent text-current placeholder-gray-400'}
+                    className={'md:w-1/3 bg-transparent text-current placeholder-gray-400 max-md:rounded-lg'}
                     onChange={(value) => {
                         if (value) {
                             setStartDate(dayjs(value[0]).toString());
@@ -63,10 +63,10 @@ export default function SearchComponent(){
                         }
                     }}
                 />
-                <Popover className="relative w-1/3" >
+                <Popover className="relative md:w-1/3" >
                     <PopoverButton
                         as={Button}
-                        size={'large'} className={'bg-transparent text-current w-full'}>
+                        size={'large'} className={'bg-transparent text-current w-full max-md:rounded-lg'}>
                         <MdPersonOutline className={'text-lg'} /> {numGuests} Guests <BsRecordFill size={8} /> {numRooms} Rooms
                     </PopoverButton>
 
@@ -94,7 +94,8 @@ export default function SearchComponent(){
                         </PopoverPanel>
 
                 </Popover>
-                <Button type={'primary'} size={'large'} icon={<SearchOutlined/>}></Button>
+                <Button className={'max-md:hidden'} type={'primary'} size={'large'} icon={<SearchOutlined/>}></Button>
+                <Button className={'md:hidden block rounded-lg'} type={'primary'} size={'large'}>Search</Button>
             </Space.Compact>
         </div>
     );
