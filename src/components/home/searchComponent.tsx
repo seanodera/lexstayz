@@ -63,7 +63,7 @@ export default function SearchComponent(){
                         }
                     }}
                 />
-                <Popover className="relative md:w-1/3" >
+                <Popover className="relative " >
                     <PopoverButton
                         as={Button}
                         size={'large'} className={'bg-transparent text-current w-full max-md:rounded-lg'}>
@@ -94,7 +94,7 @@ export default function SearchComponent(){
                         </PopoverPanel>
 
                 </Popover>
-                <Button className={'max-md:hidden'} type={'primary'} size={'large'} icon={<SearchOutlined/>}></Button>
+                <Button className={'max-md:hidden rounded-r-lg'} type={'primary'} size={'large'} icon={<SearchOutlined/>}></Button>
                 <Button className={'md:hidden block rounded-lg'} type={'primary'} size={'large'}>Search</Button>
             </Space.Compact>
         </div>

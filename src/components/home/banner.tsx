@@ -45,7 +45,7 @@ export default function Banner() {
                     </div>
                 ))}
             </Carousel>
-            <div className="absolute max-xl:hidden top-1/2 left-1/4 w-2/4 flex items-center justify-center z-10">
+            <div className="absolute max-xl:hidden top-1/2 left-1/4 flex items-center justify-center z-10">
                 <SearchComponent/>
             </div>
         </section>
