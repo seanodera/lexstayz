@@ -3,10 +3,14 @@ import {Button, DatePicker, Input, InputNumber, Space} from "antd";
 import {RangePickerProps} from "antd/es/date-picker";
 import dayjs from "dayjs";
 import {SearchOutlined} from "@ant-design/icons";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {Popover, PopoverButton, PopoverPanel} from "@headlessui/react";
 import {MdPersonOutline} from "react-icons/md";
 import {BsRecordFill} from "react-icons/bs";
+import {useAppDispatch} from "@/hooks/hooks";
+import {updateBookingData} from "@/slices/confirmBookingSlice";
+import {en} from "@faker-js/faker";
+import {updateDates} from "@/slices/staysSlice";
 
 const { RangePicker } = DatePicker;
 
@@ -22,16 +26,27 @@ export default function SearchComponent(){
 
     const [numRooms, setNumRooms] = useState(1);
     const [numGuests, setNumGuests] = useState(2);
-
-    const [popoverVisible, setPopoverVisible] = useState(false);
+    const dispatch = useAppDispatch()
+    useEffect(( )=> {
+        dispatch(updateBookingData({
+            numGuests:numGuests,
+            checkInDate: startDate,
+            checkOutDate: endDate,
+        }))
+        dispatch(updateDates({
+            length: 0,
+            startDate:startDate,
+            endDate: endDate,
+        }))
+    }, [numGuests,startDate,endDate])
 
     return (
         <div className={'py-8 md:px-24 xl:p-0 px-7 flex justify-center w-full'}>
-            <Space.Compact className={'bg-black bg-opacity-60 text-white rounded-lg xl:w-full'}>
+            <Space.Compact className={'xl:bg-black max-xl:bg-white xl:bg-opacity-60 xl:text-white rounded-lg xl:w-full'}>
                 <Input
-                    className={'w-1/3 bg-transparent text-white rounded-l-lg '}
+                    className={'w-1/3 bg-transparent xl:text-white rounded-l-lg '}
                     classNames={{
-                        input: 'bg-transparent text-white placeholder-gray-400',
+                        input: 'bg-transparent xl:text-white xl:placeholder-gray-400',
 
                     }}
                     size={'large'}

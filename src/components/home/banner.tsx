@@ -1,10 +1,7 @@
 'use client'
-import {Input} from "@headlessui/react";
-import DateComponent from "@/components/DateComponent";
-import {Button, Carousel, Divider, Rate} from "antd";
+import {Carousel, Divider, Rate} from "antd";
 import {useAppSelector} from "@/hooks/hooks";
 
-import {StarFilled} from "@ant-design/icons";
 import {Stay} from "@/lib/types";
 import Link from "next/link";
 import {selectAllStays} from "@/slices/staysSlice";
@@ -16,7 +13,7 @@ export default function Banner() {
     return (
         <section className={'relative'}>
             <Carousel arrows autoplay>
-                {stays.slice(0, 1).map((stay: Stay, index: number) => (
+                {stays.slice(0, 3).map((stay: Stay, index: number) => (
                     <div key={index}>
                         <div
                             className={'bg-center bg-cover w-screen aspect-[10/15] md:aspect-[10/8] lg:aspect-[18/7]'}

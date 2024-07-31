@@ -5,7 +5,7 @@ import Link from "next/link";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import {selectCart} from "@/slices/bookingSlice";
 import {useEffect, useState} from "react";
-import {convertCart, updateBookingData} from "@/slices/confirmBookingSlice";
+import {convertCart, selectConfirmBooking, updateBookingData} from "@/slices/confirmBookingSlice";
 import {selectDates} from "@/slices/staysSlice";
 
 const BookingDetails = ({stay}: any) => {
@@ -13,15 +13,18 @@ const BookingDetails = ({stay}: any) => {
     const cart = useAppSelector(selectCart);
     const dispatch = useAppDispatch()
     const [totalRooms, setTotalRooms] = useState(0);
+    const  booking = useAppSelector(selectConfirmBooking)
+    const [numGuests, setNumGuests] =useState(0)
     useEffect(() => {
         let _totalRooms = 0;
         cart.forEach((value: any) => {
             _totalRooms += value.numRooms;
         });
         setTotalRooms(_totalRooms);
+        setNumGuests(booking.numGuests)
         dispatch(convertCart(cart));
         dispatch(updateBookingData({
-            numGuests: 0,
+            numGuests: booking.numGuests,
             checkInDate: dates.startDate,
             checkOutDate: dates.endDate,
         }))
@@ -46,7 +49,7 @@ const BookingDetails = ({stay}: any) => {
             <div className="font-bold">{dates.length} Nights</div>
             <hr className="my-2"/>
             <h3 className="text-xl font-semibold mb-2">Your Rooms</h3>
-            <div className="text-lg font-medium">{totalRooms} rooms for 8 adults</div>
+            <div className="text-lg font-medium">{totalRooms} rooms for {numGuests} guests</div>
             <div className="ps-4">
                 {
                     cart.map((room: any, index: number) => <div key={index}><span

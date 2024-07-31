@@ -202,5 +202,6 @@ export const selectExchanged = (state: RootState) => state.confirmBooking.exchan
 export const selectStatus = (state: RootState) => state.confirmBooking.status;
 export const selectError = (state: RootState) => state.confirmBooking.error;
 export const selectBookingStatus = (state: RootState) => state.confirmBooking.bookingStatus;
+export const selectConfirmBooking = (state: RootState) => state.confirmBooking;
 
 export default ConfirmBookingSlice.reducer;
