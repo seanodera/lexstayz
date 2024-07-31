@@ -26,13 +26,13 @@ export default function SearchComponent(){
     const [popoverVisible, setPopoverVisible] = useState(false);
 
     return (
-        <div className={'py-8 md:px-24 px-7 flex justify-center'}>
-            <Space.Compact className={'bg-white bg-opacity-30 rounded-lg'}>
+        <div className={'py-8 md:px-24 xl:p-0 px-7 flex justify-center w-full'}>
+            <Space.Compact className={'bg-black bg-opacity-60 text-white rounded-lg xl:w-full'}>
                 <Input
-                    className={'w-1/3 bg-white bg-opacity-50 rounded-l-lg'}
-                    addonBefore={<SearchOutlined />}
+                    className={'w-1/3 bg-transparent text-white rounded-l-lg '}
                     classNames={{
-                        input: 'bg-transparent'
+                        input: 'bg-transparent text-white placeholder-gray-400',
+
                     }}
                     size={'large'}
                     placeholder={'where are you going?'}
@@ -40,7 +40,7 @@ export default function SearchComponent(){
                 <RangePicker
                     disabledDate={disabledDate}
                     size={'large'}
-                    className={'w-1/3 bg-white bg-opacity-50'}
+                    className={'w-1/3 bg-transparent text-current placeholder-gray-400'}
                     onChange={(value) => {
                         if (value) {
                             setStartDate(dayjs(value[0]).toString());
@@ -48,10 +48,10 @@ export default function SearchComponent(){
                         }
                     }}
                 />
-                <Popover className="relative" >
+                <Popover className="relative w-1/3" >
                     <PopoverButton
                         as={Button}
-                        size={'large'} className={'bg-white bg-opacity-50'}>
+                        size={'large'} className={'bg-transparent text-current w-full'}>
                         <MdPersonOutline className={'text-lg'} /> {numGuests} Guests <BsRecordFill size={8} /> {numRooms} Rooms
                     </PopoverButton>
 
@@ -60,7 +60,7 @@ export default function SearchComponent(){
                                 <h4>Guests</h4>
                                 <div>
                                     <InputNumber
-                                        className={'rounded-lg'}
+                                        className={' rounded-lg'}
                                         value={numGuests}
                                         onChange={(value) => setNumGuests(value ? value : 0)}
                                         min={1}
@@ -79,7 +79,7 @@ export default function SearchComponent(){
                         </PopoverPanel>
 
                 </Popover>
-                <Button type={'primary'} size={'large'}>Search</Button>
+                <Button type={'primary'} size={'large'} icon={<SearchOutlined/>}></Button>
             </Space.Compact>
         </div>
     );

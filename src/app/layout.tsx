@@ -1,4 +1,5 @@
 import type {Metadata} from "next";
+import 'antd/dist/reset.css';
 import "../styles/globals.css";
 import {AntdRegistry} from "@ant-design/nextjs-registry";
 import {ConfigProvider} from "antd";

@@ -2,7 +2,6 @@
 import Navbar from "@/components/Navbar";
 import {useEffect, useState} from "react";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
-import 'antd/dist/reset.css';
 import {fetchBookingsAsync, selectIsLoading} from "@/slices/bookingSlice";
 import Preloader from "@/components/preloader/preloader";
 import LoadingScreen from "@/components/LoadingScreen";

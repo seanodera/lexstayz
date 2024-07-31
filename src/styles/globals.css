@@ -49,6 +49,21 @@ body {
   box-shadow: 0 -2px 0 0 #221a4c;
   clip-path: inset(-2px 40%);
 }
+
+.custom-range-picker .ant-picker-suffix {
+  color: currentColor !important; /* Change the icon color to white */
+}
+
+.custom-range-picker .ant-picker-clear {
+  color: currentColor !important; /* Change the clear icon color to white */
+}
+.ant-picker-separator .anticon-swap-right{
+  color: #584cf4 !important;
+}
+.ant-picker-input{
+
+}
+
 @keyframes l4 {
   100% {background-position: calc(100%/3) 0}
 }
