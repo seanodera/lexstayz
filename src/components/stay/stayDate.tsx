@@ -41,6 +41,7 @@ export default function StayDate() {
                     <RangePicker
                     disabledDate={disabledDate}
                     size={'large'}
+                    format={'DD MMMM YYYY'}
                     className={'border border-gray-500 rounded-xl py-2 px-3 bg-transparent'}
                     value={[dayjs(booking.checkInDate),dayjs(booking.checkOutDate)]}
                     onChange={(value) => {

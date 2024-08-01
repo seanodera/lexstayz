@@ -1,7 +1,6 @@
 import {countries} from "country-data";
 
 
-
 export function getRandomInt({max, min = 0}: { max: number, min?: number }) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
@@ -18,36 +17,36 @@ export const getAbbreviation = ({num}: { num: number }) => {
 export const monthString = ({num}: { num: number }) => {
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-    return months[num];
+    return months[ num ];
 }
 
 export const monthStringShort = ({num}: { num: number }) => {
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-    return months[num];
+    return months[ num ];
 }
 
 export const monthInt = ({month}: { month: string }) => {
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     let finalIndex = 0;
     for (let index = 0; index <= months.length; index++) {
-        if (months[index].toLocaleLowerCase() === month.toLocaleLowerCase()) {
+        if (months[ index ].toLocaleLowerCase() === month.toLocaleLowerCase()) {
             finalIndex = index;
         }
     }
     return finalIndex;
 }
 
-export const timeFromDate = ({date, am_pm = true}: {date: Date | number| string | any, am_pm: boolean}) => {
+export const timeFromDate = ({date, am_pm = true}: { date: Date | number | string | any, am_pm: boolean }) => {
     let _date = new Date(date);
 
-    if (am_pm){
+    if (am_pm) {
         let hours = _date.getHours();
         let minutes: string | number = _date.getMinutes();
         let ampm = hours >= 12 ? 'PM' : 'AM';
         hours = hours % 12;
         hours = hours ? hours : 12;
-        minutes = minutes < 10 ? '0'+minutes : minutes;
+        minutes = minutes < 10 ? '0' + minutes : minutes;
         return hours + ':' + minutes + ' ' + ampm;
     } else {
         return `${_date.getHours()}:${_date.getMinutes()}`;
@@ -56,17 +55,25 @@ export const timeFromDate = ({date, am_pm = true}: {date: Date | number| string 
 
 export const dayStringShort = ({num}: { num: any }) => {
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat",]
-    return days[num];
+    return days[ num ];
 }
 
-export const dateReader = ({date = Date.now(), month = true, years = true, weekDay = false} :{date?: Date | number| string, month?: boolean , years?: boolean , weekDay?: boolean}) => {
+export const dateReader = ({date = Date.now(), day = true, month = true, years = true, weekDay = false}: {
+    date?: Date | number | string,
+    day?: boolean,
+    month?: boolean,
+    years?: boolean,
+    weekDay?: boolean
+}) => {
 
     let _date = new Date(date);
     let dateString = '';
     if (weekDay) {
         dateString = dateString.concat(dayStringShort({num: _date.getDay()}), ' ')
     }
-    dateString = dateString.concat(_date.getDate().toString(), ' ')
+    if (day) {
+        dateString = dateString.concat(_date.getDate().toString(), ' ')
+    }
     if (month) {
         dateString = dateString.concat(monthStringShort({num: _date.getMonth()}), ' ')
     }
@@ -90,12 +97,12 @@ export async function getCountry() {
         const countryCode = countryData.country;
 
         // Get country information from country-data package
-        const country = countries[countryCode];
+        const country = countries[ countryCode ];
 
         return {
             name: country.name,
             emoji: country.emoji,
-            currency: country.currencies[0]
+            currency: country.currencies[ 0 ]
         };
     } catch (error) {
         console.error("Error fetching country data: ", error);
@@ -104,8 +111,8 @@ export async function getCountry() {
 }
 
 export function serviceCountries() {
-    let list = ['KE', 'GH', 'UK','CY']
-    return list.map((e) => countries[e])
+    let list = ['KE', 'GH', 'UK', 'CY']
+    return list.map((e) => countries[ e ])
 }
 
 export async function createFile({url, name = 'image'}: { url: string, name?: string }) {
@@ -118,7 +125,7 @@ export async function createFile({url, name = 'image'}: { url: string, name?: st
     return new File([data], `${name}.jpg`, metadata);
 }
 
-export function toMoneyFormat(amount: number ) {
+export function toMoneyFormat(amount: number) {
 
     return amount.toLocaleString(undefined, {
         minimumFractionDigits: 2, maximumFractionDigits: 2,
@@ -135,7 +142,7 @@ export const generatePastMonths = (numMonths: number) => {
         const month = currentDate.getMonth() + 1; // getMonth() is zero-based
 
         // Add the year and month to the array
-        months.push({ year, month });
+        months.push({year, month});
 
         // Move to the previous month
         currentDate.setMonth(currentDate.getMonth() - 1);
@@ -156,13 +163,13 @@ function getRandomSubarray(arr: Array<any>, size: number) {
 }
 
 
-export const getExchangeRate = async (fromCurrency:string, toCurrency:string) => {
+export const getExchangeRate = async (fromCurrency: string, toCurrency: string) => {
     try {
         const response = await fetch(`https://open.er-api.com/v6/latest/${fromCurrency}`);
         const data = await response.json();
         console.log(data)
         //https://www.exchangerate-api.com/docs/free
-        const exchangeRate = data.rates[toCurrency];
+        const exchangeRate = data.rates[ toCurrency ];
         if (!exchangeRate) {
             throw new Error(`Unable to find exchange rate for ${toCurrency}`);
         }

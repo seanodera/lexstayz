@@ -7,8 +7,8 @@ import {useEffect, useState} from "react";
 import {Popover, PopoverButton, PopoverPanel} from "@headlessui/react";
 import {MdPersonOutline} from "react-icons/md";
 import {BsRecordFill} from "react-icons/bs";
-import {useAppDispatch} from "@/hooks/hooks";
-import {updateBookingData} from "@/slices/confirmBookingSlice";
+import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
+import {selectConfirmBooking, updateBookingData} from "@/slices/confirmBookingSlice";
 import {en} from "@faker-js/faker";
 import {updateDates} from "@/slices/staysSlice";
 
@@ -19,10 +19,10 @@ export default function SearchComponent(){
         // Can not select days before today and today
         return current < dayjs().subtract(1,'day').endOf('day');
     };
-
+    const booking = useAppSelector(selectConfirmBooking)
     const [searchTerms, setSearchTerms] = useState('');
-    const [startDate, setStartDate] = useState('');
-    const [endDate, setEndDate] = useState('');
+    const [startDate, setStartDate] = useState(booking.checkInDate);
+    const [endDate, setEndDate] = useState(booking.checkOutDate);
 
     const [numRooms, setNumRooms] = useState(1);
     const [numGuests, setNumGuests] = useState(2);
@@ -39,7 +39,7 @@ export default function SearchComponent(){
             endDate: endDate,
         }))
     }, [numGuests,startDate,endDate])
-
+    console.log(booking.checkInDate)
     return (
         <div className={'py-8 md:px-24 xl:p-0 px-7 flex justify-center w-full'}>
             <Space.Compact className={'xl:bg-black max-xl:bg-white xl:bg-opacity-60 xl:text-white rounded-lg xl:w-full max-md:flex max-md:flex-col max-md:w-full max-md:space-y-4'}>
@@ -54,6 +54,8 @@ export default function SearchComponent(){
                 />
                 <RangePicker
                     disabledDate={disabledDate}
+                    format={'DD MMMM YYYY'}
+                    value={[dayjs(booking.checkInDate),dayjs(booking.checkOutDate)]}
                     size={'large'}
                     className={'md:w-1/3 bg-transparent text-current placeholder-gray-400 max-md:rounded-lg'}
                     onChange={(value) => {
