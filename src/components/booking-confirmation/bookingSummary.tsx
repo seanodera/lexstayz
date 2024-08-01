@@ -27,7 +27,7 @@ const BookingSummary = ({ stay }: any) => {
        const fetchExchangeRate = async () => {
            const country = await getCountry();
 
-            const fromCurrency = 'USD'; // Change as needed
+            const fromCurrency = stay.currency? stay.currency : 'USD'; // Change as needed
             const toCurrency = 'GHS'; // Change as needed
             if (toCurrency){
                 const rate = await getExchangeRate(fromCurrency, toCurrency);
@@ -68,7 +68,7 @@ const BookingSummary = ({ stay }: any) => {
                     ${toMoneyFormat(subTotal * 1.035)}
                 </div>
             </div>
-            <div className={'text-primary text-center font-medium h4 my-2'}> 1 USD = {toMoneyFormat(exchangeRate)} {currency}</div>
+            <div className={'text-primary text-center font-medium h4 my-2'}> 1 {stay.currency? stay.currency : 'USD'} = {toMoneyFormat(exchangeRate)} {currency}</div>
             <div className={'text-lg font-medium'}>You will Pay</div>
             <div className={'text-xl font-bold'}>{currency} {toMoneyFormat(subTotal * 1.035 * exchangeRate)}</div>
         </div>

@@ -1,5 +1,7 @@
 // pages/booking-confirmation.tsx
 'use client'
+// @ts-ignore
+import PaystackPop from '@paystack/inline-js'
 import Link from "next/link";
 import {dateReader} from "@/lib/utils";
 import ContactForm from "@/components/booking-confirmation/contactForm";
@@ -16,8 +18,9 @@ import {useEffect} from "react";
 import {getAuth} from "firebase/auth";
 import {message} from "antd";
 import {useRouter} from "next/navigation";
-import {createBooking} from "@/slices/confirmBookingSlice";
+import {createBooking, selectConfirmBooking} from "@/slices/confirmBookingSlice";
 import {selectCurrentStay} from "@/slices/staysSlice";
+import {initiatePayment} from "@/data/payment";
 
 export default function Page() {
     const stay = useAppSelector(selectCurrentStay);
@@ -25,27 +28,51 @@ export default function Page() {
     const [messageApi, contextHolder] = message.useMessage();
     const dispatch = useAppDispatch()
     const router = useRouter()
-        useEffect(() => {
-            if (!stay){
-                router.push('/')
-            }
-            const user = getAuth().currentUser
-            if (user){
+    const booking = useAppSelector(selectConfirmBooking)
 
-            } else {
+    useEffect(() => {
+        if (!stay) {
+            router.push('/')
+        }
+        const user = getAuth().currentUser
+        if (user) {
 
-            }
-        }, []);
+        } else {
 
-    function handSubmit(event: any){
+        }
+    }, []);
+    const popup = new PaystackPop()
+
+    function handSubmit(event: any) {
         event.preventDefault();
+
 
         // @ts-ignore
         dispatch(createBooking()).then((value) => {
             console.log(value)
-            router.push('/checkout')
+            const bookingID = value.payload.id;
+            makePayment(bookingID);
         })
+
     }
+
+    async function makePayment(bookingID: string) {
+        const user = getAuth().currentUser
+        if (user) {
+            const amount = booking.totalPrice * booking.usedRate * 1.035
+            const response = await initiatePayment({
+                email: userDetails.email,
+                amount: amount,
+                userID: user.uid,
+                bookingID: bookingID,
+                currency: booking.currency
+            })
+           const datab = response.data;
+            localStorage.setItem('paymentData', JSON.stringify(datab))
+            popup.resumeTransaction(datab.access_code)
+        }
+    }
+
     if (!stay || stay.id === undefined) {
 
         return <div></div>;
@@ -84,8 +111,9 @@ export default function Page() {
                                 </div>
                             </div>
 
-                            <div className={'border shadow-md p-4 rounded-xl col-span-1 md:col-span-2 lg:col-span-1'}><h3
-                                className={'text-xl font-semibold mb-2'}>Terms & Conditions</h3></div>
+                            <div className={'border shadow-md p-4 rounded-xl col-span-1 md:col-span-2 lg:col-span-1'}>
+                                <h3
+                                    className={'text-xl font-semibold mb-2'}>Terms & Conditions</h3></div>
                         </div>
                         <Link href="/checkout"
                               className="hidden max-lg:block py-3 text-center bg-primary rounded-xl font-medium text-white">
@@ -98,7 +126,7 @@ export default function Page() {
                             <BookingDetails stay={stay}/>
                             <BookingSummary stay={stay}/>
                             <button onClick={handSubmit}
-                                  className="block max-lg:hidden py-3 text-center bg-primary rounded-xl font-medium text-white">
+                                    className="block max-lg:hidden py-3 text-center bg-primary rounded-xl font-medium text-white">
                                 Checkout
                             </button>
                         </div>
@@ -108,3 +136,4 @@ export default function Page() {
         );
     }
 }
+

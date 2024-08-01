@@ -57,7 +57,7 @@ export default function SearchComponent(){
                     format={'DD MMMM YYYY'}
                     value={[dayjs(booking.checkInDate),dayjs(booking.checkOutDate)]}
                     size={'large'}
-                    className={'md:w-1/3 bg-transparent text-current placeholder-gray-400 max-md:rounded-lg'}
+                    className={'md:w-1/3 xl:w-max bg-transparent text-current placeholder-gray-400 max-md:rounded-lg'}
                     onChange={(value) => {
                         if (value) {
                             setStartDate(dayjs(value[0]).toString());

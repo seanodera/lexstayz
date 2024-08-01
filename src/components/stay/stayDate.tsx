@@ -35,7 +35,6 @@ export default function StayDate() {
     }, [numGuests,startDate,endDate])
     return (
         <div className="bg-primary-50 rounded-2xl p-4 my-4 shadow-md">
-            <div className="text-xl font-semibold mb-1">Date</div>
             <div className="flex max-md:flex-col gap-4">
                 <div className="">
                     <RangePicker
@@ -58,10 +57,10 @@ export default function StayDate() {
                     />
 
                 </div>
-                <Popover className="relative md:w-1/3" >
+                <Popover className="relative" >
                     <PopoverButton
                         as={Button}
-                        size={'large'} className={'bg-transparent text-current w-full max-md:rounded-lg'}>
+                        size={'large'} className={'bg-transparent text-current max-md:rounded-lg border-black w-max'}>
                         <MdPersonOutline className={'text-lg'} /> {numGuests} Guests</PopoverButton>
 
                     <PopoverPanel anchor="bottom" className="flex flex-col p-4 z-20 shadow-xl rounded-xl ">
@@ -78,7 +77,6 @@ export default function StayDate() {
 
                         </div>
                     </PopoverPanel>
-
                 </Popover>
                 <Button size={'large'} type={'primary'}>Check Availability</Button>
             </div>
