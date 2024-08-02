@@ -11,9 +11,13 @@ export function getTag(value: string) {
             return <Tag color={'error'}>{value}</Tag>
         case 'Canceled':
             return <Tag color={'error'}>{value}</Tag>
+        case 'Unpaid':
+            return <Tag color={'error'}>{value}</Tag>
         case 'Past' :
             return <Tag color={'processing'}>{value}</Tag>
         case 'Completed':
+            return <Tag color={'success'}>{value}</Tag>
+        case 'Paid':
             return <Tag color={'success'}>{value}</Tag>
         case 'Published':
             return <Tag color={'purple'}>{value}</Tag>

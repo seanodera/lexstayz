@@ -18,15 +18,18 @@ export function generateID(){
 
 export async function completeBooking(userId:string, id:string){
     try {
-        const user = getCurrentUser();
         const batch = writeBatch(firestore);
-        const userDoc = doc(firestore, 'user', user.uid, 'bookings', id);
+        const userDoc = doc(firestore, 'user', userId, 'bookings', id);
         const bookingSnap = await getDoc(userDoc)
         const booking = bookingSnap.data();
-        const hostDoc = doc(firestore, 'hosts', booking?.accomodationId, 'bookings', id);
-        batch.update(userDoc,{status: 'Pending',isConfirmed: true})
-        batch.set(hostDoc,{...booking,status: 'Pending',isConfirmed: true})
-        await batch.commit();
+        console.log(booking)
+       if (booking){
+           const hostDoc = doc(firestore, 'hosts', booking.accommodationId, 'bookings', id);
+           batch.update(userDoc,{status: 'Pending',isConfirmed: true})
+           batch.set(hostDoc,{...booking,status: 'Pending',isConfirmed: true})
+           await batch.commit();
+           console.log('Completed',booking)
+       }
     } catch (err){
         console.log(err)
     }

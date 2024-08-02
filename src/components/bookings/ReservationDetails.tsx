@@ -8,7 +8,7 @@ export default function ReservationDetails({booking}: {booking: any}){
     return <Card className={'rounded-xl'}>
         <div className={'flex justify-between'}>
             <div className={'text-xl font-semibold mb-4'}>Reservation Details</div>
-            <div>{getTag(booking.status)}</div>
+            <div>{booking.isConfirmed? getTag('Paid'):''} {getTag(booking.status)}</div>
         </div>
         <div className={'grid grid-cols-2'}>
             <div className={''}>

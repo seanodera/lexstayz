@@ -1,4 +1,5 @@
 import axios from "axios";
+import {createBooking} from "@/slices/confirmBookingSlice";
 
 
 export async function initiatePayment({email, amount, userID, bookingID, currency}: {
@@ -31,7 +32,20 @@ export async function initiatePayment({email, amount, userID, bookingID, currenc
 }
 
 
-export async function verifyPayment(accessCode: string) {
+export async function verifyPayment(id: string) {
+    try {
+        const res = await axios.post('/api/verifyTransaction', {reference: id})
+
+        if (res.data.status === 'success') {
+            return res.data
+        } else {
+            alert('Payment verification failed');
+        }
+
+
+    } catch (err) {
+        console.log(err)
+    }
 
 
 }
