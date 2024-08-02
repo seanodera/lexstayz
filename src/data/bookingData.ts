@@ -1,7 +1,7 @@
 import {Stay} from "@/lib/types";
 import {auth, firestore} from "@/lib/firebase";
 import {writeBatch} from "@firebase/firestore";
-import {collection, doc, getDocs} from "firebase/firestore";
+import {collection, doc, getDoc, getDocs} from "firebase/firestore";
 
 export function getCurrentUser() {
     const user = auth.currentUser;
@@ -11,6 +11,26 @@ export function getCurrentUser() {
     return user;
 }
 
+export function generateID(){
+    const document = doc(collection(firestore,'bookings'))
+    return document.id
+}
+
+export async function completeBooking(userId:string, id:string){
+    try {
+        const user = getCurrentUser();
+        const batch = writeBatch(firestore);
+        const userDoc = doc(firestore, 'user', user.uid, 'bookings', id);
+        const bookingSnap = await getDoc(userDoc)
+        const booking = bookingSnap.data();
+        const hostDoc = doc(firestore, 'hosts', booking?.accomodationId, 'bookings', id);
+        batch.update(userDoc,{status: 'Pending',isConfirmed: true})
+        batch.set(hostDoc,{...booking,status: 'Pending',isConfirmed: true})
+        await batch.commit();
+    } catch (err){
+        console.log(err)
+    }
+}
 
 async function createBookingFirebase({stay, checkInDate, checkOutDate, rooms, paymentData, contact, numGuests, specialRequest, totalPrice, currency, usedRate}: {
     stay: Stay,

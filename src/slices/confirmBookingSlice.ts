@@ -1,10 +1,9 @@
-import { Stay } from "@/lib/types";
-import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import { firestore } from "@/lib/firebase";
-import { getCurrentUser } from "@/data/bookingData";
+import {Stay} from "@/lib/types";
+import {createSlice, createAsyncThunk, PayloadAction} from "@reduxjs/toolkit";
+import {firestore} from "@/lib/firebase";
+import {getCurrentUser} from "@/data/bookingData";
 import {writeBatch, doc, collection} from "firebase/firestore";
-import { RootState } from "@/data/store";
-import {getAuth} from "firebase/auth";
+import {RootState} from "@/data/store";
 
 interface ConfirmBookingState {
     stay: Stay,
@@ -49,17 +48,15 @@ const initialState: ConfirmBookingState = {
     bookingStatus: 'Pending', // Default status
 }
 
-export const createBooking = createAsyncThunk(
+export const createBooking: any = createAsyncThunk(
     'confirmBooking/createBooking',
-    async (_, { getState, rejectWithValue }) => {
-        // @ts-ignore
-        const state: RootState = getState();
+    async ({paymentData, id}: { paymentData: any, id: string }, {getState, rejectWithValue}) => {
+        const state = getState() as { confirmBooking: ConfirmBookingState };
         const {
             stay,
             checkInDate,
             checkOutDate,
             rooms,
-            paymentData,
             contact,
             numGuests,
             specialRequest,
@@ -67,13 +64,15 @@ export const createBooking = createAsyncThunk(
             currency,
             usedRate,
         } = state.confirmBooking;
+
         try {
             const user = getCurrentUser();
             const batch = writeBatch(firestore);
-            const hostDoc = doc(collection(firestore, 'hosts', stay.hostId, 'bookings'));
-            const userDoc = doc(firestore, 'user', user.uid, 'bookings', hostDoc.id);
+            // const hostDoc = doc(firestore, 'hosts', stay.hostId, 'bookings', id);
+            const userDoc = doc(firestore, 'user', user.uid, 'bookings', id);
+
             const booking = {
-                id: hostDoc.id,
+                id: id,
                 accommodationId: stay.id,
                 accountId: user.uid,
                 hostId: stay.hostId,
@@ -88,26 +87,27 @@ export const createBooking = createAsyncThunk(
                 checkOutDate,
                 createdAt: new Date().toString(),
                 rooms: rooms,
-                status: 'Pending',
+                status: 'Unpaid',
                 numGuests: numGuests,
-                isConfirmed: false,
+                isConfirmed: false, // Updated after successful payment
                 specialRequest: specialRequest,
                 totalPrice: totalPrice,
                 currency: currency,
                 usedRate: usedRate,
-                paymentData: paymentData,
+                paymentData: paymentData, // Include the payment data here
             };
-            batch.set(hostDoc, booking);
+
+            // batch.set(hostDoc, booking);
             batch.set(userDoc, booking);
             await batch.commit();
             return booking;
         } catch (error) {
-            console.log(error);
             // @ts-ignore
             return rejectWithValue(error.message);
         }
     }
 );
+
 
 const ConfirmBookingSlice = createSlice({
     name: 'confirmBooking',
@@ -126,7 +126,11 @@ const ConfirmBookingSlice = createSlice({
             state.usedRate = action.payload.usedRate;
             state.exchanged = state.stay.currency !== action.payload.currency;
         },
-        updateBookingData: (state, action: PayloadAction<{ numGuests: number; checkInDate: string; checkOutDate: string }>) => {
+        updateBookingData: (state, action: PayloadAction<{
+            numGuests: number;
+            checkInDate: string;
+            checkOutDate: string
+        }>) => {
             state.numGuests = action.payload.numGuests;
             state.checkInDate = action.payload.checkInDate;
             state.checkOutDate = action.payload.checkOutDate;

@@ -1,5 +1,5 @@
 'use client'
-import Navbar from "@/components/Navbar";
+import Navbar from "@/components/navigation/Navbar";
 import {useEffect, useState} from "react";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import {fetchBookingsAsync, selectIsLoading} from "@/slices/bookingSlice";

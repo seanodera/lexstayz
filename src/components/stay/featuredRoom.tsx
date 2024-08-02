@@ -1,4 +1,4 @@
-import RoomComponent, {RoomComponentPortrait} from "@/components/roomComponent";
+import RoomComponent, {RoomComponentPortrait} from "@/components/Grid Items/roomComponent";
 
 export default function FeaturedRoom({ stay } : any)  {
     return (

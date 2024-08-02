@@ -6,7 +6,7 @@ import {auth} from "@/lib/firebase";
 import {browserLocalPersistence, getAuth, onAuthStateChanged, setPersistence} from "firebase/auth";
 import {getUserDetails} from "@/data/usersData";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
-import Navbar from "@/components/Navbar";
+import Navbar from "@/components/navigation/Navbar";
 import LoadingScreen from "@/components/LoadingScreen";
 import {selectHasRun} from "@/slices/staysSlice";
 import {fetchBookingsAsync, selectHasBookingRun} from "@/slices/bookingSlice";

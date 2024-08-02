@@ -2,7 +2,7 @@
 import React, {Suspense, useEffect, useState} from "react";
 import LogoIcon from "@/components/LogoIcon";
 import {Field, Fieldset, Input, Label} from "@headlessui/react";
-import {Card, message} from "antd";
+import {Avatar, Card, message} from "antd";
 import {useRouter, useSearchParams} from "next/navigation";
 import {passwordReset, verifyReset} from "@/data/usersData";
 
@@ -59,7 +59,7 @@ function ResetPassWordWrappedComponent(){
     return <Card className={'text-center md:w-1/3 rounded-xl flex flex-col justify-center px-6 py-12 lg:px-8'}>
         {contextHolder}
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-            <LogoIcon className="mx-auto h-20 w-auto"/>
+            <Avatar src={'/logo/lexstayz-logo-transparent-square.png'} shape={'square'} className="mx-auto h-20 w-auto"/>
             <div className={'text-3xl'}>LexStayz</div>
             <h2 className="mt-12 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
                 Reset Password

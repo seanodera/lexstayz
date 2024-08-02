@@ -1,80 +1,47 @@
-// pages/booking-confirmation.tsx
-'use client'
-// @ts-ignore
-import PaystackPop from '@paystack/inline-js'
+'use client';
 import Link from "next/link";
-import {dateReader} from "@/lib/utils";
+import { dateReader } from "@/lib/utils";
 import ContactForm from "@/components/booking-confirmation/contactForm";
 import SpecialRequests from "@/components/booking-confirmation/specialRequests";
-import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
-
+import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import StayDetails from "@/components/booking-confirmation/stayDetails";
 import BookingDetails from "@/components/booking-confirmation/bookingDetails";
 import BookingSummary from "@/components/booking-confirmation/bookingSummary";
-import {Select} from "@headlessui/react";
-import {AiFillCheckCircle, AiOutlineCheckCircle} from "react-icons/ai";
-import {selectCurrentUser} from "@/slices/authenticationSlice";
-import {useEffect} from "react";
-import {getAuth} from "firebase/auth";
-import {message} from "antd";
-import {useRouter} from "next/navigation";
-import {createBooking, selectConfirmBooking} from "@/slices/confirmBookingSlice";
-import {selectCurrentStay} from "@/slices/staysSlice";
-import {initiatePayment} from "@/data/payment";
+import { Select } from "@headlessui/react";
+import { AiFillCheckCircle, AiOutlineCheckCircle } from "react-icons/ai";
+import { selectCurrentUser } from "@/slices/authenticationSlice";
+import { useEffect } from "react";
+import { getAuth } from "firebase/auth";
+import { message } from "antd";
+import { useRouter } from "next/navigation";
+import { createBooking, selectConfirmBooking } from "@/slices/confirmBookingSlice";
+import { selectCurrentStay } from "@/slices/staysSlice";
+import PaystackPayment from "@/components/PaystackComponent";
 
 export default function Page() {
     const stay = useAppSelector(selectCurrentStay);
-    const userDetails = useAppSelector(selectCurrentUser)
+    const userDetails = useAppSelector(selectCurrentUser);
     const [messageApi, contextHolder] = message.useMessage();
-    const dispatch = useAppDispatch()
-    const router = useRouter()
-    const booking = useAppSelector(selectConfirmBooking)
+    const dispatch = useAppDispatch();
+    const router = useRouter();
+    const booking = useAppSelector(selectConfirmBooking);
 
     useEffect(() => {
         if (!stay) {
-            router.push('/')
+            router.push('/');
         }
-        const user = getAuth().currentUser
-        if (user) {
-
-        } else {
-
+        const user = getAuth().currentUser;
+        if (!user) {
+            router.push('/login');
         }
     }, []);
-    const popup = new PaystackPop()
 
     function handSubmit(event: any) {
         event.preventDefault();
-
-
-        // @ts-ignore
-        dispatch(createBooking()).then((value) => {
-            console.log(value)
-            const bookingID = value.payload.id;
-            makePayment(bookingID);
-        })
-
-    }
-
-    async function makePayment(bookingID: string) {
-        const user = getAuth().currentUser
-        if (user) {
-            const amount = booking.totalPrice * booking.usedRate * 1.035
-            const response = await initiatePayment({
-                email: userDetails.email,
-                amount: amount,
-                userID: user.uid,
-                bookingID: bookingID,
-                currency: booking.currency
-            })
-           const datab = response.data;
-            localStorage.setItem('paymentData', JSON.stringify(datab))
-            popup.resumeTransaction(datab.access_code)
-        }
+        // No direct booking submission here. Payment should handle it.
     }
 
     if (!stay || stay.id === undefined) {
-
         return <div></div>;
     } else {
         return (
@@ -89,34 +56,31 @@ export default function Page() {
                             <SpecialRequests/>
                         </div>
                         <div className={'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'}>
-                            <div className={'border shadow-md p-4 rounded-xl'}><h3
-                                className={'text-xl font-semibold mb-2'}>Your Arrival Time</h3>
-                                <span className={'flex gap-1 items-center my-4'}><AiOutlineCheckCircle
-                                    className={'text-primary'} size={35}/> Ready for check-in at 2:00 PM</span>
+                            <div className={'border shadow-md p-4 rounded-xl'}>
+                                <h3 className={'text-xl font-semibold mb-2'}>Your Arrival Time</h3>
+                                <span className={'flex gap-1 items-center my-4'}>
+                                    <AiOutlineCheckCircle className={'text-primary'} size={35}/>
+                                    Ready for check-in at 2:00 PM
+                                </span>
                                 <div className={'font-medium my-2'}>Add your estimated arrival time</div>
-                                <Select
-                                    className={'appearance-none border border-gray-500 rounded-lg py-2 px-3 w-full'}>
-                                    <option>I dont know</option>
+                                <Select className={'appearance-none border border-gray-500 rounded-lg py-2 px-3 w-full'}>
+                                    <option>I don&apos;t know</option>
                                     <option>00:00 - 01:00</option>
                                 </Select>
                             </div>
-                            <div className={'border shadow-md p-4 rounded-xl'}><h3
-                                className={'text-xl font-semibold mb-2'}>Cancellation</h3>
-                                <div className={'text-primary-600 my-4 font-medium'}>Free Cancellation
-                                    until {dateReader({})} 00:00
-                                </div>
+                            <div className={'border shadow-md p-4 rounded-xl'}>
+                                <h3 className={'text-xl font-semibold mb-2'}>Cancellation</h3>
+                                <div className={'text-primary-600 my-4 font-medium'}>Free Cancellation until {dateReader({})} 00:00</div>
                                 <div className={'flex justify-between'}>
                                     <span className={'font-medium'}>If you cancel, you&apos;ll pay</span>
-                                    <span className={'text-primary'}>$ 30.00</span>
+                                    <span className={'text-primary'}>$30.00</span>
                                 </div>
                             </div>
-
                             <div className={'border shadow-md p-4 rounded-xl col-span-1 md:col-span-2 lg:col-span-1'}>
-                                <h3
-                                    className={'text-xl font-semibold mb-2'}>Terms & Conditions</h3></div>
+                                <h3 className={'text-xl font-semibold mb-2'}>Terms & Conditions</h3>
+                            </div>
                         </div>
-                        <Link href="/checkout"
-                              className="hidden max-lg:block py-3 text-center bg-primary rounded-xl font-medium text-white">
+                        <Link href="/checkout" className="hidden max-lg:block py-3 text-center bg-primary rounded-xl font-medium text-white">
                             Checkout
                         </Link>
                     </div>
@@ -125,10 +89,10 @@ export default function Page() {
                             <StayDetails stay={stay}/>
                             <BookingDetails stay={stay}/>
                             <BookingSummary stay={stay}/>
-                            <button onClick={handSubmit}
-                                    className="block max-lg:hidden py-3 text-center bg-primary rounded-xl font-medium text-white">
+                            <button onClick={handSubmit} className="block max-lg:hidden py-3 text-center bg-primary rounded-xl font-medium text-white">
                                 Checkout
                             </button>
+                            <PaystackPayment/>
                         </div>
                     </div>
                 </div>
@@ -136,4 +100,3 @@ export default function Page() {
         );
     }
 }
-

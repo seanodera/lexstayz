@@ -19,13 +19,14 @@ export async function initiatePayment({email, amount, userID, bookingID, currenc
             },
             {
                 headers: {
-                    Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+                    Authorization: `Bearer sk_test_41938c09430fc78c21e169c1b49b23d464d90603`,
                 },
             }
         );
+
         return response.data
     } catch (error) {
-
+        console.log(error)
     }
 }
 

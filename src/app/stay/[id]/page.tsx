@@ -3,7 +3,7 @@ import { faker } from "@faker-js/faker";
 import { MdOutlineBathtub, MdOutlineDashboard, MdPersonOutline } from "react-icons/md";
 import { IoBedOutline } from "react-icons/io5";
 import React, { useEffect, useState } from "react";
-import RoomComponent from "@/components/roomComponent";
+import RoomComponent from "@/components/Grid Items/roomComponent";
 import DateComponent from "@/components/DateComponent";
 import Link from "next/link";
 import { useParams } from "next/navigation";

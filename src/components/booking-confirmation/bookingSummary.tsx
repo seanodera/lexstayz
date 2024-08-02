@@ -40,7 +40,8 @@ const BookingSummary = ({ stay }: any) => {
             }
         };
        fetchExchangeRate()
-    });
+    },[stay.currency]);
+
     useEffect(()=>{
         dispatch(setBookingStay(stay))
         dispatch(updateCostData(

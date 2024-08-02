@@ -1,4 +1,4 @@
-import RoomComponent from "@/components/roomComponent";
+import RoomComponent from "@/components/Grid Items/roomComponent";
 
 export default function AvailableRooms({ stay}: { stay: any }) {
     return (

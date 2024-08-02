@@ -3,7 +3,7 @@ import {useSearchParams} from "next/navigation";
 import {useAppSelector} from "@/hooks/hooks";
 import {selectBookings} from "@/slices/bookingSlice";
 import {useEffect} from "react";
-import {getCurrentUser} from "@/data/bookingData";
+import {completeBooking, getCurrentUser} from "@/data/bookingData";
 import {doc} from "firebase/firestore";
 import {firestore} from "@/lib/firebase";
 import {writeBatch} from "@firebase/firestore";
@@ -14,23 +14,24 @@ import {CheckCircleOutlined} from "@ant-design/icons";
 export default function CheckOutComponent(){
     const params = useSearchParams()
     const userID  = params.get('userID')
-    const bookingID = params.get('bookingID')
+    const bookingID = params.get('booking')
     const bookings = useAppSelector(selectBookings)
-
+    const [messageApi, contextHolder] = message.useMessage();
     useEffect(() => {
+
         if (userID && bookingID){
-            const booking = bookings.find((value) => value.id === bookingID)
-            if (booking){
-                completeBooking(booking, bookingID)
-            } else {
-                message.error('booking Paid but not found')
-            }
+
+                completeBooking(userID, bookingID).then((value) => {
+                    messageApi.info('its complete')
+                })
+
         } else {
-            message.error('params not passed')
+            messageApi.error('params not passed')
         }
     });
 
     return <div>
+        {contextHolder}
         <Result
             icon={<CheckCircleOutlined/>} title={'Booking Request Sent'}
             status={'success'}
@@ -39,16 +40,16 @@ export default function CheckOutComponent(){
     </div>
 }
 
-async function completeBooking(booking:any, bookingID: string){
-    try {
-        const user = getCurrentUser();
-        const hostDoc = doc(firestore, 'hosts', booking.accommodationId, 'bookings', bookingID)
-        const userDoc = doc(firestore, 'user', user.uid, 'bookings', bookingID)
-        const batch = writeBatch(firestore)
-        batch.update(hostDoc,{status: 'Confirmed'})
-        batch.update(userDoc,{status: 'Confirmed'})
-        await batch.commit()
-    } catch (error){
-        console.log(error)
-    }
-}
+// async function completeBooking(booking:any, bookingID: string){
+//     try {
+//         const user = getCurrentUser();
+//         const hostDoc = doc(firestore, 'hosts', booking.accommodationId, 'bookings', bookingID)
+//         const userDoc = doc(firestore, 'user', user.uid, 'bookings', bookingID)
+//         const batch = writeBatch(firestore)
+//         batch.update(hostDoc,{status: 'Confirmed'})
+//         batch.update(userDoc,{status: 'Confirmed'})
+//         await batch.commit()
+//     } catch (error){
+//         console.log(error)
+//     }
+// }
