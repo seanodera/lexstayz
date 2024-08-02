@@ -24,7 +24,7 @@ export async function completeBooking(userId:string, id:string){
         const booking = bookingSnap.data();
         console.log(booking)
        if (booking){
-           const hostDoc = doc(firestore, 'hosts', booking.accommodationId, 'bookings', id);
+           const hostDoc = doc(firestore, 'hosts', booking.hostId, 'bookings', id);
            batch.update(userDoc,{status: 'Pending',isConfirmed: true})
            batch.set(hostDoc,{...booking,status: 'Pending',isConfirmed: true})
            await batch.commit();

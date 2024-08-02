@@ -85,7 +85,7 @@ export const createBooking: any = createAsyncThunk(
                 },
                 checkInDate,
                 checkOutDate,
-                createdAt: new Date().toString(),
+                createdAt: new Date().toISOString(),
                 rooms: rooms,
                 status: 'Unpaid',
                 numGuests: numGuests,
