@@ -46,43 +46,48 @@ export default function LoginComponent() {
         }
     };
 
-    return <Card className={'text-center md:w-1/3 rounded-xl flex flex-col justify-center px-6 py-12 lg:px-8'}>
+    return <Card className={'text-center w-full max-md:h-full md:w-1/3 rounded-xl flex flex-col justify-center px-6 py-12 lg:px-8'}>
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-            <Avatar src={'/logo/lexstayz-logo-transparent-square.png'} shape={'square'} className="mx-auto h-20 w-auto"/>
+            <Avatar src={'/logo/lexstayz-logo-transparent-square.png'} shape={'square'} className="mx-auto h-20 w-20 object-cover aspect-square"/>
             <div className={'text-3xl'}>LexStayz</div>
             <h2 className="mt-12 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
                 Sign in to your account
             </h2>
         </div>
-        <Fieldset className={'text-start space-y-4'}>
-            <Field className={'block'}>
-                <Label className={'block text-sm font-medium leading-6 text-gray-900'} htmlFor="email">Email</Label>
-                <Input
-                    className={inputCls}
-                    type="email" id="email" placeholder="Enter email" required value={email} onChange={(e) => setEmail(e.target.value)}/>
-            </Field>
-            <Field>
-                <div className="flex items-center justify-between">
-                    <Label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
-                        Password
-                    </Label>
-                    <Link href="/forgot-password" className="text-sm font-semibold text-primary hover:text-primary">
-                        Forgot password?
-                    </Link>
-                </div>
+        <form onSubmit={(event) => {
+            event.preventDefault();
+            handleLogin()
+        }} >
+            <Fieldset className={'text-start space-y-4'}>
+                <Field className={'block'}>
+                    <Label className={'block text-sm font-medium leading-6 text-gray-900'} htmlFor="email">Email</Label>
+                    <Input
+                        className={inputCls}
+                        type="email" id="email" placeholder="Enter email" required value={email} onChange={(e) => setEmail(e.target.value)}/>
+                </Field>
+                <Field>
+                    <div className="flex items-center justify-between">
+                        <Label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
+                            Password
+                        </Label>
+                        <Link href="/forgot-password" className="text-sm font-semibold text-primary hover:text-primary">
+                            Forgot password?
+                        </Link>
+                    </div>
 
-                <Input
-                    className={inputCls}
-                    type="password" id="password"
-                    placeholder="Enter password" required value={password} onChange={(e) => setPassword(e.target.value)}/>
-            </Field>
-            <Field>
-                <button
-                    className={'flex w-full justify-center border-0 rounded-md bg-primary px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-primary-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'}
-                    type="submit" onClick={handleLogin}>Submit
-                </button>
-            </Field>
-        </Fieldset>
+                    <Input
+                        className={inputCls}
+                        type="password" id="password"
+                        placeholder="Enter password" required value={password} onChange={(e) => setPassword(e.target.value)}/>
+                </Field>
+                <Field>
+                    <button
+                        className={'flex w-full justify-center border-0 rounded-md bg-primary px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-primary-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'}
+                        type="submit">Submit
+                    </button>
+                </Field>
+            </Fieldset>
+        </form>
         <p className="mt-10 text-center text-sm text-gray-500">
             Not a member?{' '}
             <Link href="/register" className="font-semibold leading-6 text-primary-600 hover:text-primary">
