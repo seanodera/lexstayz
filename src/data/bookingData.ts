@@ -11,31 +11,48 @@ export function getCurrentUser() {
     return user;
 }
 
-export function generateID(){
-    const document = doc(collection(firestore,'bookings'))
+export function generateID() {
+    const document = doc(collection(firestore, 'bookings'))
     return document.id
 }
 
-export async function completeBooking(userId:string, id:string){
+export async function completeBooking({userId, id, isConfirmed = true, status = 'Confirmed'}: {
+    userId: string,
+    id: string,
+    isConfirmed?: boolean,
+    status?: string
+}) {
     try {
         const batch = writeBatch(firestore);
         const userDoc = doc(firestore, 'user', userId, 'bookings', id);
         const bookingSnap = await getDoc(userDoc)
         const booking = bookingSnap.data();
         console.log(booking)
-       if (booking){
-           const hostDoc = doc(firestore, 'hosts', booking.hostId, 'bookings', id);
-           batch.update(userDoc,{status: 'Pending',isConfirmed: true})
-           batch.set(hostDoc,{...booking,status: 'Pending',isConfirmed: true})
-           await batch.commit();
-           console.log('Completed',booking)
-       }
-    } catch (err){
+        if (booking) {
+            const hostDoc = doc(firestore, 'hosts', booking.hostId, 'bookings', id);
+            batch.update(userDoc, {status: status, isConfirmed: isConfirmed})
+            batch.set(hostDoc, {...booking, status: status, isConfirmed: isConfirmed})
+            await batch.commit();
+            console.log('Completed', booking)
+        }
+    } catch (err) {
         console.log(err)
     }
 }
 
-async function createBookingFirebase({stay, checkInDate, checkOutDate, rooms, paymentData, contact, numGuests, specialRequest, totalPrice, currency, usedRate}: {
+async function createBookingFirebase({
+                                         stay,
+                                         checkInDate,
+                                         checkOutDate,
+                                         rooms,
+                                         paymentData,
+                                         contact,
+                                         numGuests,
+                                         specialRequest,
+                                         totalPrice,
+                                         currency,
+                                         usedRate
+                                     }: {
     stay: Stay,
     checkInDate: string,
     checkOutDate: string,
@@ -70,14 +87,14 @@ async function createBookingFirebase({stay, checkInDate, checkOutDate, rooms, pa
             isConfirmed: false,
             specialRequest: specialRequest,
             totalPrice: totalPrice,
-            currency: currency ,
+            currency: currency,
             usedRate: usedRate,
             paymentData: paymentData
         }
         batch.set(hostDoc, booking)
         batch.set(userDoc, booking)
         await batch.commit();
-    } catch (error){
+    } catch (error) {
         console.log(error)
     }
 }

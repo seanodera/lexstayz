@@ -10,7 +10,7 @@ import BookingSummary from "@/components/booking-confirmation/bookingSummary";
 import { Select } from "@headlessui/react";
 import { AiFillCheckCircle, AiOutlineCheckCircle } from "react-icons/ai";
 import { selectCurrentUser } from "@/slices/authenticationSlice";
-import { useEffect } from "react";
+import {useEffect, useState} from "react";
 import { getAuth } from "firebase/auth";
 import { message } from "antd";
 import { useRouter } from "next/navigation";
@@ -18,6 +18,7 @@ import { createBooking, selectConfirmBooking } from "@/slices/confirmBookingSlic
 import { selectCurrentStay } from "@/slices/staysSlice";
 import {generateID, getCurrentUser} from "@/data/bookingData";
 import axios from "axios";
+import LoadingScreen from "@/components/LoadingScreen";
 
 export default function Page() {
     const stay = useAppSelector(selectCurrentStay);
@@ -26,6 +27,7 @@ export default function Page() {
     const dispatch = useAppDispatch();
     const router = useRouter();
     const booking = useAppSelector(selectConfirmBooking);
+    const [isLoading,setIsLoading] = useState(true);
 
     useEffect(() => {
         if (!stay) {
@@ -64,7 +66,6 @@ export default function Page() {
             // Dispatch booking action and handle success or failure
             dispatch(createBooking({ paymentData: res.data, id })).then((value:any) => {
                 router.push(authorization_url)
-                messageApi.success('Booking confirmed!');
             });
 
         } catch (error) {
@@ -74,8 +75,8 @@ export default function Page() {
         }
     }
 
-    if (!stay || stay.id === undefined) {
-        return <div></div>;
+    if (isLoading){
+        return <LoadingScreen/>
     } else {
         return (
             <div className="bg-white py-24 lg:px-16 px-7 text-dark">
