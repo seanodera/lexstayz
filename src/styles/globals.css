@@ -64,6 +64,26 @@ body {
 
 }
 
+
+.ant-picker-panels {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 768px) {
+  .ant-picker-range .ant-picker-panels {
+    flex-direction: column;
+    width: 100%;
+  }
+  .ant-picker-range .ant-picker-panels .ant-picker-date-panel {
+    width: 100%;
+  }
+  .ant-picker-range .ant-picker-panels .ant-picker-date-panel:nth-child(2) {
+    display: none;
+  }
+}
+
+
 @keyframes l4 {
   100% {background-position: calc(100%/3) 0}
 }
