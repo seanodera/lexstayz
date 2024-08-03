@@ -37,8 +37,7 @@ export default function Page() {
         }
     }, []);
 
-    async function handSubmit(event: any) {
-        event.preventDefault();
+    async function handSubmit() {
 
         // Generate a unique ID for the transaction
         const id = generateID();
@@ -114,7 +113,7 @@ export default function Page() {
                                 <h3 className={'text-xl font-semibold mb-2'}>Terms & Conditions</h3>
                             </div>
                         </div>
-                        <button onClick={() => handSubmit} className="hidden max-lg:block py-3 text-center bg-primary rounded-xl font-medium text-white">
+                        <button onClick={() => handSubmit()} className="hidden max-lg:block py-3 text-center bg-primary rounded-xl font-medium text-white">
                             Checkout
                         </button>
                     </div>
@@ -123,7 +122,7 @@ export default function Page() {
                             <StayDetails stay={stay}/>
                             <BookingDetails stay={stay}/>
                             <BookingSummary stay={stay}/>
-                            <button onClick={() => handSubmit} className="block max-lg:hidden py-3 text-center bg-primary rounded-xl font-medium text-white">
+                            <button onClick={() => handSubmit()} className="block max-lg:hidden py-3 text-center bg-primary rounded-xl font-medium text-white">
                                 Checkout
                             </button>
                         </div>
