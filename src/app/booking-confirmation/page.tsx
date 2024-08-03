@@ -72,7 +72,7 @@ export default function Page() {
 
     }
     console.log('Book Confirm')
-    if (isLoading){
+    if (isLoading || !stay || !stay.id){
         return <div className={'h-screen w-screen'}><LoadingScreen/></div>
     } else {
         return (
