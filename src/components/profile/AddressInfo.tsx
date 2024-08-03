@@ -7,7 +7,7 @@ export default function AddressInfo() {
     const address = faker.location;
     return (
         <Card>
-            <div className={'grid grid-cols-1 md:grid-cols-2'}>
+            <div className={''}>
                 <div>
                     <h3 className={'mb-0'}>Street Address 1</h3>
                     <h3 className={'font-bold'}>{address.street()}</h3>
@@ -17,7 +17,7 @@ export default function AddressInfo() {
                     <h3 className={'font-bold'}>{address.secondaryAddress()}</h3>
                 </div>
             </div>
-            <div className={'col-span-2 grid grid-cols-3'}>
+            <div className={'grid grid-cols-2'}>
                 <div>
                     <h3 className={'mb-0'}>City</h3>
                     <h3 className={'font-bold'}>{address.city()}</h3>
@@ -27,18 +27,17 @@ export default function AddressInfo() {
                     <h3 className={'font-bold'}>{address.county()}</h3>
                 </div>
                 <div>
-                    <h3 className={'mb-0'}>Postal Code</h3>
-                    <h3 className={'font-bold'}>{address.zipCode()}</h3>
-                </div>
-                <div>
                     <h3 className={'mb-0'}>Country</h3>
                     <h3 className={'font-bold'}>{address.country()}</h3>
+                </div>
+                <div>
+                    <h3 className={'mb-0'}>Postal Code</h3>
+                    <h3 className={'font-bold'}>{address.zipCode()}</h3>
                 </div>
             </div>
         </Card>
     );
 }
-
 
 
 const AddressField = () => {

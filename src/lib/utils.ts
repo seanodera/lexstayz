@@ -167,7 +167,6 @@ export const getExchangeRate = async (fromCurrency: string, toCurrency: string) 
     try {
         const response = await fetch(`https://open.er-api.com/v6/latest/${fromCurrency}`);
         const data = await response.json();
-        console.log(data)
         //https://www.exchangerate-api.com/docs/free
         const exchangeRate = data.rates[ toCurrency ];
         if (!exchangeRate) {
@@ -175,7 +174,6 @@ export const getExchangeRate = async (fromCurrency: string, toCurrency: string) 
         }
         return exchangeRate;
     } catch (error) {
-        console.error("Error fetching exchange rate: ", error);
         return null;
     }
 };

@@ -28,7 +28,7 @@ const BookingSummary = ({ stay }: any) => {
            const country = await getCountry();
 
             const fromCurrency = stay.currency? stay.currency : 'USD'; // Change as needed
-            const toCurrency = 'GHS'; // Change as needed
+            const toCurrency = 'KES'; // Change as needed
             if (toCurrency){
                 const rate = await getExchangeRate(fromCurrency, toCurrency);
                 if (rate) {

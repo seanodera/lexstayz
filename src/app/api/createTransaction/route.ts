@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ status: 'error', message: 'Transaction initialization failed' }, { status: 400 });
         }
     } catch (error) {
-        console.error('Paystack transaction initialization error:', error);
+        console.error('Paystack transaction initialization error:', error, 'Params',email, amount, currency, reference,callback_url );
         if (axios.isAxiosError(error)) {
             return NextResponse.json(
                 { status: 'error', message: error.response?.data.message || 'Unknown error from Paystack' },

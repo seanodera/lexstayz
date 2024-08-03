@@ -1,5 +1,4 @@
 'use client';
-import Link from "next/link";
 import { dateReader } from "@/lib/utils";
 import ContactForm from "@/components/booking-confirmation/contactForm";
 import SpecialRequests from "@/components/booking-confirmation/specialRequests";
@@ -8,16 +7,14 @@ import StayDetails from "@/components/booking-confirmation/stayDetails";
 import BookingDetails from "@/components/booking-confirmation/bookingDetails";
 import BookingSummary from "@/components/booking-confirmation/bookingSummary";
 import { Select } from "@headlessui/react";
-import { AiFillCheckCircle, AiOutlineCheckCircle } from "react-icons/ai";
+import { AiOutlineCheckCircle } from "react-icons/ai";
 import { selectCurrentUser } from "@/slices/authenticationSlice";
 import {useEffect, useState} from "react";
 import { getAuth } from "firebase/auth";
 import { message } from "antd";
 import { useRouter } from "next/navigation";
-import { createBooking, selectConfirmBooking } from "@/slices/confirmBookingSlice";
+import {handlePaymentAsync, selectConfirmBooking} from "@/slices/confirmBookingSlice";
 import { selectCurrentStay } from "@/slices/staysSlice";
-import {generateID, getCurrentUser} from "@/data/bookingData";
-import axios from "axios";
 import LoadingScreen from "@/components/LoadingScreen";
 
 export default function Page() {
@@ -27,7 +24,7 @@ export default function Page() {
     const dispatch = useAppDispatch();
     const router = useRouter();
     const booking = useAppSelector(selectConfirmBooking);
-    const [isLoading,setIsLoading] = useState(true);
+    const [isLoading,setIsLoading] = useState(false);
 
     useEffect(() => {
         if (!stay) {
@@ -37,46 +34,46 @@ export default function Page() {
         if (!user) {
             router.push('/login');
         }
-    }, []);
+
+    });
 
     async function handSubmit() {
+        setIsLoading(true)
+        dispatch(handlePaymentAsync()).then((value: any) => {
+            if (value.meta.requestStatus === 'fulfilled'){
+                router.push(value.payload)
+            } else {
+                messageApi.error(value.payload)
+            }
+            const errObj = {
+                "type": "confirmBooking/handlePaymentAsync/rejected",
+                "payload": "An error occurred. Please try again. AxiosError: Request failed with status code 400",
+                "meta": {
+                    "requestId": "oCMUSpkxfyB6kukDNDz5e",
+                    "rejectedWithValue": true,
+                    "requestStatus": "rejected",
+                    "aborted": false,
+                    "condition": false
+                },
+                "error": {
+                    "message": "Rejected"
+                }
+            }
+            const successObj = {
+                "type": "confirmBooking/handlePaymentAsync/fulfilled",
+                "payload": "https://checkout.paystack.com/pm2dcx9va7dbdqe",
+                "meta": {
+                    "requestId": "OUpeWvkm0ndDGy2sxzw93",
+                    "requestStatus": "fulfilled"
+                }
+            }
+            setIsLoading(false)
+            })
 
-        // Generate a unique ID for the transaction
-        const id = generateID();
-
-        try {
-            const user = getCurrentUser();
-            // Make a POST request to create the transaction
-            const res = await axios.post('/api/createTransaction', {
-                email: booking.contact.email,
-                amount: (booking.totalPrice * 1.035 * booking.usedRate).toFixed(2), // Amount in KES
-                currency: booking.currency,
-                callback_url: `https://lexstayz.vercel.app/checkout?userID=${user.uid}&booking=${id}`,
-                reference: id
-            });
-
-            // Extract access code and reference from the response
-            const { access_code: accessCode, reference, authorization_url } = res.data.data.data;
-            console.log('Access Code:', accessCode, 'Reference:', reference);
-
-            // Initialize Paystack pop-up for payment
-            // const popup = new window.PaystackPop();
-            // popup.resumeTransaction(accessCode);
-
-            // Dispatch booking action and handle success or failure
-            dispatch(createBooking({ paymentData: res.data, id })).then((value:any) => {
-                router.push(authorization_url)
-            });
-
-        } catch (error) {
-            // Handle errors from the API request or any other unexpected issues
-            console.error('Error handling payment:', error);
-            messageApi.error(`An error occurred. Please try again. ${error}`,);
-        }
     }
-
+    console.log('Book Confirm')
     if (isLoading){
-        return <LoadingScreen/>
+        return <div className={'h-screen w-screen'}><LoadingScreen/></div>
     } else {
         return (
             <div className="bg-white py-24 lg:px-16 px-7 text-dark">

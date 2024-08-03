@@ -1,9 +1,10 @@
-import {Stay} from "@/lib/types";
-import {createSlice, createAsyncThunk, PayloadAction} from "@reduxjs/toolkit";
-import {firestore} from "@/lib/firebase";
-import {getCurrentUser} from "@/data/bookingData";
-import {writeBatch, doc, collection} from "firebase/firestore";
-import {RootState} from "@/data/store";
+import { Stay } from "@/lib/types";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { firestore } from "@/lib/firebase";
+import {generateID, getCurrentUser} from "@/data/bookingData";
+import { writeBatch, doc, collection } from "firebase/firestore";
+import { RootState } from "@/data/store";
+import axios from 'axios';
 
 interface ConfirmBookingState {
     stay: Stay,
@@ -49,7 +50,7 @@ const initialState: ConfirmBookingState = {
 
 export const createBooking: any = createAsyncThunk(
     'confirmBooking/createBooking',
-    async ({paymentData, id}: { paymentData: any, id: string }, {getState, rejectWithValue}) => {
+    async ({ paymentData, id }: { paymentData: any, id: string }, { getState, rejectWithValue }) => {
         const state = getState() as { confirmBooking: ConfirmBookingState };
         const {
             stay,
@@ -67,7 +68,6 @@ export const createBooking: any = createAsyncThunk(
         try {
             const user = getCurrentUser();
             const batch = writeBatch(firestore);
-            // const hostDoc = doc(firestore, 'hosts', stay.hostId, 'bookings', id);
             const userDoc = doc(firestore, 'user', user.uid, 'bookings', id);
 
             const booking = {
@@ -96,17 +96,53 @@ export const createBooking: any = createAsyncThunk(
                 paymentData: paymentData, // Include the payment data here
             };
 
-            // batch.set(hostDoc, booking);
             batch.set(userDoc, booking);
             await batch.commit();
             return booking;
         } catch (error) {
-            // @ts-ignore
-            return rejectWithValue(error.message);
+            if (error instanceof Error) {
+                return rejectWithValue(error.message);
+            } else {
+                rejectWithValue('Error')
+            }
         }
     }
 );
 
+export const handlePaymentAsync:any = createAsyncThunk(
+    'confirmBooking/handlePaymentAsync',
+    async (_, { dispatch, getState, rejectWithValue }) => {
+        const state = getState() as { confirmBooking: ConfirmBookingState };
+        const booking = state.confirmBooking;
+
+        // Generate a unique ID for the transaction
+        const id = generateID();
+
+        try {
+            const user = getCurrentUser();
+            // Make a POST request to create the transaction
+            const amount = parseInt((booking.totalPrice * 1.035 * booking.usedRate).toFixed(2));
+            const res = await axios.post('/api/createTransaction', {
+                email: booking.contact.email,
+                amount:  amount,// Amount in KES
+                currency: booking.currency,
+                callback_url: `https://lexstayz.vercel.app/checkout?userID=${user.uid}&booking=${id}`,
+                reference: id
+            });
+
+            // Extract access code and reference from the response
+            const { access_code: accessCode, reference, authorization_url } = res.data.data.data;
+            console.log('Access Code:', accessCode, 'Reference:', reference);
+
+            // Dispatch booking action and handle success or failure
+            const paymentData = { accessCode, reference, authorization_url };
+            await dispatch(createBooking({ paymentData, id }));
+            return authorization_url;
+        } catch (error) {
+            return rejectWithValue(`An error occurred. Please try again. ${error}`);
+        }
+    }
+);
 
 const ConfirmBookingSlice = createSlice({
     name: 'confirmBooking',
@@ -172,6 +208,18 @@ const ConfirmBookingSlice = createSlice({
             .addCase(createBooking.rejected, (state, action: PayloadAction<any>) => {
                 state.status = 'failed';
                 state.error = action.payload;
+            })
+            .addCase(handlePaymentAsync.pending, (state) => {
+                state.status = 'loading';
+                state.error = null;
+            })
+            .addCase(handlePaymentAsync.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                state.bookingStatus = 'Pending';
+            })
+            .addCase(handlePaymentAsync.rejected, (state, action: PayloadAction<any>) => {
+                state.status = 'failed';
+                state.error = action.payload;
             });
     }
 });
@@ -193,7 +241,6 @@ export const selectCheckInDate = (state: RootState) => state.confirmBooking.chec
 export const selectCheckOutDate = (state: RootState) => state.confirmBooking.checkOutDate;
 export const selectRooms = (state: RootState) => state.confirmBooking.rooms;
 export const selectPaymentData = (state: RootState) => state.confirmBooking.paymentData;
-// export const selectUserId = (state: RootState) => state.confirmBooking.userId;
 export const selectContact = (state: RootState) => state.confirmBooking.contact;
 export const selectNumGuests = (state: RootState) => state.confirmBooking.numGuests;
 export const selectSpecialRequest = (state: RootState) => state.confirmBooking.specialRequest;
