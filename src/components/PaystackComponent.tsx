@@ -15,18 +15,11 @@ declare global {
 }
 
 const PaystackPayment = () => {
-    const paystackPublicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY as string;
     const booking = useAppSelector(selectConfirmBooking);
     const dispatch = useAppDispatch();
     const [messageApi, contextHolder] = message.useMessage();
     const router = useRouter()
     async function handlePaystackPayment() {
-        // Log the payment details
-        console.log('Function called:',
-            'email:', booking.contact.email,
-            'amount:', (booking.totalPrice * 1.035 * booking.usedRate).toFixed(2),
-            'currency:', 'GHS'
-        );
 
         // Generate a unique ID for the transaction
         const id = generateID();
@@ -62,47 +55,10 @@ const PaystackPayment = () => {
             messageApi.error(`An error occurred. Please try again. ${error}`,);
         }
     }
-
-
-    const handlePaystackPaymentOld = () => {
-        const id = generateID()
-        const handler = window.PaystackPop.setup({
-            key: paystackPublicKey,
-            email: booking.contact.email,
-            amount: (Number(booking.totalPrice * 1.035 * booking.usedRate * 100).toFixed(0)), // Amount in kobo
-            currency: 'KES',
-            ref: id, // Generate a unique reference
-            callback: function(response: any) {
-                // Make an API call to your server to verify the transaction
-                axios.post('/api/verifyTransaction', { reference: response.reference })
-                    .then(res => {
-                        if (res.data.status === 'success') {
-                            alert('Payment successful');
-
-                            dispatch(createBooking({paymentData: res.data, id: id})).then((value: any) => {
-                                if (value.meta.requestStatus === 'fulfilled') {
-                                    messageApi.success('Booking confirmed!');
-                                } else {
-                                    messageApi.error('Booking failed. Please try again.');
-                                }
-                            });
-                        } else {
-                            alert('Payment verification failed');
-                        }
-                    });
-            },
-            onClose: function() {
-                alert('Transaction was not completed, window closed.');
-            }
-        });
-        handler.openIframe();
-
-    };
-
     return (
-        <div>
+        <div className={'block'}>
             {contextHolder}
-            <button className="block max-lg:hidden py-3 text-center bg-primary rounded-xl font-medium text-white" onClick={() => handlePaystackPayment()}>
+            <button className="block py-3 text-center bg-primary rounded-xl font-medium text-white" onClick={() => handlePaystackPayment()}>
                 Checkout
             </button>
         </div>

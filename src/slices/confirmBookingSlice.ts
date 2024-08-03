@@ -11,7 +11,6 @@ interface ConfirmBookingState {
     checkOutDate: string,
     rooms: object[],
     paymentData: any,
-
     contact: any,
     numGuests: number,
     specialRequest: string,

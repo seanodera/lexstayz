@@ -16,7 +16,8 @@ import { message } from "antd";
 import { useRouter } from "next/navigation";
 import { createBooking, selectConfirmBooking } from "@/slices/confirmBookingSlice";
 import { selectCurrentStay } from "@/slices/staysSlice";
-import PaystackPayment from "@/components/PaystackComponent";
+import {generateID, getCurrentUser} from "@/data/bookingData";
+import axios from "axios";
 
 export default function Page() {
     const stay = useAppSelector(selectCurrentStay);
@@ -36,9 +37,42 @@ export default function Page() {
         }
     }, []);
 
-    function handSubmit(event: any) {
+    async function handSubmit(event: any) {
         event.preventDefault();
-        // No direct booking submission here. Payment should handle it.
+
+        // Generate a unique ID for the transaction
+        const id = generateID();
+
+        try {
+            const user = getCurrentUser();
+            // Make a POST request to create the transaction
+            const res = await axios.post('/api/createTransaction', {
+                email: booking.contact.email,
+                amount: (booking.totalPrice * 1.035 * booking.usedRate).toFixed(2), // Amount in KES
+                currency: booking.currency,
+                callback_url: `https://lexstayz.vercel.app/checkout?userID=${user.uid}&booking=${id}`,
+                reference: id
+            });
+
+            // Extract access code and reference from the response
+            const { access_code: accessCode, reference, authorization_url } = res.data.data.data;
+            console.log('Access Code:', accessCode, 'Reference:', reference);
+
+            // Initialize Paystack pop-up for payment
+            // const popup = new window.PaystackPop();
+            // popup.resumeTransaction(accessCode);
+
+            // Dispatch booking action and handle success or failure
+            dispatch(createBooking({ paymentData: res.data, id })).then((value:any) => {
+                router.push(authorization_url)
+                messageApi.success('Booking confirmed!');
+            });
+
+        } catch (error) {
+            // Handle errors from the API request or any other unexpected issues
+            console.error('Error handling payment:', error);
+            messageApi.error(`An error occurred. Please try again. ${error}`,);
+        }
     }
 
     if (!stay || stay.id === undefined) {
@@ -80,19 +114,18 @@ export default function Page() {
                                 <h3 className={'text-xl font-semibold mb-2'}>Terms & Conditions</h3>
                             </div>
                         </div>
-                        <Link href="/checkout" className="hidden max-lg:block py-3 text-center bg-primary rounded-xl font-medium text-white">
+                        <button onClick={() => handSubmit} className="hidden max-lg:block py-3 text-center bg-primary rounded-xl font-medium text-white">
                             Checkout
-                        </Link>
+                        </button>
                     </div>
                     <div className="col-span-1 lg:col-span-1 flex flex-col gap-8 max-lg:order-first">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 lg:gap-8 gap-4">
                             <StayDetails stay={stay}/>
                             <BookingDetails stay={stay}/>
                             <BookingSummary stay={stay}/>
-                            <button onClick={handSubmit} className="block max-lg:hidden py-3 text-center bg-primary rounded-xl font-medium text-white">
+                            <button onClick={() => handSubmit} className="block max-lg:hidden py-3 text-center bg-primary rounded-xl font-medium text-white">
                                 Checkout
                             </button>
-                            <PaystackPayment/>
                         </div>
                     </div>
                 </div>
