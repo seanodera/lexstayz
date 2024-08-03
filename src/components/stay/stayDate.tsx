@@ -1,14 +1,12 @@
 'use client'
-import DateComponent from "@/components/DateComponent";
+
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import {Button, DatePicker, InputNumber} from "antd";
 import {RangePickerProps} from "antd/es/date-picker";
 import dayjs from "dayjs";
-import {selectDates, updateDates} from "@/slices/staysSlice";
 import {selectConfirmBooking, updateBookingData} from "@/slices/confirmBookingSlice";
 import {Popover, PopoverButton, PopoverPanel} from "@headlessui/react";
 import {MdPersonOutline} from "react-icons/md";
-import {BsRecordFill} from "react-icons/bs";
 import {useEffect, useState} from "react";
 
 const { RangePicker } = DatePicker;
@@ -16,7 +14,6 @@ const { RangePicker } = DatePicker;
 export default function StayDate() {
     const dispatch = useAppDispatch();
     const booking = useAppSelector(selectConfirmBooking)
-    const dates = useAppSelector(selectDates)
     const [numGuests, setNumGuests] = useState(booking.numGuests);
     const [startDate, setStartDate] = useState(booking.checkInDate);
     const [endDate, setEndDate] = useState(booking.checkOutDate);
@@ -45,11 +42,7 @@ export default function StayDate() {
                     value={[dayjs(booking.checkInDate),dayjs(booking.checkOutDate)]}
                     onChange={(value) => {
                     if (value) {
-                        dispatch(updateDates({
-                            startDate: dayjs(value[0]).toString(),
-                            endDate: dayjs(value[1]).toString(),
-                            length: 0
-                        }))
+
                         setStartDate(dayjs(value[0]).toString())
                         setEndDate(dayjs(value[1]).toString())
                     }

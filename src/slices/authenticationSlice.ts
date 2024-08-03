@@ -1,5 +1,4 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
-import {async} from "@firebase/util";
 import {getUserDetails} from "@/data/usersData";
 
 

@@ -2,7 +2,7 @@
 
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { getBookings } from "@/data/bookingData";
-import { RootState } from "@/data/store"; // Ensure you have a RootState type defined in your store
+import {RootState} from "@/data/types";
 
 interface BookingState {
     cart: any[];

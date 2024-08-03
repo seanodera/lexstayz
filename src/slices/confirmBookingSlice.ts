@@ -3,8 +3,9 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { firestore } from "@/lib/firebase";
 import {generateID, getCurrentUser} from "@/data/bookingData";
 import { writeBatch, doc, collection } from "firebase/firestore";
-import { RootState } from "@/data/store";
 import axios from 'axios';
+import {differenceInDays} from "date-fns";
+import {RootState} from "@/data/types";
 
 interface ConfirmBookingState {
     stay: Stay,
@@ -19,6 +20,7 @@ interface ConfirmBookingState {
     currency: string,
     usedRate: number,
     fees: number,
+    length: number,
     exchanged: boolean,
     status: 'idle' | 'loading' | 'succeeded' | 'failed',
     error: string | null,
@@ -42,7 +44,7 @@ const initialState: ConfirmBookingState = {
     fees: 0,
     usedRate: 0,
     exchanged: false,
-
+    length: 0,
     status: 'idle',
     error: null,
     bookingStatus: 'Pending', // Default status
@@ -166,6 +168,7 @@ const ConfirmBookingSlice = createSlice({
             checkInDate: string;
             checkOutDate: string
         }>) => {
+            state.length = differenceInDays(action.payload.checkOutDate, action.payload.checkInDate);
             state.numGuests = action.payload.numGuests;
             state.checkInDate = action.payload.checkInDate;
             state.checkOutDate = action.payload.checkOutDate;

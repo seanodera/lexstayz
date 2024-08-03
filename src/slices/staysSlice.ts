@@ -1,9 +1,10 @@
 'use client';
 
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { addDays, differenceInDays } from "date-fns";
+
 import { getStaysFirebase } from "@/data/hotelsData";
-import { RootState } from "@/data/store"; // Ensure you have a RootState type defined in your store
+import {RootState} from "@/data/types";
+
 
 export interface Stay {
     id: string;
@@ -21,7 +22,6 @@ interface StaysState {
     stays: Stay[];
     currentStay: Stay;
     currentId: number | string;
-    dates: Dates;
     isLoading: boolean;
     hasError: boolean;
     errorMessage: string;
@@ -32,12 +32,7 @@ const initialState: StaysState = {
     stays: [],
     currentStay: {} as Stay,
     currentId: -1,
-    dates: {
-        startDate: new Date().toDateString(),
-        endDate: addDays(new Date(), 1).toDateString(),
-        length: 1,
-    },
-    isLoading: false,
+    isLoading: true,
     hasError: false,
     errorMessage: '',
     hasRun: false,
@@ -61,17 +56,17 @@ const staysSlice = createSlice({
         setCurrentStay: (state, action: PayloadAction<Stay>) => {
             state.currentStay = action.payload;
             state.currentId = -1;
+
         },
         setCurrentStayFromId: (state, action: PayloadAction<string | number>) => {
             state.currentId = action.payload;
             const currentStay = state.stays.find((value) => value.id === action.payload);
-            console.log(currentStay);
+            if (currentStay){
+                if (state.currentStay.id !== currentStay?.id){
+
+                }
+            }
             state.currentStay = currentStay ? currentStay : ({} as Stay);
-        },
-        updateDates: (state, action: PayloadAction<Dates>) => {
-            state.dates.startDate = action.payload.startDate;
-            state.dates.endDate = action.payload.endDate;
-            state.dates.length = differenceInDays(new Date(state.dates.endDate), new Date(state.dates.startDate));
         },
     },
     extraReducers: (builder) => {
@@ -97,18 +92,16 @@ const staysSlice = createSlice({
 export const selectCurrentStay = (state: RootState) => state.stays.currentStay;
 export const selectAllStays = (state: RootState) => state.stays.stays;
 export const selectCurrentId = (state: RootState) => state.stays.currentId;
-export const selectDates = (state: RootState) => state.stays.dates;
 export const selectIsLoading = (state: RootState) => state.stays.isLoading;
 export const selectHasError = (state: RootState) => state.stays.hasError;
 export const selectErrorMessage = (state: RootState) => state.stays.errorMessage;
 export const selectHasRun = (state: RootState) => state.stays.hasRun;
-export const selectStayById = (state: RootState, id: string | number) => state.stays.stays.find((stay) => stay.id === id);
+export const selectStayById = (state: RootState, id: string | number) => state.stays.stays.find((stay: Stay) => stay.id === id);
 
 export const {
     setAllStays,
     setCurrentStay,
     setCurrentStayFromId,
-    updateDates
 } = staysSlice.actions;
 
 export default staysSlice.reducer;

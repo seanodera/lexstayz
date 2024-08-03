@@ -1,15 +1,14 @@
 // components/BookingDetails.tsx
 import {dateReader} from "@/lib/utils";
-import {addDays} from "date-fns";
+import {addDays, differenceInDays} from "date-fns";
 import Link from "next/link";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import {selectCart} from "@/slices/bookingSlice";
 import {useEffect, useState} from "react";
 import {convertCart, selectConfirmBooking, updateBookingData} from "@/slices/confirmBookingSlice";
-import {selectDates} from "@/slices/staysSlice";
 
 const BookingDetails = ({stay}: any) => {
-    const dates = useAppSelector(selectDates);
+
     const cart = useAppSelector(selectCart);
     const dispatch = useAppDispatch()
     const [totalRooms, setTotalRooms] = useState(0);
@@ -23,12 +22,8 @@ const BookingDetails = ({stay}: any) => {
         setTotalRooms(_totalRooms);
         setNumGuests(booking.numGuests)
         dispatch(convertCart(cart));
-        dispatch(updateBookingData({
-            numGuests: booking.numGuests,
-            checkInDate: dates.startDate,
-            checkOutDate: dates.endDate,
-        }))
-    }, [cart, dates]);
+
+    }, [cart]);
 
     return (
         <div className="border border-gray-200 rounded-xl p-4 shadow-md shadow-primary">
@@ -37,16 +32,16 @@ const BookingDetails = ({stay}: any) => {
                 <div className="font-medium">Check In</div>
                 <div className="font-medium">Check Out</div>
                 <div className="border rounded-xl p-2 font-bold text-lg">
-                    {dateReader({date: dates.startDate})}
+                    {dateReader({date: booking.checkInDate})}
                     <div className="text-sm text-gray-500 font-medium">From 14:00</div>
                 </div>
                 <div className="border rounded-xl p-2 font-bold text-lg">
-                    {dateReader({date: dates.endDate})}
+                    {dateReader({date: booking.checkOutDate})}
                     <div className="text-sm text-gray-500 font-medium">Until 12:00</div>
                 </div>
             </div>
             <div className="font-medium">Length of Stay</div>
-            <div className="font-bold">{dates.length} Nights</div>
+            <div className="font-bold">{differenceInDays(booking.checkOutDate,booking.checkInDate)} Nights</div>
             <hr className="my-2"/>
             <h3 className="text-xl font-semibold mb-2">Your Rooms</h3>
             <div className="text-lg font-medium">{totalRooms} rooms for {numGuests} guests</div>

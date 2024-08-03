@@ -4,21 +4,22 @@ import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import {selectCart} from "@/slices/bookingSlice";
 import {useEffect, useState} from "react";
 import {message} from "antd";
-import {setBookingStay, updateCostData} from "@/slices/confirmBookingSlice";
-import {selectDates} from "@/slices/staysSlice";
+import {selectConfirmBooking, setBookingStay, updateCostData} from "@/slices/confirmBookingSlice";
+
 
 const BookingSummary = ({ stay }: any) => {
     const cart = useAppSelector(selectCart);
-    const dates = useAppSelector(selectDates);
     const [subTotal, setSubTotal] = useState(0);
     const [exchangeRate, setExchangeRate] = useState(0)
     const [currency,setCurrency] = useState('USD')
+    const  booking = useAppSelector(selectConfirmBooking)
     const [messageApi, contextHolder] = message.useMessage();
     const dispatch =useAppDispatch()
     useEffect(() => {
         let _subTotal = 0;
+
         cart.forEach((value: any) => {
-            _subTotal += value.numRooms * stay.rooms.find((stay: any) => stay.id === value.roomId).price * dates.length ;
+            _subTotal += value.numRooms * stay.rooms.find((stay: any) => stay.id === value.roomId).price * booking.length ;
         });
         setSubTotal(_subTotal);
     }, [cart]);
@@ -28,7 +29,7 @@ const BookingSummary = ({ stay }: any) => {
            const country = await getCountry();
 
             const fromCurrency = stay.currency? stay.currency : 'USD'; // Change as needed
-            const toCurrency = 'KES'; // Change as needed
+            const toCurrency = 'GHS'; // Change as needed
             if (toCurrency){
                 const rate = await getExchangeRate(fromCurrency, toCurrency);
                 if (rate) {

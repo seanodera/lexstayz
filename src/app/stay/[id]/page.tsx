@@ -1,17 +1,10 @@
 'use client'
-import { faker } from "@faker-js/faker";
-import { MdOutlineBathtub, MdOutlineDashboard, MdPersonOutline } from "react-icons/md";
-import { IoBedOutline } from "react-icons/io5";
+
 import React, { useEffect, useState } from "react";
-import RoomComponent from "@/components/Grid Items/roomComponent";
-import DateComponent from "@/components/DateComponent";
-import Link from "next/link";
+
 import { useParams } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import {
-    resetBooking, selectCart,
 
-} from "@/slices/bookingSlice";
 
 
 
@@ -23,7 +16,7 @@ import MobileCartSummary from "@/components/stay/MobileCartSummary";
 import CartSummary from "@/components/stay/cartSummary";
 import FeaturedRoom from "@/components/stay/featuredRoom";
 import AvailableRooms from "@/components/stay/availableRooms";
-import {selectCurrentId, selectCurrentStay, selectDates, setCurrentStayFromId} from "@/slices/staysSlice";
+import {selectCurrentId, selectCurrentStay, setCurrentStayFromId} from "@/slices/staysSlice";
 
 
 export default function Stay() {
@@ -38,7 +31,7 @@ export default function Stay() {
     }, [dispatch, params]);
 
     const stay = useAppSelector(selectCurrentStay);
-    const dates = useAppSelector(selectDates);
+
 
 
     if (!stay || stay.id === undefined) {
@@ -59,7 +52,7 @@ export default function Stay() {
                         <CartSummary stay={stay} />
                     </div>
                 </div>
-                <MobileCartSummary dates={dates} />
+                <MobileCartSummary />
             </div>
         );
     }

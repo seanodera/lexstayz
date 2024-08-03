@@ -9,8 +9,7 @@ import {MdPersonOutline} from "react-icons/md";
 import {BsRecordFill} from "react-icons/bs";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import {selectConfirmBooking, updateBookingData} from "@/slices/confirmBookingSlice";
-import {en} from "@faker-js/faker";
-import {updateDates} from "@/slices/staysSlice";
+
 
 const { RangePicker } = DatePicker;
 
@@ -33,11 +32,7 @@ export default function SearchComponent(){
             checkInDate: startDate,
             checkOutDate: endDate,
         }))
-        dispatch(updateDates({
-            length: 0,
-            startDate:startDate,
-            endDate: endDate,
-        }))
+
     }, [numGuests,startDate,endDate])
     console.log(booking.checkInDate)
     return (

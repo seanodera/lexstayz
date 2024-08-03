@@ -3,6 +3,8 @@ import BookingReducer from '@/slices/bookingSlice';
 import AuthenticationReducer from '@/slices/authenticationSlice';
 import ConfirmBookingReducer from "@/slices/confirmBookingSlice";
 import staysReducer from "@/slices/staysSlice";
+import {bookingResetMiddleware} from "@/data/middleware.ts";
+
 
 const store = configureStore({
     reducer: {
@@ -11,10 +13,9 @@ const store = configureStore({
         confirmBooking: ConfirmBookingReducer,
         stays: staysReducer,
     },
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(bookingResetMiddleware),
 });
 
-export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch;
-
 export default store;
+
 
