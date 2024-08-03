@@ -23,7 +23,7 @@ export default function ForgotPassword() {
     };
 
     return (
-        <Card className={'text-center w-full max-md:h-screen md:w-1/3  rounded-xl flex flex-col justify-center md:px-6 py-12 lg:px-8'}>
+        <Card className={'text-center w-full max-md:min-h-screen md:w-1/3  rounded-xl flex flex-col justify-center md:px-6 py-12 lg:px-8'}>
             <div className="sm:mx-auto sm:w-full sm:max-w-sm">
                 <Image src={'/logo/lexstayz-logo-transparent-square.png'} height={100} width={100} className="mx-auto h-20 w-20 object-cover aspect-square" alt={'logo'}/>
                 <div className={'text-3xl'}>LexStayz</div>

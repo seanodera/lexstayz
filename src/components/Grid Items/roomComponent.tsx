@@ -102,9 +102,9 @@ export default function RoomComponent({room, stay, className = ''}: { room: any,
         </div>
 
         <div
-            className={'flex flex-wrap gap-1 my-1'}>{room.amenities.slice(0, 3).map((amenity: string, index: number) =>
+            className={'flex flex-wrap gap-1 my-1 text-balance'}>{room.amenities.slice(0, 3).map((amenity: string, index: number) =>
             <div
-                className={'border border-gray-500 shadow-md rounded py-1 px-2 text-balance text-sm text-nowrap'}
+                className={'border border-gray-500 shadow-md rounded py-1 px-2 text-sm text-nowrap'}
                 key={index}>{amenity}</div>)}</div>
 
 

@@ -46,7 +46,7 @@ export default function RegisterComponent() {
         router.push('/login');
     }
 
-    return <Card className={'text-center w-full max-md:h-screen md:w-1/3 rounded-xl flex flex-col justify-center md:px-6 py-10 lg:px-8'}>
+    return <Card className={'text-center w-full max-md:min-h-screen md:w-1/3 rounded-xl flex flex-col justify-center md:px-6 py-10 lg:px-8'}>
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
             <Avatar src={'/logo/lexstayz-logo-transparent-square.png'} shape={'square'} className="mx-auto h-20 w-20 object-cover aspect-square"/>
             <div className={'text-3xl'}>LexStayz</div>
