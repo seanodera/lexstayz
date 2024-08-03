@@ -1,5 +1,4 @@
 'use client'
-import LogoIcon from "@/components/LogoIcon";
 import {Field, Fieldset, Input, Label} from "@headlessui/react";
 import Link from "next/link";
 import {Avatar, Card, message} from "antd";
@@ -36,17 +35,9 @@ export default function LoginComponent() {
         }
     };
 
-    const handleLogout = async () => {
-        try {
-            await signOut(auth);
-            // setUser(null);
-        } catch (error) {
-            // @ts-ignore
-            message.error(`Error logging out: ${error.message}`);
-        }
-    };
 
-    return <Card className={'text-center w-full max-md:h-full md:w-1/3 rounded-xl flex flex-col justify-center px-6 py-12 lg:px-8'}>
+
+    return <Card className={'text-center w-full max-md:h-full md:w-1/3 rounded-xl flex flex-col justify-center md:px-6 py-12 lg:px-8'}>
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
             <Avatar src={'/logo/lexstayz-logo-transparent-square.png'} shape={'square'} className="mx-auto h-20 w-20 object-cover aspect-square"/>
             <div className={'text-3xl'}>LexStayz</div>
