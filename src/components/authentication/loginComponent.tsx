@@ -37,7 +37,7 @@ export default function LoginComponent() {
 
 
 
-    return <Card className={'text-center w-full max-md:h-full md:w-1/3 rounded-xl flex flex-col justify-center md:px-6 py-12 lg:px-8'}>
+    return <Card className={'text-center w-full max-md:h-screen md:w-1/3 rounded-xl flex flex-col justify-center md:px-6 py-12 lg:px-8'}>
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
             <Avatar src={'/logo/lexstayz-logo-transparent-square.png'} shape={'square'} className="mx-auto h-20 w-20 object-cover aspect-square"/>
             <div className={'text-3xl'}>LexStayz</div>
@@ -72,7 +72,7 @@ export default function LoginComponent() {
                         placeholder="Enter password" required value={password} onChange={(e) => setPassword(e.target.value)}/>
                 </Field>
                 <Field>
-                    <button
+                    <button onClick={() => handleLogin()}
                         className={'flex w-full justify-center border-0 rounded-md bg-primary px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-primary-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'}
                         type="submit">Submit
                     </button>
