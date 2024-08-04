@@ -32,14 +32,16 @@ export default function RegisterComponent() {
                 firstName: firstName,
                 lastName: lastName,
                 email: email,
-                accountType: accountType
+                accountType: accountType,
+                wishlist: []
             }
         } else {
             details = {
                 uid: userCredentials.user.uid,
                 companyName: companyName,
                 email: email,
-                accountType: accountType
+                accountType: accountType,
+                wishlist: [],
             }
         }
         await createUser(details, userCredentials.user.uid)
