@@ -7,13 +7,11 @@ import {browserLocalPersistence, getAuth, onAuthStateChanged, setPersistence} fr
 import {getUserDetails} from "@/data/usersData";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import Navbar from "@/components/navigation/Navbar";
-import LoadingScreen from "@/components/LoadingScreen";
-import {selectHasRun} from "@/slices/staysSlice";
 import {fetchBookingsAsync, selectHasBookingRun} from "@/slices/bookingSlice";
 
 export const authRoutes = ['/login', '/register', '/forgot-password', '/reset-password', '/user-information']
 
-export default function AuthenticationProvider({ children }: { children: ReactNode }) {
+export default function AuthenticationProvider({children}: { children: ReactNode }) {
     const [userLoaded, setUserLoaded] = useState(false);
     const dispatch = useAppDispatch();
     const currentUser = useAppSelector(selectCurrentUser)
@@ -28,11 +26,11 @@ export default function AuthenticationProvider({ children }: { children: ReactNo
             onAuthStateChanged(auth, async (user) => {
                 console.log(user)
                 if (user) {
-                    if (currentUser.uid !== user.uid){
+                    if (!currentUser || currentUser.uid !== user.uid) {
                         const userDetails = await getUserDetails(user.uid);
-                        if (userDetails){
-                        dispatch(loginUser(userDetails));
-                        setUserLoaded(true)
+                        if (userDetails) {
+                            dispatch(loginUser(userDetails));
+                            setUserLoaded(true)
                         } else {
                             router.push('/user-information')
                         }
@@ -40,17 +38,17 @@ export default function AuthenticationProvider({ children }: { children: ReactNo
                 } else {
                     if (!isAuthRoute) {
                         setUserLoaded(false)
-                        dispatch(logoutUser({}));
+                        dispatch(logoutUser());
                         router.push('/');
                     }
                 }
             });
         };
-        if (!userLoaded){
+        if (!userLoaded) {
             initializeAuth();
         }
         const user = getAuth().currentUser
-        if (user && !hasBookingsRun){
+        if (user && !hasBookingsRun) {
             console.log('bookings')
             // @ts-ignore
             dispatch(fetchBookingsAsync());

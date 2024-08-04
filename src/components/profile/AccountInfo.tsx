@@ -1,15 +1,18 @@
 'use client'
-import {Avatar, Card, Col, Image, Row} from "antd";
+import {Card, Col, Image, Row} from "antd";
 import {useAppSelector} from "@/hooks/hooks";
 import {selectCurrentUser} from "@/slices/authenticationSlice";
 
 
 export default function AccountInfo(){
     const user = useAppSelector(selectCurrentUser)
+    if (!user){
+        return <div></div>
+    } else {
     return <Card className={''}>
         <Row gutter={[16,16]}>
             <Col sm={24} md={6}>
-                {user.avatar? <Image className={'bg-primary aspect-square rounded-full w-full'} src={user.avatar}/>:
+                {user.avatar? <Image className={'bg-primary aspect-square rounded-full w-full'} src={user.avatar} alt={'img'}/>:
                     <div className={'bg-primary aspect-square rounded-full flex items-center justify-center text-5xl w-max p-8 text-white'}>{user.firstName?.charAt(0)}{user.lastName?.charAt(0)}</div>}
             </Col>
             <Col sm={24} md={18}>
@@ -42,4 +45,5 @@ export default function AccountInfo(){
             </Col>
         </Row>
     </Card>
+    }
 }

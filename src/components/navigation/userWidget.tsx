@@ -15,7 +15,7 @@ export default function UserWidget() {
     function handleLogout(e:any){
         console.log('Signing out')
         signOut(auth).then(() => {
-            dispatch(logoutUser({}))
+            dispatch(logoutUser())
             router.push('/')
         });
 
@@ -39,9 +39,10 @@ export default function UserWidget() {
                 }
             ]
         }}>
-            <div className={'flex gap-1 items-center text-current'}><Avatar shape={'circle'}
-                         className={'bg-primary'}> {userDetails.firstName.charAt(0)}{userDetails.lastName.charAt(0)}</Avatar><div className={'hidden md:block'}>{userDetails.firstName} {userDetails.lastName}</div>
-            </div>
+            {userDetails && <div className={'flex gap-1 items-center text-current'}><Avatar shape={'circle'}
+                                                                                            className={'bg-primary'}> {userDetails.firstName.charAt(0)}{userDetails.lastName.charAt(0)}</Avatar>
+                <div className={'hidden md:block'}>{userDetails.firstName} {userDetails.lastName}</div>
+            </div>}
         </Dropdown>
     </div>
 }

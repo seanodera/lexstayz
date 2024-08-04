@@ -42,7 +42,7 @@ export const updateWishList = createAsyncThunk('authentication/updateWishlist',
         const {authentication} = getState() as RootState;
         try {
             const user = authentication.user;
-            if (user.uid) {
+            if (user) {
                 const userDocRef = doc(firestore, 'users', user.uid);
                 await runTransaction(firestore, async (transaction) => {
                     const userDoc = await transaction.get(userDocRef);
@@ -72,7 +72,7 @@ export const deleteFromWishList = createAsyncThunk('authentication/deleteFromWis
         const {authentication} = getState() as RootState;
         try {
             const user = authentication.user;
-            if (user.uid) {
+            if (user) {
                 const userDocRef = doc(firestore, 'users', user.uid);
                 await runTransaction(firestore, async (transaction) => {
                     const userDoc = await transaction.get(userDocRef);
@@ -99,8 +99,15 @@ export const deleteFromWishList = createAsyncThunk('authentication/deleteFromWis
 
 interface AuthenticationState {
     isAuthenticated: boolean,
-    user: {
-        uid: string | undefined
+    user?: {
+        phone: string;
+        email: string;
+        lastName: string;
+        firstName: string;
+        avatar?: any;
+        uid: string;
+        dob?:string;
+        gender?:string
     },
     wishlist: string[],
     isLoading: boolean,
@@ -111,9 +118,7 @@ interface AuthenticationState {
 
 const initialState: AuthenticationState = {
     isAuthenticated: false,
-    user: {
-        uid: undefined
-    },
+    user: undefined,
     wishlist: [],
     isLoading: false,
     hasError: false,
@@ -131,9 +136,7 @@ const AuthenticationSlice = createSlice({
         },
         logoutUser: (state) => {
             state.isAuthenticated = false;
-            state.user = {
-                uid: undefined
-            };
+            state.user = undefined;
             state.wishlist = [];
         }
     },

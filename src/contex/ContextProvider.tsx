@@ -2,8 +2,7 @@
 import Navbar from "@/components/navigation/Navbar";
 import {useEffect, useState} from "react";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
-import {fetchBookingsAsync, selectIsLoading} from "@/slices/bookingSlice";
-import Preloader from "@/components/preloader/preloader";
+import {selectIsLoading} from "@/slices/bookingSlice";
 import LoadingScreen from "@/components/LoadingScreen";
 import AuthenticationProvider, {authRoutes} from "@/contex/authenticationProvider";
 import {usePathname, useRouter} from "next/navigation";
@@ -37,7 +36,7 @@ export default function ContextProvider({children}: { children: React.ReactNode 
                }
 
             if (user) {
-                if (currentUser.uid !== user.uid){
+                if (!currentUser || currentUser.uid !== user.uid){
                     const userDetails = await getUserDetails(user.uid);
                     if (userDetails){
                         dispatch(loginUser(userDetails));
@@ -54,7 +53,7 @@ export default function ContextProvider({children}: { children: React.ReactNode 
     useEffect(()=> {
         const user = getAuth().currentUser;
         if (user){
-            if (!currentUser.uid){
+            if (!currentUser){
 
             }
         }
