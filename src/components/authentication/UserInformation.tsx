@@ -34,6 +34,7 @@ export default function UserInformation(){
                 email: user.email,
                 accountType: accountType,
                 phone: phone,
+                wishlist: [],
             }
         } else {
             details = {
@@ -42,6 +43,7 @@ export default function UserInformation(){
                 email: user.email,
                 accountType: accountType,
                 phone: phone,
+                wishlist: [],
             }
         }
         await createUser(details, user.uid);
