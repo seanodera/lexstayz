@@ -11,6 +11,7 @@ import {getAuth} from "firebase/auth";
 import {getUserDetails} from "@/data/usersData";
 import {loginUser, selectCurrentUser} from "@/slices/authenticationSlice";
 import {fetchStaysAsync, selectHasRun} from "@/slices/staysSlice";
+import ErrorDialog from "@/components/dialogs/ErrorDialog";
 
 const authNeededRoutes = ['/bookings', '/booking-confirmation', '/checkout']
 
@@ -70,6 +71,7 @@ export default function ContextProvider({children}: { children: React.ReactNode 
         return <div>
             <Navbar/>
             <main className={'h-full w-full'}>{children}</main>
+            <ErrorDialog/>
         </div>
     }
 }

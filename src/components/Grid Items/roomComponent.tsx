@@ -3,13 +3,104 @@ import {IoBedOutline} from "react-icons/io5";
 import {LuBedSingle} from "react-icons/lu";
 import ReservationDialog from "@/components/stay/reservationDialog";
 import {useEffect, useState} from "react";
-import {Select} from "@headlessui/react";
+import {Dialog, DialogPanel, DialogTitle, Select} from "@headlessui/react";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import {selectCart, updateCart} from "@/slices/bookingSlice";
-import {Button, Card, Image} from "antd";
+import {Button, Card, Divider, Image} from "antd";
 
 
 export default function RoomComponent({room, stay, className = ''}: { room: any, stay: any, className?: string }) {
+    const dispatch = useAppDispatch();
+    const globalCart = useAppSelector(selectCart)
+    const fullState = useAppSelector((state: any) => state.booking);
+    const [numRooms, setNumRooms] = useState<number>(0);
+    const [open, setOpen] = useState(false);
+    const [roomIndex, setRoomIndex] = useState<number>(-1);
+
+    useEffect(() => {
+        let _roomIndex = globalCart.findIndex((value: any) => value.roomId === room.id);
+        setRoomIndex(_roomIndex)
+        if (_roomIndex !== -1){
+            setNumRooms(globalCart[_roomIndex].numRooms)
+        }
+
+    }, [globalCart])
+
+    function handleCart() {
+        // Clone the global cart array to avoid mutating the original array
+        let newCart = [...globalCart];
+
+        // Check if the number of rooms is greater than zero
+        if (numRooms > 0) {
+            // Check if the room is already in the cart by its index
+            if (roomIndex !== -1) {
+                // Update the existing room entry in the cart
+                newCart[roomIndex] = {
+                    name: room.name,
+                    price: room.price,
+                    numRooms: numRooms,
+                    roomId: room.id,
+                    stayId: stay.id
+                };
+            } else {
+                // Add a new room entry to the cart
+                newCart.push({
+                    name: room.name,
+                    price: room.price,
+                    numRooms: numRooms,
+                    roomId: room.id,
+                    stayId: stay.id
+                });
+            }
+        } else if (numRooms === 0 && roomIndex !== -1) {
+            // Remove the room from the cart if the number of rooms is zero
+            newCart.splice(roomIndex, 1);
+        }
+
+        // Dispatch the updated cart
+        dispatch(updateCart(newCart));
+    }
+    useEffect(() => {
+        handleCart()
+    }, [numRooms])
+    return <div
+        className={`${(roomIndex !== -1) && 'shadow-primary'} ${className ? className : 'rounded-2xl p-4 shadow-md'}`}>
+        <Image className={'aspect-video rounded-xl object-cover'} src={room.poster} alt={room.name}/>
+        <div className={'flex justify-between items-center my-2'}>
+            <h3 className={'text-xl font-medium mb-0'}>{room.name}</h3>
+            <div className={'flex justify-between'}> <span
+                className={'font-medium text-primary text-xl'}>{'$'} {room.price.toLocaleString(undefined, {
+                minimumFractionDigits: 2, maximumFractionDigits: 2
+            })} <span className={'font-light text-sm'}>/night</span></span></div>
+        </div>
+        <div>
+            <span className="flex gap-1 items-center flex-wrap my-4">
+                                    <div className="text-sm mb-0">Up to {room.maxGuests} Guests</div>
+                                    <Divider className="bg-primary h-5" type="vertical"/>
+                                    {/*<h4 className={'max-md:text-sm mb-0'}>{bedsText}</h4>*/}
+                                </span>
+        </div>
+
+        <div className={'flex flex-col items-end gap-2'}>
+            <div className={'flex justify-end gap-2 w-max'}><Select value={numRooms}
+                                                                    onChange={(e) => setNumRooms(parseInt(e.target.value))}
+                                                                    className={'appearance-none rounded-xl border border-primary text-sm py-2 px-4 text-start bg-transparent'}>
+                {Array.from({length: 11}, (_, i) => <option value={i}
+                                                            key={i}>{i} {(i === 1) ? 'Room' : 'Rooms'}</option>)}
+            </Select>
+                <Button type={'primary'} size={'large'} className={''}
+                        onClick={() => setOpen(true)}>View Room
+                </Button>
+            </div>
+        </div>
+
+
+        <ReservationDialog isOpen={open} setIsOpen={setOpen} room={room} stay={stay} numRoom={numRooms}
+                           setNumRoom={setNumRooms}/>
+    </div>
+}
+
+export function RoomComponentOld({room, stay, className = ''}: { room: any, stay: any, className?: string }) {
     const dispatch = useAppDispatch();
     const globalCart = useAppSelector(selectCart)
     const fullState = useAppSelector((state: any) => state.booking);
@@ -89,27 +180,22 @@ export default function RoomComponent({room, stay, className = ''}: { room: any,
 
             <div className={'flex flex-col items-end gap-2'}>
                 <div className={'flex flex-col justify-end gap-2 w-max'}><Select value={numRooms}
-                                                      onChange={(e) => setNumRooms(parseInt(e.target.value))}
-                                                      className={'appearance-none rounded-xl border border-primary text-sm py-2 px-2 text-start bg-transparent'}>
+                                                                                 onChange={(e) => setNumRooms(parseInt(e.target.value))}
+                                                                                 className={'appearance-none rounded-xl border border-primary text-sm py-2 px-2 text-start bg-transparent'}>
                     {Array.from({length: 11}, (_, i) => <option value={i}
                                                                 key={i}>{i} {(i === 1) ? 'Room' : 'Rooms'}</option>)}
                 </Select>
-                <Button type={'primary'} size={'large'} className={''}
-                        onClick={() => {}}>View Room
-                </Button>
+                    <Button type={'primary'} size={'large'} className={''}
+                            onClick={() => setOpen(true)}>View Room
+                    </Button>
                 </div>
             </div>
         </div>
 
-        <div
-            className={'flex flex-wrap gap-1 my-1 text-balance'}>{room.amenities.slice(0, 3).map((amenity: string, index: number) =>
-            <div
-                className={'border border-gray-500 shadow-md rounded py-1 px-2 text-sm text-nowrap'}
-                key={index}>{amenity}</div>)}</div>
 
 
 
-        <ReservationDialog isOpen={open} setIsOpen={setOpen} room={room} stay={stay}/>
+        <ReservationDialog isOpen={open} setIsOpen={setOpen} room={room} stay={stay} numRoom={numRooms} setNumRoom={setNumRooms}/>
     </div>
 }
 
@@ -201,6 +287,6 @@ export function RoomComponentPortrait({room, stay, className = ''}: { room: any,
             </button>
         </div>
 
-        <ReservationDialog isOpen={open} setIsOpen={setOpen} room={room} stay={stay}/>
+        <ReservationDialog isOpen={open} setIsOpen={setOpen} room={room} stay={stay} numRoom={numRooms} setNumRoom={setNumRooms}/>
     </div>
 }

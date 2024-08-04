@@ -50,7 +50,7 @@ export default function StayDate() {
                                 setEndDate(dayjs(value[1]).toString());
                             }
                         }}
-                        mode={isMobile ? ['date', 'date'] : undefined} // Show only one month on mobile
+                        // mode={isMobile ? ['date', 'date'] : undefined} // Show only one month on mobile
                     />
                 </div>
                 <Popover className="relative">

@@ -42,6 +42,7 @@ export default function Stay() {
     if (!stay || stay.id === undefined) {
         return <div></div>;
     } else {
+        console.log(stay)
         return (
             <div className="lg:px-24 px-7 py-24 bg-white text-dark">
                 <Banner stay={stay}/>

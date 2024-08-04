@@ -5,10 +5,8 @@ import {Avatar, Card, message} from "antd";
 import {useState} from "react";
 import {useAppDispatch} from "@/hooks/hooks";
 import {useRouter} from "next/navigation";
-import {signInWithEmailAndPassword, signOut} from "firebase/auth";
-import {auth} from "@/lib/firebase";
 import {getUserDetails} from "@/data/usersData";
-import {loginUser} from "@/slices/authenticationSlice";
+import {loginUser, signInUserAsync} from "@/slices/authenticationSlice";
 
 
 export default function LoginComponent() {
@@ -18,21 +16,14 @@ export default function LoginComponent() {
     const dispatch = useAppDispatch();
     const router = useRouter();
 
-    const handleLogin = async () => {
-        try {
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            const userDetails = await getUserDetails(userCredential.user.uid);
-            if (userDetails){
-                dispatch(loginUser(userDetails));
-                router.push('/');
-            } else {
-                router.push('/user-information')
-            }
-        } catch (error) {
+    const handleLogin = () => {
+        dispatch(signInUserAsync({email:email, password:password}))
+            .then((actionResult:any) => {
 
+            }).catch((error:any) => {
             // @ts-ignore
             message.error(`Error logging in: ${error.message}`);
-        }
+        });
     };
 
 

@@ -37,9 +37,9 @@ export default function SearchComponent(){
     console.log(booking.checkInDate)
     return (
         <div className={'py-8 md:px-24 xl:p-0 px-7 flex justify-center w-full'}>
-            <Space.Compact className={'xl:bg-black max-xl:bg-white xl:bg-opacity-60 xl:text-white rounded-lg xl:w-full max-md:flex max-md:flex-col max-md:w-full max-md:space-y-4'}>
+            <Space.Compact className={'xl:bg-black max-xl:bg-white xl:bg-opacity-60 xl:text-white rounded-lg xl:w-full max-lg:flex max-lg:flex-col max-md:w-full max-lg:space-y-4'}>
                 <Input
-                    className={'md:w-1/3 bg-transparent xl:text-white rounded-l-lg max-md:rounded-lg'}
+                    className={'lg:w-1/3 bg-transparent xl:text-white rounded-l-lg max-lg:rounded-lg'}
                     classNames={{
                         input: 'bg-transparent xl:text-white xl:placeholder-gray-400',
 
@@ -52,7 +52,7 @@ export default function SearchComponent(){
                     format={'DD MMMM YYYY'}
                     value={[dayjs(booking.checkInDate),dayjs(booking.checkOutDate)]}
                     size={'large'}
-                    className={'md:w-1/3 xl:w-max bg-transparent text-current placeholder-gray-400 max-md:rounded-lg'}
+                    className={'lg:w-1/3 xl:w-max bg-transparent text-current placeholder-gray-400 max-lg:rounded-lg'}
                     onChange={(value) => {
                         if (value) {
                             setStartDate(dayjs(value[0]).toString());
@@ -63,7 +63,7 @@ export default function SearchComponent(){
                 <Popover className="relative " >
                     <PopoverButton
                         as={Button}
-                        size={'large'} className={'bg-transparent text-current w-full max-md:rounded-lg'}>
+                        size={'large'} className={'bg-transparent text-current w-full max-lg:rounded-lg'}>
                         <MdPersonOutline className={'text-lg'} /> {numGuests} Guests <BsRecordFill size={8} /> {numRooms} Rooms
                     </PopoverButton>
 
@@ -91,8 +91,8 @@ export default function SearchComponent(){
                         </PopoverPanel>
 
                 </Popover>
-                <Button className={'max-md:hidden rounded-r-lg'} type={'primary'} size={'large'} icon={<SearchOutlined/>}></Button>
-                <Button className={'md:hidden block rounded-lg'} type={'primary'} size={'large'}>Search</Button>
+                <Button className={'max-lg:hidden rounded-r-lg'} type={'primary'} size={'large'} icon={<SearchOutlined/>}></Button>
+                <Button className={'lg:hidden block rounded-lg'} type={'primary'} size={'large'}>Search</Button>
             </Space.Compact>
         </div>
     );

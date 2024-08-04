@@ -1,13 +1,37 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import {getUserDetails} from "@/data/usersData";
+import {signInWithEmailAndPassword} from "firebase/auth";
+import {auth} from "@/lib/firebase";
+import {redirect} from "next/navigation";
 
 
 export const getUserDetailsAsync = createAsyncThunk('authentication/user',
     async (id: string) => {
+    try {
         const userDetails = await getUserDetails(id)
-        return userDetails;
-    })
+        if (userDetails){
+            return userDetails;
+        } else {
+            redirect('/user-information')
+        }
+    } catch (error){
 
+    }
+    })
+export const signInUserAsync:any= createAsyncThunk('authentication/signIn',
+    async ({email,password}:{email: string, password: string}, { dispatch, getState, rejectWithValue }) => {
+       try {
+           const userCredential = await signInWithEmailAndPassword(auth, email, password)
+           const payload = await dispatch(getUserDetailsAsync(userCredential.user.uid));
+           console.log(payload)
+           return userCredential;
+       } catch (error){
+           if (error instanceof Error) {
+               return rejectWithValue(error.message);
+           }
+           return rejectWithValue('An unknown error occurred');
+       }
+    });
 const AuthenticationSlice = createSlice({
     name: "authentication",
     initialState: {
@@ -40,8 +64,21 @@ const AuthenticationSlice = createSlice({
             })
             .addCase(getUserDetailsAsync.pending, (state, action) => {
                 state.isLoading = true;
-
-
+            })
+            .addCase(signInUserAsync.pending, (state, action) => {
+                state.isLoading = true
+        })
+            .addCase(signInUserAsync.fulfilled,(state,action) => {
+                state.isAuthenticated = true;
+                state.isLoading = false;
+                state.hasError = false;
+                state.errorMessage = '';
+                redirect('/')
+            })
+            .addCase(signInUserAsync.rejected,(state, action)=> {
+                state.hasError = true;
+                state.errorMessage = action.payload as string;
+                state.isLoading = false
             })
     }
 })

@@ -1,15 +1,16 @@
 'use client';
 
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-
-import { getStaysFirebase } from "@/data/hotelsData";
+import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {RootState} from "@/data/types";
+import {collection, getDocs} from "firebase/firestore";
+import {firestore} from "@/lib/firebase";
 
 
 export interface Stay {
     id: string;
     rooms: any[];
-    [key: string]: any;
+
+    [ key: string ]: any;
 }
 
 interface Dates {
@@ -40,9 +41,23 @@ const initialState: StaysState = {
 
 export const fetchStaysAsync = createAsyncThunk(
     'stays/fetchStays',
-    async () => {
-        const stays = await getStaysFirebase();
-        return stays;
+    async (_, {rejectWithValue}) => {
+        try {
+            const staysRef = collection(firestore, 'stays');
+            const stays: Array<any> = [];
+            const snapshot = await getDocs(staysRef);
+            for (const doc1 of snapshot.docs) {
+                stays.push(doc1.data());
+            }
+            return stays
+        } catch (error) {
+            console.log(error)
+            if (error instanceof Error) {
+                return rejectWithValue(error.message);
+            }
+            return rejectWithValue('An unknown error occurred');
+        }
+
     }
 );
 
@@ -61,13 +76,17 @@ const staysSlice = createSlice({
         setCurrentStayFromId: (state, action: PayloadAction<string | number>) => {
             state.currentId = action.payload;
             const currentStay = state.stays.find((value) => value.id === action.payload);
-            if (currentStay){
-                if (state.currentStay.id !== currentStay?.id){
+            if (currentStay) {
+                if (state.currentStay.id !== currentStay?.id) {
 
                 }
             }
             state.currentStay = currentStay ? currentStay : ({} as Stay);
         },
+        resetError: (state) => {
+            state.hasError = false
+            state.errorMessage = ''
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -78,13 +97,13 @@ const staysSlice = createSlice({
             })
             .addCase(fetchStaysAsync.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.stays = action.payload;
+                state.stays = action.payload as Stay[];
                 state.hasRun = true;
             })
             .addCase(fetchStaysAsync.rejected, (state, action) => {
                 state.isLoading = false;
                 state.hasError = true;
-                state.errorMessage = action.error.message || 'Failed to fetch stays';
+                state.errorMessage = action.payload as string || 'Failed to fetch stays';
             });
     }
 });
@@ -102,6 +121,7 @@ export const {
     setAllStays,
     setCurrentStay,
     setCurrentStayFromId,
+    resetError,
 } = staysSlice.actions;
 
 export default staysSlice.reducer;
