@@ -113,7 +113,7 @@ export default function ReservationDialog({isOpen = false, setIsOpen, room, stay
                                 {Array.from({length: 11}, (_, i) => <option value={i}
                                                                             key={i}>{i} {(i === 1) ? 'Room' : 'Rooms'}</option>)}
                             </Select>
-                            <Button type={'primary'} size={'large'}>Select</Button>
+                            <Button type={'primary'} size={'large'} onClick={handleUpdate}>Select</Button>
                         </div>
                         <div
                             className="md:hidden fixed end-0 bottom-0 w-full bg-primary-50 z-10 flex justify-between border border-gray-200 py-3 px-7">

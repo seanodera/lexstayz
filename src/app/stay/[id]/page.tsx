@@ -16,6 +16,7 @@ import FeaturedRoom from "@/components/stay/featuredRoom";
 import AvailableRooms from "@/components/stay/availableRooms";
 import {selectCurrentId, selectCurrentStay, setCurrentStayFromId} from "@/slices/staysSlice";
 import {selectCart, updateCart} from "@/slices/bookingSlice";
+import HouseRules from "@/components/stay/houseRules";
 
 
 export default function Stay() {
@@ -52,12 +53,14 @@ export default function Stay() {
                         <Description stay={stay}/>
                         <StayDate/>
                         <AvailableRooms stay={stay}/>
+                        <HouseRules stay={stay}/>
                     </div>
                     <div className="max-lg:hidden lg:ps-12 col-span-1 md:col-span-2 lg:col-span-1">
                         <FeaturedRoom stay={stay}/>
                         <CartSummary stay={stay}/>
                     </div>
                 </div>
+
                 <MobileCartSummary/>
             </div>
         );
