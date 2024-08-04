@@ -34,7 +34,7 @@ export default function HouseRules({stay}: { stay: any }) {
                     <p>{(stay.cancellation.cancellation === 'Other') ? `Free cancellation until ${stay.cancellation.time} ${stay.cancellation.timeSpace} ${(stay.cancellation.preDate) ? 'Before Check In' : 'After Booking Date'}` : stay.cancellation.cancellation}</p>
                     <p>{(stay.cancellation.cancellation === 'Other') && `${100 - stay.cancellation.rate} Refundable`}</p>
                     {(stay.cancellation.cancellation === 'Free') &&
-                        <p className={'text-sm text-gray-300 italic'}><InfoOutlined/> Booking fee is not refundable</p>}
+                        <p className={'text-sm text-gray-500 italic'}><InfoOutlined/> Booking fee is not refundable</p>}
                 </div>
                 <Divider type={'horizontal'} className={'md:col-span-4 w-full bg-gray-200 h-0.5'}/>
                 <div className={'font-bold text-lg pb-4'}>

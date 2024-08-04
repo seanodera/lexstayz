@@ -4,7 +4,7 @@ import { firestore } from "@/lib/firebase";
 import {generateID, getCurrentUser} from "@/data/bookingData";
 import { writeBatch, doc, collection } from "firebase/firestore";
 import axios from 'axios';
-import {differenceInDays} from "date-fns";
+import {addDays, differenceInDays} from "date-fns";
 import {RootState} from "@/data/types";
 
 interface ConfirmBookingState {
@@ -30,7 +30,7 @@ interface ConfirmBookingState {
 const initialState: ConfirmBookingState = {
     stay: {} as Stay,
     checkInDate: new Date().toString(),
-    checkOutDate: new Date().toString(),
+    checkOutDate: addDays(new Date().toString(),1).toString(),
     rooms: [],
     paymentData: {
         method: 'Pryzapay',
