@@ -1,5 +1,4 @@
 import axios from "axios";
-import {createBooking} from "@/slices/confirmBookingSlice";
 
 
 export async function initiatePayment({email, amount, userID, bookingID, currency}: {

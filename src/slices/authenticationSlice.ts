@@ -165,7 +165,6 @@ const AuthenticationSlice = createSlice({
                 state.isLoading = false;
                 state.hasError = false;
                 state.errorMessage = '';
-                redirect('/');
             })
             .addCase(signInUserAsync.rejected, (state, action) => {
                 state.hasError = true;

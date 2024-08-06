@@ -5,29 +5,13 @@ import {
     SmileOutlined, MedicineBoxOutlined, AppstoreOutlined, QuestionOutlined
 } from '@ant-design/icons';
 
-type Amenity =
-    | 'Air Conditioning/Heating'
-    | 'Wi-Fi/Internet Access'
-    | 'Television with Cable/Satellite Channels'
-    | 'Telephone'
-    | 'Mini-Bar'
-    | 'Coffee/Tea Maker'
-    | 'In-Room Safe'
-    | 'Work Desk'
-    | 'Iron and Ironing Board'
-    | 'Hairdryer'
-    | 'Room Service'
-    | 'Alarm Clock/Radio'
-    | 'Bathrobes and Slippers'
-    | 'Toiletries'
-    | 'Closet/Wardrobe';
 
 type IconComponent = React.ComponentType;
 
 const amenityIconMap: Record<string, IconComponent> = {
     'Air Conditioning/Heating': HeatMapOutlined,
     'Wi-Fi/Internet Access': WifiOutlined,
-    'Television with Cable/Satellite Channels': DesktopOutlined,
+    'TV with Cable/Satellite Channels': DesktopOutlined,
     'Telephone': PhoneOutlined,
     'Mini-Bar': CoffeeOutlined,
     'Coffee/Tea Maker': CoffeeOutlined,
