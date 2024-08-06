@@ -1,3 +1,4 @@
+'use client'
 import {useAppSelector} from "@/hooks/hooks";
 import {selectWishlist} from "@/slices/authenticationSlice";
 import {selectAllStays} from "@/slices/staysSlice";

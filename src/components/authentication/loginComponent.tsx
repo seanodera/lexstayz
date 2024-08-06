@@ -19,7 +19,7 @@ export default function LoginComponent() {
     const handleLogin = () => {
         dispatch(signInUserAsync({email:email, password:password}))
             .then((actionResult:any) => {
-                router.back()
+                router.push('/')
             }).catch((error:any) => {
             // @ts-ignore
             message.error(`Error logging in: ${error.message}`);
