@@ -29,10 +29,14 @@ export default function UserWidget() {
                 },
                 {
                     key: 1,
-                    label: <Link href={'/profile'}>Profile</Link>
+                    label: <Link href={'/wishlist'}>Wishlist</Link>
                 },
                 {
                     key: 2,
+                    label: <Link href={'/profile'}>Profile</Link>
+                },
+                {
+                    key: 3,
                     label: 'Logout',
                     danger: true,
                     onClick:handleLogout
