@@ -42,7 +42,7 @@ export default function RootLayout({
         </head>
         <body className={'min-h-screen bg-[#f5f5f5]'}><StoreProvider><AntdRegistry>
             <ConfigProvider theme={theme}><ContextProvider>
-                <div>{children}</div>
+                <div className={'h-screen w-full'}>{children}</div>
             </ContextProvider></ConfigProvider> </AntdRegistry></StoreProvider>
         </body>
 

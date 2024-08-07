@@ -8,6 +8,7 @@ import {getUserDetails} from "@/data/usersData";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import Navbar from "@/components/navigation/Navbar";
 import {fetchBookingsAsync, selectHasBookingRun} from "@/slices/bookingSlice";
+import {fetchUserChatsAsync} from "@/slices/messagingSlice";
 
 export const authRoutes = ['/login', '/register', '/forgot-password', '/reset-password', '/user-information']
 
@@ -52,12 +53,15 @@ export default function AuthenticationProvider({children}: { children: ReactNode
             console.log('bookings')
             // @ts-ignore
             dispatch(fetchBookingsAsync());
+
+            // @ts-ignore
+            dispatch(fetchUserChatsAsync())
         }
     });
     return <Suspense fallback={null}>
         <div>
             <Navbar/>
-            <main>{children}</main>
+            <main className={'h-full w-full'}>{children}</main>
         </div>
     </Suspense>
 }

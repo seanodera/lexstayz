@@ -1,5 +1,5 @@
 'use client'
-import {useParams} from "next/navigation";
+import {useParams, useRouter} from "next/navigation";
 import {useEffect, useState} from "react";
 import {useAppSelector} from "@/hooks/hooks";
 import {selectBookings} from "@/slices/bookingSlice";
@@ -9,6 +9,8 @@ import {Button, Col, Row, Skeleton} from "antd";
 import ReservationDetails from "@/components/bookings/ReservationDetails";
 import BookingUserDetails from "@/components/bookings/BookingUserDetails";
 import RoomsWidget from "@/components/bookings/RoomsWidget";
+import {startChatAsync} from "@/slices/messagingSlice";
+import {useDispatch} from "react-redux";
 
 
 export default function Page(){
@@ -17,6 +19,8 @@ export default function Page(){
     const [stay, setStay] = useState<any>()
     const bookings = useAppSelector(selectBookings);
     const stays = useAppSelector(selectAllStays)
+    const router =useRouter()
+    const dispatch = useDispatch();
     useEffect(() => {
         const _booking = bookings.find((value) => value.id === bookingId.toString())
         setBooking(_booking)
@@ -25,11 +29,20 @@ export default function Page(){
             setStay(_stay)
         }
     },[bookingId, stays, bookings]);
+    function handleContactHost() {
+
+        // @ts-ignore
+        dispatch(startChatAsync({
+            hostId: booking.hostId,
+            })).then((value: any) => {
+            router.push('/messages')
+        })
+    }
     return<div className={'grid grid-cols-1 md:grid-cols-3 gap-4 py-24 lg:px-24 px-7'}>
         <div className={'md:col-span-3 flex justify-between'}>
             <div className={'text-2xl font-bold'}>Booking</div>
             {booking && booking.status !== 'Rejected'?<div className={'flex gap-2'}>
-                 <Button type={'primary'}>Message Host</Button>
+                 <Button type={'primary'} onClick={() => handleContactHost()}>Message Host</Button>
                     {booking.status === 'Confirmed'? <Button type={'primary'} danger>Cancel</Button>: '' }
             </div>: <div></div>}
         </div>

@@ -12,7 +12,7 @@ import {loginUser, selectCurrentUser} from "@/slices/authenticationSlice";
 import {fetchStaysAsync, selectHasRun} from "@/slices/staysSlice";
 import ErrorDialog from "@/components/dialogs/ErrorDialog";
 
-const authNeededRoutes = ['/bookings', '/booking-confirmation', '/checkout']
+const authNeededRoutes = ['/bookings', '/booking-confirmation', '/checkout', '/wishlist', '/profile', '/messages']
 
 export default function ContextProvider({children}: { children: React.ReactNode }) {
     const pathname = usePathname()
