@@ -11,7 +11,7 @@ export default function FeaturedRoom({ stay } : any)  {
             <h3 className="text-2xl font-semibold mb-2">Featured Room</h3>
             {stay.rooms.slice(0, 1).map((room:any, index: number) => {
                 const len = dayjs(booking.checkOutDate).diff(dayjs(booking.checkInDate), 'days');
-                let available = false
+                let available = true
                 let lowest = room.available;
                 for (let i = 0; i <= len; ++i) {
                     console.log(booking.checkInDate)
