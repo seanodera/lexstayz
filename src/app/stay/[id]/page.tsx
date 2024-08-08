@@ -43,8 +43,9 @@ export default function Stay() {
     }, [dispatch, params]);
 
     const stay = useAppSelector(selectCurrentStay);
-
+    console.log(stay)
     if (!stay || stay.id === undefined) {
+
         return <div></div>;
     } else {
         const checkInDate = dayjs(booking.checkInDate);
@@ -57,7 +58,7 @@ export default function Stay() {
                     <div className="col-span-2">
                         <Details stay={stay}/>
                         <Description stay={stay}/>
-                        <StayDate/>
+                        <StayDate stay={stay}/>
                         {stay.type === 'Hotel' && <AvailableRooms stay={stay}/>}
                         <HouseRules stay={stay}/>
                     </div>

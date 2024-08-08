@@ -4,6 +4,7 @@ import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {RootState} from "@/data/types";
 import {collection, getDocs} from "firebase/firestore";
 import {firestore} from "@/lib/firebase";
+import {query, where} from "@firebase/firestore";
 
 
 export interface Stay {
@@ -43,7 +44,8 @@ export const fetchStaysAsync = createAsyncThunk(
     'stays/fetchStays',
     async (_, {rejectWithValue}) => {
         try {
-            const staysRef = collection(firestore, 'stays');
+
+            const staysRef = query(collection(firestore, 'stays'));
             const stays: Array<any> = [];
             const snapshot = await getDocs(staysRef);
             for (const doc1 of snapshot.docs) {

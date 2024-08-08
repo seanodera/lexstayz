@@ -9,7 +9,7 @@ import {selectCart, updateCart} from "@/slices/bookingSlice";
 import {Button, Card, Divider, Image} from "antd";
 
 
-export default function RoomComponent({room, stay, className = ''}: { room: any, stay: any, className?: string }) {
+export default function RoomComponent({room, stay, className = '', available = true, lowest = 10}: { room: any, stay: any, className?: string, available?: boolean, lowest?: number }) {
     const dispatch = useAppDispatch();
     const globalCart = useAppSelector(selectCart)
     const fullState = useAppSelector((state: any) => state.booking);
@@ -63,9 +63,16 @@ export default function RoomComponent({room, stay, className = ''}: { room: any,
     useEffect(() => {
         handleCart()
     }, [numRooms])
+
     return <div
         className={`${(roomIndex !== -1) && 'shadow-primary'} ${className ? className : 'rounded-2xl p-4 shadow-md'}`}>
-        <Image className={'aspect-video rounded-xl object-cover'} src={room.poster} alt={room.name}/>
+        <div className={'relative aspect-video'}>
+            <Image className={'aspect-video rounded-xl object-cover'} src={room.poster} alt={room.name}/>
+            {(lowest > 0 && lowest < 5 && available) && <div
+                className={'absolute top-0 right-0 py-2 px-3 rounded-lg shadow-md mt-2 mx-2 bg-warning font-medium'}>{lowest} Left</div>}
+            {!available && <div
+                className={'absolute top-0 right-0 py-2 px-3 rounded-lg shadow-md mt-2 mx-2 bg-danger font-medium text-white'}>Fully Booked</div>}
+        </div>
         <div className={'flex justify-between items-center my-2'}>
             <h3 className={'text-xl font-medium mb-0'}>{room.name}</h3>
             <div className={'flex justify-between'}> <span
@@ -82,10 +89,10 @@ export default function RoomComponent({room, stay, className = ''}: { room: any,
         </div>
 
         <div className={'flex flex-col items-end gap-2'}>
-            <div className={'flex justify-end gap-2 w-max'}><Select value={numRooms}
+            <div className={'flex justify-end gap-2 w-max'}><Select disabled={!available} value={numRooms}
                                                                     onChange={(e) => setNumRooms(parseInt(e.target.value))}
                                                                     className={'appearance-none rounded-xl border border-primary text-sm py-2 px-4 text-start bg-transparent'}>
-                {Array.from({length: 11}, (_, i) => <option value={i}
+                {Array.from({length: lowest < 10? lowest + 1 : 11}, (_, i) => <option value={i}
                                                             key={i}>{i} {(i === 1) ? 'Room' : 'Rooms'}</option>)}
             </Select>
                 <Button type={'primary'} size={'large'} className={''}
@@ -96,7 +103,7 @@ export default function RoomComponent({room, stay, className = ''}: { room: any,
 
 
         <ReservationDialog isOpen={open} setIsOpen={setOpen} room={room} stay={stay} numRoom={numRooms}
-                           setNumRoom={setNumRooms}/>
+                           setNumRoom={setNumRooms} available={available} lowest={lowest}/>
     </div>
 }
 
@@ -200,7 +207,7 @@ export function RoomComponentOld({room, stay, className = ''}: { room: any, stay
 }
 
 
-export function RoomComponentPortrait({room, stay, className = ''}: { room: any, stay: any, className?: string }) {
+export function RoomComponentPortrait({room, stay, className = '', available = true, lowest = 10}: { room: any, stay: any, className?: string, available?: boolean, lowest?: number }) {
     const dispatch = useAppDispatch();
     const globalCart = useAppSelector(selectCart)
     const fullState = useAppSelector((state: any) => state.booking);
@@ -253,13 +260,19 @@ export function RoomComponentPortrait({room, stay, className = ''}: { room: any,
     }
 
     return <div className={`${(roomIndex !== -1) && 'shadow-primary'} ${className ? className : 'rounded-2xl p-4 shadow-md'}`}>
-        <Image className={'aspect-video rounded-xl object-cover'} src={room.poster} alt={room.name}/>
+        <div className={'relative aspect-video'}>
+            <Image className={'aspect-video rounded-xl object-cover'} src={room.poster} alt={room.name}/>
+            {(lowest > 0 && lowest < 5 && available) && <div
+                className={'absolute top-0 right-0 py-2 px-3 rounded-lg shadow-md mt-2 mx-2 bg-warning font-medium'}>{lowest} Left</div>}
+            {!available && <div
+                className={'absolute top-0 right-0 py-2 px-3 rounded-lg shadow-md mt-2 mx-2 bg-danger font-medium text-white'}>Fully Booked</div>}
+        </div>
         <div className={'my-4 flex justify-between'}><h3
             className={'text-xl font-medium'}>{room.name}</h3>  <span
             className={'font-medium text-primary text-xl'}>{'$'} {room.price.toLocaleString(undefined, {
             minimumFractionDigits: 2, maximumFractionDigits: 2
         })} <span className={'font-light text-sm'}>/night</span></span></div>
-        <div className={'flex flex-wrap gap-2 my-4'}>{room.amenities.slice(0,3).map((amenity: string, index: number) =>
+        <div className={'flex flex-wrap gap-2 my-4'}>{room.amenities.slice(0, 3).map((amenity: string, index: number) =>
             <div
                 className={'border border-gray-500 shadow-md rounded py-1 px-3 text-balance text-sm'}
                 key={index}>{amenity}</div>)}</div>
@@ -276,13 +289,13 @@ export function RoomComponentPortrait({room, stay, className = ''}: { room: any,
             }
         </div>
         <div className={'flex items-center gap-2'}>
-            <div className={'rounded-xl'}><Select value={numRooms}
+            <div className={'rounded-xl'}><Select disabled={!available} value={numRooms}
                                                   onChange={(e) => setNumRooms(parseInt(e.target.value))}
                                                   className={'appearance-none rounded-xl border border-primary py-3 px-3 text-start bg-transparent'}>
                 {Array.from({length: 11}, (_, i) => <option value={i}
                                                             key={i}>{i} {(i === 1) ? 'Room' : 'Rooms'}</option>)}
             </Select></div>
-            <button className={'rounded-xl text-center py-3 bg-primary text-white font-medium w-full'}
+            <button disabled={!available} className={'rounded-xl text-center py-3 bg-primary text-white font-medium w-full'}
                     onClick={handleCart}>Reserve
             </button>
         </div>

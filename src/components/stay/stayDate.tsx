@@ -12,7 +12,7 @@ import {useMediaQuery} from 'react-responsive';
 
 const { RangePicker } = DatePicker;
 
-export default function StayDate() {
+export default function StayDate({stay}: {stay: any}) {
     const dispatch = useAppDispatch();
     const booking = useAppSelector(selectConfirmBooking);
     const [numGuests, setNumGuests] = useState(booking.numGuests);
@@ -22,8 +22,9 @@ export default function StayDate() {
     const isMobile = useMediaQuery({ maxWidth: 768 });
 
     const disabledDate: RangePickerProps['disabledDate'] = (current) => {
-        // Can not select days before today and today
-        return current < dayjs().subtract(1,'day').endOf('day');
+        const curr = current.toISOString().split('T')[ 0 ]
+
+        return stay.fullyBookedDates?.includes(curr) || current.isBefore(dayjs().subtract(1,'day'));
     };
 
     useEffect(() => {
@@ -44,6 +45,7 @@ export default function StayDate() {
                         format={'DD MMMM YYYY'}
                         className={'border border-gray-500 rounded-xl py-2 px-3 bg-transparent'}
                         value={[dayjs(booking.checkInDate), dayjs(booking.checkOutDate)]}
+
                         onChange={(value) => {
                             if (value) {
                                 setStartDate(dayjs(value[0]).toString());

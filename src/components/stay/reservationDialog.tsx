@@ -1,19 +1,19 @@
 import {CloseButton, Dialog, DialogPanel, Select} from '@headlessui/react';
 import {useState, useEffect} from 'react';
 import {DialogBody} from 'next/dist/client/components/react-dev-overlay/internal/components/Dialog';
-import {Button, Carousel, Divider, Image} from 'antd';
+import {Button, Carousel, Divider, Image, Tag} from 'antd';
 import {getAmenityIcon} from '@/components/utilities/amenityIcon';
 import {CloseIcon} from "next/dist/client/components/react-dev-overlay/internal/icons/CloseIcon";
 import {CloseOutlined} from "@ant-design/icons";
 import {updateCart} from "@/slices/bookingSlice";
 
-export default function ReservationDialog({isOpen = false, setIsOpen, room, stay, numRoom, setNumRoom}: {
+export default function ReservationDialog({isOpen = false, setIsOpen, room, stay, numRoom, setNumRoom, available = true, lowest = 10}: {
     isOpen: boolean,
     setIsOpen: any,
     room: any,
     stay: any,
     numRoom: number,
-    setNumRoom: any,
+    setNumRoom: any, available?:boolean, lowest?:number,
 }) {
     const [bedsText, setBedsText] = useState('');
     const [numRooms, setNumRooms] = useState<number>(numRoom);
@@ -48,7 +48,10 @@ export default function ReservationDialog({isOpen = false, setIsOpen, room, stay
                             </div>
                         </div>
                         <div className={'max-md:hidden flex w-full justify-between items-center py-3'}>
-                            <h2 className={'font-semibold mb-0'}>Room Details</h2>
+                            <div className={'flex gap-2 items-center'}><h2 className={'font-semibold mb-0'}>Room Details</h2>
+                                {!available && <Tag color={'error'}>Fully Booked</Tag>}
+                                {(lowest > 0 && lowest < 10 && available )&& <Tag color={'warning'}>{lowest} Rooms left</Tag>}
+                            </div>
                             <div onClick={() => setIsOpen(false)}><CloseOutlined className={'text-xl'}/></div>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-5 gap-8 max-md:mt-5">
@@ -107,13 +110,13 @@ export default function ReservationDialog({isOpen = false, setIsOpen, room, stay
                                 setIsOpen(false)
                             }}>Back</Button>
 
-                            <Select value={numRooms}
+                            <Select disabled={!available} value={numRooms}
                                     onChange={(e) => setNumRooms(parseInt(e.target.value))}
                                     className={'appearance-none rounded-lg border border-primary text-sm py-2 px-4 text-start bg-transparent'}>
                                 {Array.from({length: 11}, (_, i) => <option value={i}
                                                                             key={i}>{i} {(i === 1) ? 'Room' : 'Rooms'}</option>)}
                             </Select>
-                            <Button type={'primary'} size={'large'} onClick={handleUpdate}>Select</Button>
+                            <Button disabled={!available} type={'primary'} size={'large'} onClick={handleUpdate}>Select</Button>
                         </div>
                         <div
                             className="md:hidden fixed end-0 bottom-0 w-full bg-primary-50 z-10 flex justify-between border border-gray-200 py-3 px-7">
@@ -122,13 +125,13 @@ export default function ReservationDialog({isOpen = false, setIsOpen, room, stay
                                         onClick={() => {
                                             setIsOpen(false)
                                         }}>Back</Button>
-                                <Select value={numRooms}
+                                <Select disabled={!available} value={numRooms}
                                         onChange={(e) => setNumRooms(parseInt(e.target.value))}
                                         className={'appearance-none rounded-lg border border-primary text-sm py-2 px-4 text-start bg-transparent'}>
-                                    {Array.from({length: 11}, (_, i) => <option value={i}
+                                    {Array.from({length: lowest < 10? lowest + 1 : 11}, (_, i) => <option value={i}
                                                                                 key={i}>{i} {(i === 1) ? 'Room' : 'Rooms'}</option>)}
                                 </Select>
-                                <Button type={'primary'} size={'large'} onClick={handleUpdate}>Select</Button>
+                                <Button disabled={!available} type={'primary'} size={'large'} onClick={handleUpdate}>Select</Button>
                             </div>
                         </div>
                     </DialogBody>
