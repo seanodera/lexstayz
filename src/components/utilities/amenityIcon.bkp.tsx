@@ -32,24 +32,13 @@ import {
     BookOutlined,
     CameraOutlined,
     CrownOutlined,
-    UpOutlined,
-    MedicineBoxOutlined,
-    ScissorOutlined,
-    HeatMapOutlined,
-    SafetyOutlined,
-    ToolOutlined,
-    BankOutlined,
-    ContainerOutlined,
-    BorderOutlined,
-    AppstoreAddOutlined,
-    SolutionOutlined,
-    ReadOutlined,
-    BgColorsOutlined, BarsOutlined, FireOutlined
+    UpOutlined, MedicineBoxOutlined, ScissorOutlined, HeatMapOutlined, SafetyOutlined, ToolOutlined
 } from '@ant-design/icons';
 import {
     FaSwimmer,
     FaSpa,
     FaHotTub,
+
     FaGolfBall,
     FaBicycle,
     FaBusinessTime,
@@ -61,7 +50,7 @@ import {
     FaSmoking,
     FaBath
 } from 'react-icons/fa';
-import { GiTennisCourt } from "react-icons/gi";
+import {GiTennisCourt} from "react-icons/gi";
 
 type IconComponent = React.ComponentType;
 
@@ -132,122 +121,17 @@ const amenityIconMap: Record<string, IconComponent> = {
     'Smoking/Non-Smoking Rooms': FaSmoking,
     'Fireplace in Lobby': FireTwoTone,
     'BBQ Facilities': FaBath,
-
-    // Home Facilities
-    'Living Room': HomeOutlined,
-    'Sofa': RestOutlined,
-    'Coffee Table': CoffeeOutlined,
-    'TV with Streaming Services': DesktopOutlined,
-    'Bookshelf': BookOutlined,
-    'Rug': BgColorsOutlined,
-    'Fireplace': FireOutlined,
-    'Curtains': BgColorsOutlined,
-    'Wall Art': BgColorsOutlined,
-
-    'Kitchen': ShopOutlined,
-    'Refrigerator': ShopOutlined,
-    'Oven': FireOutlined,
-    'Microwave': FireTwoTone,
-    'Dishwasher': BarsOutlined,
-    'Kitchen Island': AppstoreOutlined,
-    'Pantry': ContainerOutlined,
-    'Sink': ShopOutlined,
-    'Cabinets': AppstoreOutlined,
-    'Cookware': ShopOutlined,
-    'Tableware': ShopOutlined,
-    'Coffee Maker': CoffeeOutlined,
-    'Toaster': ShopOutlined,
-
-    'Bedroom': RestOutlined,
-    'Bed': RestOutlined,
-    'Wardrobe': AppstoreOutlined,
-    'Nightstand': ContainerOutlined,
-    'Dresser': AppstoreAddOutlined,
-    'Desk': SolutionOutlined,
-    'Chair': BankOutlined,
-    'Lamp': ReadOutlined,
-    'Mirror': BorderOutlined,
-    'Linens': ContainerOutlined,
-    'Extra Pillows and Blankets': ContainerOutlined,
-
-    'Bathroom': RestOutlined,
-    'Shower': FaBath,
-    'Bathtub': FaBath,
-    'Toilet': RestOutlined,
-
-    'Towel Rack': AppstoreOutlined,
-    'Storage Cabinet': ContainerOutlined,
-    'Vanity': SmileOutlined,
-
-    'Towels': SmileOutlined,
-
-    'Dining Room': ShopOutlined,
-    'Dining Table': AppstoreOutlined,
-    'Chairs': BankOutlined,
-    'Buffet': AppleOutlined,
-    'Hutch': ContainerOutlined,
-    'Chandelier': CrownOutlined,
-
-    'Wall Decor': BgColorsOutlined,
-
-    'Home Office': SolutionOutlined,
-
-    'Office Chair': BankOutlined,
-    'Bookshelves': BookOutlined,
-    'Computer': DesktopOutlined,
-    'Printer': FileDoneOutlined,
-    'Filing Cabinet': ContainerOutlined,
-    'Desk Lamp': ReadOutlined,
-    'Whiteboard': BorderOutlined,
-    'High-Speed Internet': WifiOutlined,
-
-    'Garage': CarOutlined,
-    'Parking Space': CarOutlined,
-    'Storage Shelves': ContainerOutlined,
-    'Workbench': ToolOutlined,
-    'Tool Rack': ToolOutlined,
-    'Bicycle Rack': FaBicycle,
-    'Lawn Equipment Storage': FaBicycle,
-    'Sports Equipment Storage': FaBicycle,
-    'Garage Door Opener': UpOutlined,
-
-    'Backyard': EnvironmentOutlined,
-    'Patio': HomeOutlined,
-    'Deck': HomeOutlined,
-    'Garden': EnvironmentOutlined,
-    'Swimming Pool': FaSwimmer,
-    'Barbecue Grill': FaBath,
-    'Outdoor Furniture': HomeOutlined,
-    'Playground': FaChild,
-    'Fence': BorderOutlined,
-    'Hot Tub': FaHotTub,
-    'Fire Pit': FireTwoTone,
-
-    'Laundry Room': RestOutlined,
-    'Washing Machine': RestOutlined,
-    'Dryer': RestOutlined,
-    'Laundry Sink': RestOutlined,
-    'Ironing Board': ToolOutlined,
-    'Drying Rack': ContainerOutlined,
-    'Storage Cabinets': ContainerOutlined,
-    'Laundry Detergent': MedicineBoxOutlined,
-    'Iron': ToolOutlined,
-
-    'General': HomeOutlined,
-    'Air Conditioning': HeatMapOutlined,
-    'Heating': HeatMapOutlined,
-    'Wi-Fi': WifiOutlined,
-    'Smoke Detectors': SafetyOutlined,
-    'Carbon Monoxide Detectors': SafetyOutlined,
-    'First Aid Kit': MedicineBoxOutlined,
-    'Fire Extinguisher': FireTwoTone,
-    'Parking': CarOutlined,
-    'Wheelchair Accessible': CheckCircleOutlined
 };
 
 const DefaultIcon = SmileOutlined;
+
 
 // Step 2: Create a function to get the icon for a given amenity
 export function getAmenityIcon(amenity: string): IconComponent {
     return amenityIconMap[amenity] || DefaultIcon;
 }
+
+
+
+
+

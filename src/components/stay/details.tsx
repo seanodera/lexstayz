@@ -12,10 +12,10 @@ export default function Details({stay}: { stay: any }) {
                 <MdPersonOutline/> {stay.maxGuests} Guests
         </span>
                 <span className="flex items-center gap-2 font-light px-3 md:border-e border-gray-400">
-                    <IoBedOutline/> {stay.bed} Beds
+                    <IoBedOutline/> {stay.beds} Beds
                 </span>
                 <span className="flex items-center gap-2 font-light px-3">
-                    <MdOutlineBathtub/> {stay.bath} Baths
+                    <MdOutlineBathtub/> {stay.bathrooms} Baths
                 </span>
             </div>}
         </div>
