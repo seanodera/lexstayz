@@ -64,7 +64,7 @@ export default function Stay() {
                         <div className="max-lg:hidden lg:ps-12 col-span-1 md:col-span-2 lg:col-span-1">
                             <FeaturedRoom stay={stay}/>
                             <CartSummary stay={stay}/>
-                        </div> : <div className="max-lg:hidden lg:ps-12 col-span-1 md:col-span-2 lg:col-span-1">
+                        </div> : <div className="max-lg:hidden lg:ps-12 col-span-1 md:col-span-2 lg:col-span-1 ">
                             <Card className={'rounded-xl'}>
                                 <Calendar
                                     fullscreen={false}
@@ -76,13 +76,13 @@ export default function Stay() {
                                         const isCheckOut = date.isSame(checkOutDate);
                                         const inRange = date.isBetween(checkInDate, checkOutDate);
 
-                                        let className = 'ant-picker-cell-inner';
+                                        let className = 'ant-picker-cell-inner  hover:text-primary';
                                         if (isCheckIn || isCheckOut || inRange) {
-                                            className += ' ant-picker-cell-selected bg-primary text-white';
+                                            className += ' ant-picker-cell-selected bg-primary text-white hover:text-white';
                                         }
 
                                         return (
-                                            <div className={className}>
+                                            <div className={className + ''}>
                                                 {date.date()}
                                             </div>
                                         );
