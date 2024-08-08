@@ -76,7 +76,7 @@ export const startChatAsync = createAsyncThunk('messaging/startChat',
             const docRef = doc(collection(firestore, 'chats'));
             const now = new Date().toISOString();
             const {authentication,messaging} = state;
-            const existingChat = messaging.userChats.find((value) => value.host.id === hostId)
+            const existingChat = messaging.userChats.find((value) => value.hostId === hostId)
             if (existingChat){
                 return undefined;
             }

@@ -49,6 +49,7 @@ export default function Stay() {
     } else {
         const checkInDate = dayjs(booking.checkInDate);
         const checkOutDate = dayjs(booking.checkOutDate);
+        console.log(stay)
         return (
             <div className="lg:px-24 px-7 py-24 bg-white text-dark">
                 <Banner stay={stay}/>
@@ -72,15 +73,17 @@ export default function Stay() {
                                         return date.isBefore(dayjs());
                                     }}
                                     fullCellRender={(date) => {
-                                        const isCheckIn = date.isSame(checkInDate);
-                                        const isCheckOut = date.isSame(checkOutDate);
+                                        const isCheckIn = date.isSame(checkInDate, 'date');
+                                        const isCheckOut = date.isSame(checkOutDate, 'date');
                                         const inRange = date.isBetween(checkInDate, checkOutDate);
 
                                         let className = 'ant-picker-cell-inner  hover:text-primary';
                                         if (isCheckIn || isCheckOut || inRange) {
                                             className += ' ant-picker-cell-selected bg-primary text-white hover:text-white';
                                         }
-
+                                        if (date.toDate().getDate() === 17){
+                                            console.log(isCheckOut, date, checkOutDate);
+                                        }
                                         return (
                                             <div className={className + ''}>
                                                 {date.date()}

@@ -5,7 +5,7 @@ export default function Details({stay}: { stay: any }) {
     return (
         <div>
             <h3 className="font-semibold text-xl">
-                {stay.type} in {stay.location.city}, {stay.location.country}
+                {stay.type === 'Home'? stay.homeType : stay.type} in {stay.location.city}, {stay.location.country}
             </h3>
             {stay.type !== 'Hotel' && <div className="flex items-center my-4">
                 <span className="flex items-center gap-2 font-light pe-3 md:border-e border-gray-400">
