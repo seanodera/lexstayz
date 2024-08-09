@@ -131,13 +131,7 @@ export function RoomComponentPortrait({room, stay, className = '', available = t
         }
 
     }, [globalCart])
-    useEffect(() => {
-        if (!available){
-            setNumRooms(0);
-        } else if (lowest > numRooms){
-            setNumRooms(lowest)
-        }
-    }, [lowest, available]);
+
 
     function handleCart() {
         // Clone the global cart array to avoid mutating the original array
