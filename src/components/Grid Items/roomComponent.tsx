@@ -33,42 +33,42 @@ export default function RoomComponent({room, stay, className = '', available = t
         }
     }, [lowest, available]);
 
+    function handleCart() {
+        // Clone the global cart array to avoid mutating the original array
+        let newCart = [...globalCart];
 
-    useEffect(() => {
-        function handleCart() {
-            // Clone the global cart array to avoid mutating the original array
-            let newCart = [...globalCart];
-
-            // Check if the number of rooms is greater than zero
-            if (numRooms > 0) {
-                // Check if the room is already in the cart by its index
-                if (roomIndex !== -1) {
-                    // Update the existing room entry in the cart
-                    newCart[roomIndex] = {
-                        name: room.name,
-                        price: room.price,
-                        numRooms: numRooms,
-                        roomId: room.id,
-                        stayId: stay.id
-                    };
-                } else {
-                    // Add a new room entry to the cart
-                    newCart.push({
-                        name: room.name,
-                        price: room.price,
-                        numRooms: numRooms,
-                        roomId: room.id,
-                        stayId: stay.id
-                    });
-                }
-            } else if (numRooms === 0 && roomIndex !== -1) {
-                // Remove the room from the cart if the number of rooms is zero
-                newCart.splice(roomIndex, 1);
+        // Check if the number of rooms is greater than zero
+        if (numRooms > 0) {
+            // Check if the room is already in the cart by its index
+            if (roomIndex !== -1) {
+                // Update the existing room entry in the cart
+                newCart[roomIndex] = {
+                    name: room.name,
+                    price: room.price,
+                    numRooms: numRooms,
+                    roomId: room.id,
+                    stayId: stay.id
+                };
+            } else {
+                // Add a new room entry to the cart
+                newCart.push({
+                    name: room.name,
+                    price: room.price,
+                    numRooms: numRooms,
+                    roomId: room.id,
+                    stayId: stay.id
+                });
             }
-
-            // Dispatch the updated cart
-            dispatch(updateCart(newCart));
+        } else if (numRooms === 0 && roomIndex !== -1) {
+            // Remove the room from the cart if the number of rooms is zero
+            newCart.splice(roomIndex, 1);
         }
+
+        // Dispatch the updated cart
+        dispatch(updateCart(newCart));
+    }
+    useEffect(() => {
+
         handleCart()
     }, [numRooms])
 
