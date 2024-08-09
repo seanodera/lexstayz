@@ -91,8 +91,8 @@ export default function SearchComponent(){
                         </PopoverPanel>
 
                 </Popover>
-                <Button className={'max-lg:hidden rounded-r-lg'} type={'primary'} size={'large'} icon={<SearchOutlined/>}></Button>
-                <Button className={'lg:hidden block rounded-lg'} type={'primary'} size={'large'}>Search</Button>
+                <Button href={'/search'} className={'max-lg:hidden rounded-r-lg'} type={'primary'} size={'large'} icon={<SearchOutlined/>}></Button>
+                <Button href={'/search'} className={'lg:hidden block rounded-lg'} type={'primary'} size={'large'}>Search</Button>
             </Space.Compact>
         </div>
     );

@@ -36,8 +36,6 @@ export default function HotelItem({hotel}: {
             })
         }
     }
-    const user = useAppSelector(selectCurrentUser)
-    console.log(user, wishlist)
     return <div
         className={'text-current rounded-xl transition-all duration-300 ease-in-out'}>
 
