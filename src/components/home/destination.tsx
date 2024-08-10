@@ -10,6 +10,7 @@ import {IoMdGlobe} from "react-icons/io";
 import {useAppSelector} from "@/hooks/hooks";
 import {selectAllStays} from "@/slices/staysSlice";
 import {Tabs} from "antd";
+import HomeItem from "@/components/Grid Items/HomeItem";
 
 
 export default function Destination() {
@@ -48,7 +49,9 @@ export default function Destination() {
                 label: value.name,
                 children: <div
                     className={'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 text-black'}>
-                    {data.map((hotel: any, index: number) => <HotelItem key={index} hotel={hotel}/>)}
+                    {data.map(((stay: any, index) => (stay.type === 'Hotel') ?
+                        <HotelItem
+                            key={index} hotel={stay}/> : <HomeItem stay={stay} key={index}/>))}
                 </div>
             }
         })}/>
