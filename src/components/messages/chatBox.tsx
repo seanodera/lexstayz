@@ -1,12 +1,12 @@
 'use client';
-import {useState, useEffect, useRef} from 'react';
+import {useState, useEffect} from 'react';
 import {Avatar, Button, Empty, Input} from 'antd';
 import {ArrowUpOutlined, ExclamationCircleOutlined, PaperClipOutlined} from '@ant-design/icons';
 import {timeFromDate} from "@/lib/utils";
 import dayjs from "dayjs";
 import BookingBox from "@/components/messages/bookingBox";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
-import {fetchMessages, selectFocusChat, sendMessageAsync} from "@/slices/messagingSlice";
+import {selectFocusChat, sendMessageAsync} from "@/slices/messagingSlice";
 import {listenToMessages} from "@/lib/firebaseListener";
 
 const {TextArea} = Input;
@@ -100,7 +100,7 @@ export default function ChatBox() {
                     />
                 </div>
             </div>
-            <div className={'h-full w-full max-w-sm'}>
+            <div className={'h-full w-full max-w-sm max-md:hidden'}>
                 <BookingBox/>
             </div>
         </div>

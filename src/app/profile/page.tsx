@@ -8,7 +8,7 @@ import PreferencesTab from "@/components/profile/preferencesTab";
 
 export default function Page(){
 
-    return<div className={'py-24 lg:px-24 px-7'}>
+    return<div className={'py-4 lg:px-24 px-7'}>
         <AccountInfo/>
         <Tabs  defaultValue={''} items={[
             {

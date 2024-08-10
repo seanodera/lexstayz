@@ -76,7 +76,7 @@ export default function Page() {
         return <div className={'h-screen w-screen'}><LoadingScreen/></div>
     } else {
         return (
-            <div className="bg-white py-24 lg:px-16 px-7 text-dark">
+            <div className="bg-white py-4 lg:px-16 px-7 text-dark">
                 {contextHolder}
                 <div className="grid grid-cols-1 lg:grid-cols-4 max-lg:gap-8 gap-4">
                     <div className="col-span-1 lg:col-span-3 flex flex-col gap-8">

@@ -3,25 +3,24 @@ import {getUserDetails} from "@/data/usersData";
 import {signInWithEmailAndPassword} from "firebase/auth";
 import {auth, firestore} from "@/lib/firebase";
 import {redirect} from "next/navigation";
-import {doc, runTransaction} from "firebase/firestore";
+import {doc, runTransaction, updateDoc} from "firebase/firestore";
 import {RootState} from "@/data/types";
+import {getCurrentUser} from "@/data/bookingData";
 
-export const getUserDetailsAsync = createAsyncThunk('authentication/user',
+export const getUserDetailsAsync:any = createAsyncThunk('authentication/user',
     async (id: string) => {
         try {
             const userDetails = await getUserDetails(id)
-            if (userDetails) {
-                return userDetails;
-            } else {
-                redirect('/user-information')
-            }
+
+            return userDetails;
+
         } catch (error) {
             console.error("Failed to fetch user details", error);
             throw error;
         }
     });
 
-export const signInUserAsync:any = createAsyncThunk('authentication/signIn',
+export const signInUserAsync: any = createAsyncThunk('authentication/signIn',
     async ({email, password}: { email: string, password: string }, {dispatch, rejectWithValue}) => {
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -36,6 +35,21 @@ export const signInUserAsync:any = createAsyncThunk('authentication/signIn',
         }
     }
 );
+
+export const updateUserAsync: any = createAsyncThunk('authentication/updateUser',
+    async ({details}:{details: any}, {rejectWithValue}) => {
+        try {
+            const user = getCurrentUser()
+            await updateDoc(doc(firestore, 'hosts', user.uid), details);
+            return details;
+        } catch (error){
+            if (error instanceof Error){
+                return rejectWithValue(error.message);
+            } else {
+                return rejectWithValue('An unknown error occurred');
+            }
+        }
+    })
 
 export const updateWishList = createAsyncThunk('authentication/updateWishlist',
     async ({stayId}: { stayId: string }, {getState, rejectWithValue}) => {
@@ -107,7 +121,8 @@ interface AuthenticationState {
         avatar?: any;
         uid: string;
         dob?:string;
-        gender?:string
+        gender?:string;
+        address?: any;
     },
     wishlist: string[],
     isLoading: boolean,
@@ -144,9 +159,6 @@ const AuthenticationSlice = createSlice({
         builder
             .addCase(getUserDetailsAsync.fulfilled, (state, action) => {
                 state.user = action.payload as any;
-
-                state.wishlist = action.payload.wishlist
-
                 state.isLoading = false;
             })
             .addCase(getUserDetailsAsync.rejected, (state, action) => {
@@ -165,11 +177,26 @@ const AuthenticationSlice = createSlice({
                 state.isLoading = false;
                 state.hasError = false;
                 state.errorMessage = '';
+
             })
             .addCase(signInUserAsync.rejected, (state, action) => {
                 state.hasError = true;
                 state.errorMessage = action.payload as string;
                 state.isLoading = false;
+            })
+            .addCase(updateUserAsync.fulfilled, (state, action) => {
+                state.user = {...state.user, ...action.payload};
+                state.isLoading = false;
+                state.hasError = false;
+                state.errorMessage = '';
+            })
+            .addCase(updateUserAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.hasError = true;
+                state.errorMessage = action.payload || 'Failed to update user';
+            })
+            .addCase(updateUserAsync.pending, (state) => {
+                state.isLoading = true;
             })
             .addCase(updateWishList.fulfilled, (state, action) => {
                 state.wishlist.push(action.payload);

@@ -1,6 +1,6 @@
 'use client'
 
-import React, {useEffect, useState} from "react";
+import React, {useEffect} from "react";
 import {useParams} from "next/navigation";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 
@@ -12,7 +12,7 @@ import MobileCartSummary from "@/components/stay/MobileCartSummary";
 import CartSummary from "@/components/stay/cartSummary";
 import FeaturedRoom from "@/components/stay/featuredRoom";
 import AvailableRooms from "@/components/stay/availableRooms";
-import {selectCurrentId, selectCurrentStay, setCurrentStayFromId} from "@/slices/staysSlice";
+import {selectCurrentStay, setCurrentStayFromId} from "@/slices/staysSlice";
 import {selectCart, updateCart} from "@/slices/bookingSlice";
 import HouseRules from "@/components/stay/houseRules";
 import {Calendar, Card} from "antd";
@@ -27,7 +27,7 @@ dayjs.extend(isBetween);
 export default function Stay() {
     const params = useParams()['id'];
     const dispatch = useAppDispatch();
-    const currentId = useAppSelector(selectCurrentId);
+
     const booking = useAppSelector(selectConfirmBooking)
     const cart = useAppSelector(selectCart)
 
@@ -40,7 +40,7 @@ export default function Stay() {
             }
         })
         dispatch(updateCart(newCart));
-    }, [dispatch, params]);
+    }, [cart, dispatch, params]);
 
     const stay = useAppSelector(selectCurrentStay);
     console.log(stay)
@@ -52,7 +52,7 @@ export default function Stay() {
         const checkOutDate = dayjs(booking.checkOutDate);
         console.log(stay)
         return (
-            <div className="lg:px-24 px-7 py-24 bg-white text-dark">
+            <div className="lg:px-24 px-7 py-4 bg-white text-dark">
                 <Banner stay={stay}/>
                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 pt-8">
                     <div className="col-span-2">

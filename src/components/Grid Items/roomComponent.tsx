@@ -28,7 +28,7 @@ export default function RoomComponent({room, stay, className = '', available = t
     useEffect(() => {
         if (!available){
             setNumRooms(0);
-        } else if (lowest > numRooms){
+        } else if (lowest < numRooms){
             setNumRooms(lowest)
         }
     }, [lowest, available]);
@@ -201,7 +201,7 @@ export function RoomComponentPortrait({room, stay, className = '', available = t
             <div className={'rounded-xl'}><Select disabled={!available} value={numRooms}
                                                   onChange={(e) => setNumRooms(parseInt(e.target.value))}
                                                   className={'appearance-none rounded-xl border border-primary py-3 px-3 text-start bg-transparent'}>
-                {Array.from({length: 11}, (_, i) => <option value={i}
+                {Array.from({length:  lowest < 10? lowest + 1 : 11}, (_, i) => <option value={i}
                                                             key={i}>{i} {(i === 1) ? 'Room' : 'Rooms'}</option>)}
             </Select></div>
             <button disabled={!available} className={'rounded-xl text-center py-3 bg-primary text-white font-medium w-full'}
