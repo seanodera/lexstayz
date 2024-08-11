@@ -56,7 +56,7 @@ export default function SearchFilter({stays, onFilter}: { stays: any[ ], onFilte
         setPriceRange([low, high]);
         setAvailableFilters(generateFilters());
 
-    }, [onFilter, stays]);
+    }, [stays]);
 
     useEffect(() => {
         onFilter(displayStays);
@@ -124,7 +124,7 @@ export default function SearchFilter({stays, onFilter}: { stays: any[ ], onFilte
         });
 
         setDisplayStays(filteredStays);
-
+        onFilter(filteredStays);
     }
 
     return <div >

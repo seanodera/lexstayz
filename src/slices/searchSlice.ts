@@ -12,7 +12,7 @@ export const searchAsync = createAsyncThunk(
         try {
             const data = await index.search(value);
             const processed = data.hits.flatMap((hit: any) => {
-                const fullLocation = `${hit.location.street}, ${hit.location.city}, ${hit.location.country}`;
+                const fullLocation = `${hit.location.district}, ${hit.location.city}, ${hit.location.country}`;
                 const cityCountry = `${hit.location.city}, ${hit.location.country}`;
                 return [
                     {

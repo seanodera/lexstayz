@@ -28,11 +28,14 @@ import {
     selectPreFilteredList,
     updatePreFilter
 } from '@/slices/searchSlice';
+import {selectAllStays} from "@/slices/staysSlice";
+import {all} from "axios";
 
 const {RangePicker} = DatePicker;
 
 export default function SearchComponent() {
     const dispatch = useAppDispatch();
+    const allStays = useAppSelector(selectAllStays)
     const stays = useAppSelector(selectSearchResults);
     const preFilter = useAppSelector(selectPreFilteredList);
     const processedOptions = useAppSelector(selectProcessedList);
@@ -52,7 +55,7 @@ export default function SearchComponent() {
     const isMobile = useMediaQuery({maxWidth: 640});
     const [options, setOptions] = useState<any[]>(processedOptions);
     const [count, setCount] = useState(0);
-
+    const [searchTerm, setSearchTerm] = useState("");
     const handleChange = (value: any) => {
         setDates(value);
     };
@@ -92,9 +95,15 @@ export default function SearchComponent() {
                 return values.includes(item.toLowerCase());
             });
         })
-        setDisplayStays(filteredStays);
-        console.log('Filtered', filteredStays, 'value: ', value);
-        dispatch(updatePreFilter(filteredStays))
+
+
+        if (value === ''){
+            dispatch(updatePreFilter(allStays))
+        } else {
+            setDisplayStays(filteredStays);
+            console.log('Filtered', filteredStays, 'value: ', value);
+            dispatch(updatePreFilter(filteredStays))
+        }
     }
 
     useEffect(() => {
@@ -103,6 +112,10 @@ export default function SearchComponent() {
             dispatch(updatePreFilter(stays))
         }
     }, [stays]);
+
+    useEffect(() => {
+        console.log('selectedLocation: ',selectedLocation);
+    }, [selectedLocation]);
 
     useEffect(() => {
         return () => {
@@ -120,9 +133,13 @@ export default function SearchComponent() {
                         <Combobox value={selectedLocation} onChange={(value) => handleSelect(value || '')}>
                             <ComboboxInput className={'bg-gray-200 rounded-lg border-0'} placeholder={'Anywhere'}
                                            displayValue={(item: any) => item}
-                                           onChange={(e) => debouncedHandleSearch(e.target.value)}/>
+                                           onChange={(e) => {
+                                               debouncedHandleSearch(e.target.value)
+                                               setSearchTerm(e.target.value)
+                                           }}/>
                             <ComboboxOptions anchor="bottom"
                                              className="border-0 shadow-md empty:invisible bg-white rounded-lg py-2 text-nowrap gap-2">
+                                <ComboboxOption className={'hover:bg-dark px-8'} value={searchTerm}>{searchTerm}</ComboboxOption>
                                 {processedOptions.map((option, index) => (
                                     <ComboboxOption
                                         className={'hover:bg-dark hover:bg-opacity-20 px-8'}
