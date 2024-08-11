@@ -46,6 +46,8 @@ export default function SearchComponent() {
     const isMobile = useMediaQuery({maxWidth: 640});
     const [options, setOptions] = useState<any[]>([]);
 
+
+
     const handleChange = (value: any) => {
         setDates(value);
     };
@@ -124,7 +126,7 @@ export default function SearchComponent() {
                     <div className={'flex gap-2'}>
                         <Combobox value={selectedLocation} onChange={(value) => handleSelect(value || '')}>
                             <ComboboxInput className={'bg-gray-200 rounded-lg border-0'} placeholder={'Anywhere'}
-                                           displayValue={(item: any) => item.label}
+                                           displayValue={(item: any) => item}
                                            onChange={(e) => debouncedHandleSearch(e.target.value)}/>
                             <ComboboxOptions anchor="bottom"
                                              className="border empty:invisible bg-white rounded-lg px-8 py-2 text-nowrap">

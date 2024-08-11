@@ -1,3 +1,4 @@
+'use client'
 import {useEffect, useState} from "react";
 import {useAppSelector} from "@/hooks/hooks";
 import {selectAllStays} from "@/slices/staysSlice";
