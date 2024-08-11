@@ -58,7 +58,6 @@ export default function SearchComponent(){
     };
 
     useEffect(() => {
-        setDisplayStays(stays)
         if (params.has('loc')) {
             if (params.get('loc')) {
                 setSearchTerms(params.get('loc') || '');
@@ -100,10 +99,9 @@ export default function SearchComponent(){
         value.split(',').forEach((item, index) => {
             filteredStays.filter(stay => {
                 let locationString = JSON.stringify(stay.location);
-                const values = Object.values(stay.location).map((value: any) => {});
+                const values = Object.values(stay.location).map((value:any) => String(value).toLowerCase());
 
-
-                return locationString.includes(item.trim())
+                return values.includes(item)
             })
         })
         console.log(filteredStays);

@@ -23,11 +23,12 @@ export default function SearchFilter({stays, onFilter}: { stays: any[ ], onFilte
         amenities: string[],
         locations: string[]
     }>({amenities: [], locations: []});
-
+    useEffect(() => {
+        onFilter(stays)
+    },);
 
     useEffect(() => {
         setDisplayStays(stays);
-        onFilter(stays)
         let high = 0;
         let low = Infinity;
         stays.forEach(stay => {
@@ -53,8 +54,8 @@ export default function SearchFilter({stays, onFilter}: { stays: any[ ], onFilte
         setLowestPrice(low);
         setPriceRange([low, high]);
         setAvailableFilters(generateFilters());
-        applyFilters();
-    }, [stays]);
+
+    }, [onFilter, stays]);
 
     useEffect(() => {
         onFilter(displayStays);
