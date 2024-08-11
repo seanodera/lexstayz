@@ -40,7 +40,7 @@ export default function Stay() {
             }
         })
         dispatch(updateCart(newCart));
-    }, [cart, dispatch, params]);
+    }, [dispatch, params]);
 
     const stay = useAppSelector(selectCurrentStay);
     console.log(stay)
