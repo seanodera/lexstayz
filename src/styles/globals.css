@@ -78,10 +78,13 @@ body {
 
 .ant-picker-panels {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
 }
 
 @media (max-width: 768px) {
+  .ant-picker-panels {
+    flex-direction: column;
+  }
   .ant-picker-range .ant-picker-panels {
     flex-direction: column;
     width: 100%;

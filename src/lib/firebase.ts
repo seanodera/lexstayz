@@ -7,6 +7,7 @@ import {
     persistentMultipleTabManager
 } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
+import algoliasearch from "algoliasearch/lite";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -25,6 +26,6 @@ const firestore = initializeFirestore(app, {localCache:
         persistentLocalCache(/*settings*/{tabManager: persistentMultipleTabManager()})
 });
 const storage = getStorage(app);
+const searchClient = algoliasearch("S192CBDSDM", "07dbe0e186e0f74a4ce9915a7fb74233");
 
-
-export { app, auth, firestore, storage };
+export { app, auth, firestore, storage, searchClient };

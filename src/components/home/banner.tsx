@@ -12,11 +12,11 @@ export default function Banner() {
     const stays = useAppSelector(selectAllStays);
     return (
         <section className={'relative'}>
-            <Carousel arrows autoplay>
+            <Carousel arrows autoplay >
                 {stays.slice(0, 3).map((stay: Stay, index: number) => (
                     <div key={index}>
                         <div
-                            className={'bg-center bg-cover w-screen aspect-[10/15] md:aspect-[10/8] lg:aspect-[18/7]'}
+                            className={'bg-center bg-cover w-screen aspect-[10/15] md:aspect-[10/8] lg:aspect-[18/7] '}
                             style={{
                                 backgroundImage: `url("${stay.poster}")`,
                             }}>

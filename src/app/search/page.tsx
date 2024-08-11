@@ -1,18 +1,57 @@
 'use client'
-import {Button, Drawer} from "antd";
-import {useState} from "react";
-import {useAppSelector} from "@/hooks/hooks";
-import {selectAllStays} from "@/slices/staysSlice";
+import { Affix, Button, DatePicker, Drawer } from "antd";
+import { useEffect, useMemo, useState } from "react";
+import { useAppSelector } from "@/hooks/hooks";
+import { selectAllStays } from "@/slices/staysSlice";
 import HotelItem from "@/components/Grid Items/HotelItem";
 import HomeItem from "@/components/Grid Items/HomeItem";
 import SearchFilter from "@/components/search/searchFilter";
-import {FilterOutlined} from "@ant-design/icons";
+import { FilterOutlined, MinusOutlined, PlusOutlined } from "@ant-design/icons";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import {
+    Combobox,
+    ComboboxInput,
+    ComboboxOption,
+    ComboboxOptions,
+    Popover,
+    PopoverButton,
+    PopoverPanel
+} from "@headlessui/react";
+import { useMediaQuery } from "react-responsive";
+import dayjs from "dayjs";
+import { MdPersonOutline } from "react-icons/md";
+import { BsRecordFill } from "react-icons/bs";
+import { selectConfirmBooking } from "@/slices/confirmBookingSlice";
+import debounce from "lodash/debounce";
+import { searchClient } from "@/lib/firebase";
 
+const { RangePicker } = DatePicker;
 
 export default function SearchPage() {
-    const [displayStays, setDisplayStays] = useState<any[]>([]);
     const stays = useAppSelector(selectAllStays);
+    const [preFilter, setPreFilter] = useState<any[]>(stays)
+    const [displayStays, setDisplayStays] = useState<any[]>(stays); // Initialize with all stays
     const [open, setOpen] = useState(false);
+    const params = useSearchParams();
+
+    const booking = useAppSelector(selectConfirmBooking);
+    const [searchTerms, setSearchTerms] = useState('');
+    const [selectedLocation, setSelectedLocation] = useState('');
+    const [startDate, setStartDate] = useState(booking.checkInDate);
+    const [endDate, setEndDate] = useState(booking.checkOutDate);
+    const [numRooms, setNumRooms] = useState(1);
+    const [numGuests, setNumGuests] = useState(2);
+    const indexName = 'stays';
+    const index = searchClient.initIndex(indexName);
+    const router = useRouter();
+    const [dates, setDates] = useState<any[]>([]);
+    const [hoveredDate, setHoveredDate] = useState(null);
+    const isMobile = useMediaQuery({ maxWidth: 640 });
+    const [options, setOptions] = useState<any[]>([]);
+
+    const handleChange = (value: any) => {
+        setDates(value);
+    };
 
     const showDrawer = () => {
         setOpen(true);
@@ -22,257 +61,102 @@ export default function SearchPage() {
         setOpen(false);
     };
 
+    useEffect(() => {
+        if (params.has('loc')) {
+            if (params.get('loc')) {
+                setSearchTerms(params.get('loc') || '');
+            }
+        }
+    }, [params]);
+
+    const debouncedHandleSearch = useMemo(() => debounce(async (value: string) => {
+        if (!value) return;
+        setOptions([]);
+        const data = await index.search(value);
+        const processed = data.hits.flatMap((hit: any) => {
+            const fullLocation = `${hit.location.street}, ${hit.location.city}, ${hit.location.country}`;
+            const cityCountry = `${hit.location.city}, ${hit.location.country}`;
+            return [
+                {
+                    value: fullLocation,
+                    label: fullLocation,
+                },
+                {
+                    value: cityCountry,
+                    label: cityCountry,
+                }
+            ];
+        });
+        setOptions(processed);
+        setSearchTerms(value);
+
+        // Update displayStays with search results
+        // setDisplayStays(data.hits);
+        setPreFilter(data.hits)
+
+    }, 300), [index]);
+
+    function handleSelect(value: string) {
+        setSelectedLocation(value);
+        console.log('Selected Location:', value);
+    }
+
+    useEffect(() => {
+        return () => {
+            debouncedHandleSearch.cancel();
+        };
+    }, [debouncedHandleSearch]);
+
     return (
-        <div className={'py-4  px-7'}>
-            <div className={'grid grid-cols-5 gap-6'}>
-                <div className={'max-md:hidden'}>
-                    <SearchFilter stays={stays} onFilter={(filteredList) => setDisplayStays(filteredList)}/>
-                </div>
-                <div className={'col-span-5 md:col-span-4'}>
-                    <div className={'flex justify-between mb-2'}>
-                        <div className={'text-2xl font-bold mb-3'}>Stays</div>
-                        <div>
-                            <Button className={'md:hidden'} onClick={showDrawer} size={'large'} type={'primary'} ghost
-                                    icon={<FilterOutlined/>}>Filter</Button>
-                        </div>
+        <div className={'bg-white'}>
+            <Affix offsetTop={0} className={'z-30'}>
+                <div className={'flex justify-between gap-2 sticky-top z-50 bg-white py-3 px-7 border-solid border-gray-100 border-0 border-t border-b'}>
+                    <div></div>
+                    <div className={'flex gap-2'}>
+                        <Combobox value={selectedLocation} onChange={(value) => setSelectedLocation(value || '')}>
+                            <ComboboxInput className={'bg-gray-200 rounded-lg border-0'} placeholder={'Anywhere'}
+                                           displayValue={(item: any) => item.label} onChange={(e) => debouncedHandleSearch(e.target.value)} />
+                            <ComboboxOptions anchor="bottom" className="border empty:invisible bg-white rounded-lg px-8 py-2 text-nowrap">
+                                {options.map((option, index) => <ComboboxOption key={index} value={option.value}>{option.label}</ComboboxOption>)}
+                            </ComboboxOptions>
+                        </Combobox>
+                        <RangePicker
+                            onCalendarChange={handleChange}
+                            onMouseLeave={() => setHoveredDate(null)}
+                            panelRender={(panelNode) => (
+                                <div className={`flex ${isMobile ? "flex-col" : "flex-row"}`}>
+                                    {panelNode}
+                                </div>
+                            )}
+                            className="bg-gray-200 rounded-lg border-0"
+                            format="DD MMMM"
+                            placeholder={["Check-in", "Check-out"]}
+                            dropdownClassName="custom-popover"
+                        />
+                        <Popover className={'block'}>
+                            <PopoverButton
+                                className={'bg-gray-200 rounded-lg border-0 flex items-center w-max h-full gap-2'}>
+                                <Button icon={<MinusOutlined />} /> {numGuests} Guests <Button icon={<PlusOutlined />} />
+                            </PopoverButton>
+                            <PopoverPanel>
+
+                            </PopoverPanel>
+                        </Popover>
                     </div>
-                    <div
-                        className={'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8'}>{displayStays.map((stay: any, index) => (stay.type === 'Hotel') ?
-                        <HotelItem
-                            key={index} hotel={stay}/> : <HomeItem stay={stay} key={index}/>)}</div>
+                    <Button className={'bg-gray-200 text-gray-500'} onClick={showDrawer} size={'large'} type={'text'}
+                            ghost
+                            icon={<FilterOutlined />}>Filter</Button>
                 </div>
-            </div>
+            </Affix>
+            <div
+                className={'px-7 py-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8'}>{displayStays.map((stay: any, index) => (stay.type === 'Hotel') ?
+                <HotelItem
+                    key={index} hotel={stay} /> : <HomeItem stay={stay} key={index} />)}</div>
             <Drawer title="Filter Stays" onClose={onClose} open={open} classNames={{
                 body: 'p-0'
             }}>
-                <SearchFilter stays={stays} onFilter={(filteredList) => setDisplayStays(filteredList)}/>
+                <SearchFilter stays={preFilter} onFilter={(filteredList) => setDisplayStays(filteredList)} />
             </Drawer>
         </div>
     );
 }
-
-
-// const sample = [
-//     {
-//         "type": "Hotel",
-//         "parties": "Yes",
-//         "checkOutTime": "14:00",
-//         "fullyBookedDates": [
-//             "2024-08-12",
-//             "2024-08-13",
-//             "2024-08-14"
-//         ],
-//         "rooms": [
-//             {
-//                 "amenities": [
-//                     "Room Service",
-//                     "Closet/Wardrobe",
-//                     "In-Room Safe",
-//                     "Air Conditioning/Heating",
-//                     "Telephone",
-//                     "Work Desk",
-//                     "Alarm Clock/Radio",
-//                     "Toiletries",
-//                     "Wi-Fi/Internet Access"
-//                 ],
-//                 "available": 10,
-//                 "maxGuests": 4,
-//                 "poster": "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/0GLQDz5UH334ElOeVjLN%2FSEq9B8azK6zajd8zrxJl%2Fposter?alt=media&token=d0622b83-a828-4408-992e-51e691a60aa7",
-//                 "description": "dbghjnsmnbnd",
-//                 "id": "SEq9B8azK6zajd8zrxJl",
-//                 "images": [
-//                     "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/0GLQDz5UH334ElOeVjLN%2FSEq9B8azK6zajd8zrxJl%2Fimage-0?alt=media&token=4bfa806e-abd8-412b-84f2-90c4475166d4",
-//                     "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/0GLQDz5UH334ElOeVjLN%2FSEq9B8azK6zajd8zrxJl%2Fimage-1?alt=media&token=76797daf-7eae-4b66-809c-a0659f99a917",
-//                     "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/0GLQDz5UH334ElOeVjLN%2FSEq9B8azK6zajd8zrxJl%2Fimage-2?alt=media&token=a1ddd36b-d94d-4f1d-9979-81268aa5b417",
-//                     "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/0GLQDz5UH334ElOeVjLN%2FSEq9B8azK6zajd8zrxJl%2Fimage-3?alt=media&token=8f3abbfc-a7e6-4c3a-8359-be338be4101d"
-//                 ],
-//                 "fullDates": [
-//                     "2024-08-12",
-//                     "2024-08-13",
-//                     "2024-08-14"
-//                 ],
-//                 "price": 434,
-//                 "bookedDates": {
-//                     "2024-08-14": 10,
-//                     "2024-08-12": 10,
-//                     "2024-08-08": 4,
-//                     "2024-08-13": 10,
-//                     "2024-08-09": 4
-//                 },
-//                 "name": "ghfc",
-//                 "beds": [
-//                     {
-//                         "number": 2,
-//                         "type": "Double"
-//                     }
-//                 ]
-//             }
-//         ],
-//         "name": "The palace",
-//         "cancellation": {
-//             "cancellation": "Free",
-//             "rate": 20,
-//             "timeSpace": "Days",
-//             "preDate": true,
-//             "time": 0
-//         },
-//         "location": {
-//             "street2": "ddf",
-//             "zipCode": "ffxdd",
-//             "country": "Kenya",
-//             "district": "tgtf",
-//             "street": "hjncc",
-//             "city": "cccc"
-//         },
-//         "images": [
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/0GLQDz5UH334ElOeVjLN%2Fimage-0?alt=media&token=99fff333-8d45-49be-a12c-a5c0e6561958",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/0GLQDz5UH334ElOeVjLN%2Fimage-1?alt=media&token=b8b6cfc2-1057-467a-b70b-af390a3dff3f",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/0GLQDz5UH334ElOeVjLN%2Fimage-2?alt=media&token=addc57e3-9e85-4812-b91a-e3617dfbc505",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/0GLQDz5UH334ElOeVjLN%2Fimage-3?alt=media&token=28b2c2bf-3e94-4e92-9f19-44c0c1aa1fcd",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/0GLQDz5UH334ElOeVjLN%2Fimage-4?alt=media&token=297800e4-ec16-4832-a97e-e223c4cb2c3d",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/0GLQDz5UH334ElOeVjLN%2Fimage-5?alt=media&token=a3bc1bcb-a335-481f-9338-67147c5fdba1",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/0GLQDz5UH334ElOeVjLN%2Fimage-6?alt=media&token=00e68ba0-503d-4f02-802d-2b6e5ccff2df",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/0GLQDz5UH334ElOeVjLN%2Fimage-7?alt=media&token=38a51ce7-c6ad-42c6-9e2d-8eca5695a36e",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/0GLQDz5UH334ElOeVjLN%2Fimage-8?alt=media&token=58d0057c-fcbd-4047-b8b8-d125a455a3e4",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/0GLQDz5UH334ElOeVjLN%2Fimage-9?alt=media&token=7e822dd5-d8df-45e8-96d3-1ab70babcd83",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/0GLQDz5UH334ElOeVjLN%2Fimage-10?alt=media&token=ce51b19c-1f87-4402-8101-c999775ecf60",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/0GLQDz5UH334ElOeVjLN%2Fimage-11?alt=media&token=c34e2f3a-fb4d-4a6b-a03a-5fcd8b627695",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/0GLQDz5UH334ElOeVjLN%2Fimage-12?alt=media&token=4d1237f7-ff12-4ca4-80b9-1cff7955ae04",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/0GLQDz5UH334ElOeVjLN%2Fimage-13?alt=media&token=8faeb55b-6b27-4573-ae38-c70c24bd30c8",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/0GLQDz5UH334ElOeVjLN%2Fimage-14?alt=media&token=00fb022d-1a55-49d2-9e05-c7e5fa19d079",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/0GLQDz5UH334ElOeVjLN%2Fimage-15?alt=media&token=dcb84d50-e72a-4f6b-94d8-d27675334dd8",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/0GLQDz5UH334ElOeVjLN%2Fimage-16?alt=media&token=468b06c4-74d3-4ba7-9d3e-ac79e89180cf",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/0GLQDz5UH334ElOeVjLN%2Fimage-17?alt=media&token=e483d42c-e99c-42a0-8bca-b0eb2dbd85b7",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/0GLQDz5UH334ElOeVjLN%2Fimage-18?alt=media&token=dc86308a-7b2f-422e-800c-7e1128bfe656",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/0GLQDz5UH334ElOeVjLN%2Fimage-19?alt=media&token=4ad0fb0b-a848-4a6b-90f0-33cb2a52a6a6"
-//         ],
-//         "published": true,
-//         "description": "gbdhnjsmknbchjfdknsmjcbhfdnxmfbhjckndmxsz,bfcdnjxm ",
-//         "hostId": "PTqiZj6jxJcJwy4cwi5BHG8VQuw1",
-//         "poster": "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/0GLQDz5UH334ElOeVjLN%2Fposter?alt=media&token=8ca73292-3962-46dc-9d0a-06d53bfa3cf9",
-//         "pets": "No",
-//         "id": "0GLQDz5UH334ElOeVjLN",
-//         "publishedDate": {
-//             "seconds": 1721990944,
-//             "nanoseconds": 651000000
-//         },
-//         "checkInTime": "12:00",
-//         "smoking": "Designated Smoking Areas",
-//         "facilities": [
-//             "Mini-Bar",
-//             "Work Desk",
-//             "Hairdryer",
-//             "Breakfast Buffet",
-//             "Massage Services",
-//             "Yoga/Pilates Classes",
-//             "Bicycle Rentals",
-//             "Banquet Halls",
-//             "Audio/Visual Equipment Rental",
-//             "Fax/Photocopying Services",
-//             "Sauna/Steam Room",
-//             "Swimming Pool (Indoor/Outdoor)",
-//             "Accessible Parking",
-//             "Car Rental Desk",
-//             "Children's Play Area",
-//             "Pet-Friendly Services"
-//         ],
-//         "minAge": 18
-//     },
-//     {
-//         "type": "Home",
-//         "publishedDate": "Fri Aug 09 2024 20:09:40 GMT+0300 (Eastern European Summer Time)",
-//         "fullyBookedDates": [
-//             "2024-08-12",
-//             "2024-08-17",
-//             "2024-08-18"
-//         ],
-//         "currency": "GHS",
-//         "homeType": "House",
-//         "bedrooms": 2,
-//         "parties": "No",
-//         "price": 245,
-//         "images": [
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/o2l9TGFCZN9euEcryxVz%2Fimage-0?alt=media&token=9d9d0fd5-4c07-44e7-8669-e4873a755af6",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/o2l9TGFCZN9euEcryxVz%2Fimage-1?alt=media&token=308bc691-5fca-4704-babd-bb3382b1bfbc",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/o2l9TGFCZN9euEcryxVz%2Fimage-2?alt=media&token=2f718ae6-8b5c-46d7-869b-7c9f45248efb",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/o2l9TGFCZN9euEcryxVz%2Fimage-3?alt=media&token=c268485f-c4d4-4e56-9153-523e70966488",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/o2l9TGFCZN9euEcryxVz%2Fimage-4?alt=media&token=f9a3e2a5-f2b8-4219-af6c-2cec0703934b",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/o2l9TGFCZN9euEcryxVz%2Fimage-5?alt=media&token=332eaf88-5ea7-4c3f-89b2-b1bd3d5f25bf",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/o2l9TGFCZN9euEcryxVz%2Fimage-6?alt=media&token=56dc9b70-b2b0-43bf-aef0-4d7da9b6f1f5",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/o2l9TGFCZN9euEcryxVz%2Fimage-7?alt=media&token=a306630c-ad48-4869-8a43-f5ea3065bcc2",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/o2l9TGFCZN9euEcryxVz%2Fimage-8?alt=media&token=2dcd3ee1-7730-4487-be75-146b643ecb5f",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/o2l9TGFCZN9euEcryxVz%2Fimage-9?alt=media&token=eb4ad776-cf47-487c-900d-d84b0a9fa062",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/o2l9TGFCZN9euEcryxVz%2Fimage-10?alt=media&token=8da25b99-067f-49ed-98cf-5f83bc94d50e",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/o2l9TGFCZN9euEcryxVz%2Fimage-11?alt=media&token=c59b8d7d-aa91-4c43-b477-7474c8e79ba8",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/o2l9TGFCZN9euEcryxVz%2Fimage-12?alt=media&token=81d60a5a-bc8c-4aa3-a190-36a89dae89f6",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/o2l9TGFCZN9euEcryxVz%2Fimage-13?alt=media&token=d2310258-0692-431b-9889-7414592ca8e1",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/o2l9TGFCZN9euEcryxVz%2Fimage-14?alt=media&token=2df094f3-c8ed-4c13-9c2c-0059b92e2439",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/o2l9TGFCZN9euEcryxVz%2Fimage-15?alt=media&token=ea98bd3e-8257-4522-9a69-296971ef3092",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/o2l9TGFCZN9euEcryxVz%2Fimage-16?alt=media&token=8bb27d6e-587d-4fc5-bf5f-9ac6f7d37f0e",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/o2l9TGFCZN9euEcryxVz%2Fimage-17?alt=media&token=7c4138ec-6f54-42f8-9a5c-01fae815dc9e",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/o2l9TGFCZN9euEcryxVz%2Fimage-18?alt=media&token=a76bc9f3-84df-46e0-8f04-22b7cbd52bc8",
-//             "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/o2l9TGFCZN9euEcryxVz%2Fimage-19?alt=media&token=f4d2d6de-151b-4859-8cb7-3e7ebc8a189e"
-//         ],
-//         "bathrooms": 0,
-//         "poster": "https://firebasestorage.googleapis.com/v0/b/lexstayz.appspot.com/o/o2l9TGFCZN9euEcryxVz%2Fposter?alt=media&token=40232350-b714-485d-890c-64747aa87804",
-//         "minAge": 16,
-//         "pets": "No",
-//         "numReviews": 0,
-//         "checkInTime": "14:00",
-//         "description": "Its a home",
-//         "beds": 4,
-//         "hostId": "PTqiZj6jxJcJwy4cwi5BHG8VQuw1",
-//         "rooms": [],
-//         "location": {
-//             "street": "Erika-Mann-Straße 33",
-//             "street2": "Wohnung 1",
-//             "country": "Germany",
-//             "district": "",
-//             "zipCode": "80636",
-//             "city": "München"
-//         },
-//         "checkOutTime": "14:00",
-//         "cancellation": {
-//             "time": 0,
-//             "preDate": true,
-//             "cancellation": "Free",
-//             "rate": 20,
-//             "timeSpace": "Days"
-//         },
-//         "id": "o2l9TGFCZN9euEcryxVz",
-//         "rating": 0,
-//         "smoking": "Designated Smoking Areas",
-//         "published": true,
-//         "facilities": [
-//             "Sofa",
-//             "TV with Streaming Services",
-//             "Rug",
-//             "Curtains",
-//             "Printer",
-//             "Desk Lamp",
-//             "High-Speed Internet",
-//             "Bicycle Rack",
-//             "Lawn Equipment Storage",
-//             "Garage Door Opener",
-//             "Storage Shelves",
-//             "Tool Rack",
-//             "Deck",
-//             "Barbecue Grill",
-//             "Fence",
-//             "Fire Pit",
-//             "Smoke Detectors",
-//             "First Aid Kit",
-//             "Storage Cabinets",
-//             "Iron",
-//             "Ironing Board",
-//             "Sink",
-//             "Tableware",
-//             "Microwave",
-//             "Oven",
-//             "Wardrobe",
-//             "Mirror",
-//             "Chair"
-//         ],
-//         "name": "New Home"
-//     },
-// ]

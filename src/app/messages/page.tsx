@@ -7,7 +7,8 @@ import {useMediaQuery} from "react-responsive";
 
 
 export default function MessagePage() {
-    const isMobile = useMediaQuery({query: '(max-width: 1024px)'});
+    const isMobile = useMediaQuery({query: '(max-width: 768px)'});
+    console.log(isMobile);
     if (isMobile) {
         return <div className={'h-full py-4 bg-white px-4'}>
             <div className={'text-2xl'}>Messages</div>

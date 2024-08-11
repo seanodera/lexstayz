@@ -59,9 +59,9 @@ export default function AuthenticationProvider({children}: { children: ReactNode
         }
     });
     return <Suspense fallback={null}>
-        <div className={'h-full w-full'}>
+        <div className={''}>
             <Navbar/>
-            <main className={'h-full w-full'}>{children}</main>
+            <main className={''}>{children}</main>
         </div>
     </Suspense>
 }

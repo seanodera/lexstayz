@@ -67,9 +67,9 @@ export default function ContextProvider({children}: { children: React.ReactNode 
     } else if (authNeededRoutes.includes(pathname)) {
         return <AuthenticationProvider>{children}</AuthenticationProvider>
     } else {
-        return <div className={'h-full w-full'}>
+        return <div className={''}>
             <Navbar/>
-            <main className={'h-full w-full'}>{children}</main>
+            {children}
             <ErrorDialog/>
         </div>
     }

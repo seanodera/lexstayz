@@ -1,6 +1,6 @@
 'use client';
 import {useState, useEffect} from 'react';
-import {Avatar, Button, Empty, Input} from 'antd';
+import {Affix, Avatar, Button, Empty, Input} from 'antd';
 import {ArrowUpOutlined, ExclamationCircleOutlined, PaperClipOutlined} from '@ant-design/icons';
 import {timeFromDate} from "@/lib/utils";
 import dayjs from "dayjs";
@@ -8,6 +8,8 @@ import BookingBox from "@/components/messages/bookingBox";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import {selectFocusChat, sendMessageAsync} from "@/slices/messagingSlice";
 import {listenToMessages} from "@/lib/firebaseListener";
+import {useMediaQuery} from "react-responsive";
+import RecipientsBox from "@/components/messages/recipentBox";
 
 const {TextArea} = Input;
 
@@ -16,6 +18,7 @@ export default function ChatBox() {
     const [inputValue, setInputValue] = useState('');
     const dispatch = useAppDispatch();
     const chat = useAppSelector(selectFocusChat)
+    const [container, setContainer] = useState<HTMLDivElement | null>(null);
     const handleInputChange = (e: any) => {
         setInputValue(e.target.value);
     };
@@ -48,16 +51,17 @@ export default function ChatBox() {
 
         }
     };
-
+    const isMobile = useMediaQuery({query: '(max-width: 1024px)'});
     if (!chat){
         return <div className={'h-full w-full'}>
             <Empty/>
         </div>;
     } else {
     return (
-        <div className={'flex h-full w-full'}>
-            <div className="flex flex-col items-center justify-end h-full w-full">
-                <div className={'flex justify-between bg-white py-3 w-full px-4'}>
+        <div className={'h-full overscroll-none flex'} ref={setContainer}>
+            {!isMobile && <div><RecipientsBox/></div>}
+            <div className="flex flex-col justify-between overscroll-none h-full w-full items-center">
+                <div className={'flex justify-between bg-white py-3 w-full px-4 static'}>
                     <div className={'flex items-center gap-1'}>
                         <Avatar className={'bg-primary h-8 w-8'}
                                 shape={'circle'}>{chat.host.name.split(' ').map((v) => v.charAt(0).toUpperCase()).join('')}</Avatar>
@@ -65,7 +69,7 @@ export default function ChatBox() {
                     </div>
                     <Button type={'text'} icon={<ExclamationCircleOutlined/>}/>
                 </div>
-                <div className="h-full flex-1 px-4 overflow-auto border-white border-solid border-b-0 w-full pt-2">
+                <div className="flex flex-col justify-end py-2 px-4 overflow-y-auto overscroll-contain h-full w-full pt-2">
                     {chat.messages?.map((message, index) => {
 
                         return (
@@ -89,7 +93,7 @@ export default function ChatBox() {
                         placeholder="Message Person"
                         value={inputValue}
                         onChange={handleInputChange}
-                        style={{overflowY : 'hidden'}} // Hide scrollbar
+                        style={{overflowY: 'hidden'}} // Hide scrollbar
                     />
                     <Button
                         icon={<ArrowUpOutlined/>}
@@ -104,5 +108,6 @@ export default function ChatBox() {
                 <BookingBox/>
             </div>
         </div>
-    );}
+    );
+    }
 }

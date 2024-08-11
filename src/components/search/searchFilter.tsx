@@ -27,6 +27,7 @@ export default function SearchFilter({stays, onFilter}: { stays: any[ ], onFilte
 
     useEffect(() => {
         setDisplayStays(stays);
+        onFilter(stays)
         let high = 0;
         let low = Infinity;
         stays.forEach(stay => {
@@ -52,11 +53,12 @@ export default function SearchFilter({stays, onFilter}: { stays: any[ ], onFilte
         setLowestPrice(low);
         setPriceRange([low, high]);
         setAvailableFilters(generateFilters());
+        applyFilters();
     }, [stays]);
 
     useEffect(() => {
         onFilter(displayStays);
-    }, [displayStays]);
+    }, [displayStays, onFilter]);
 
     function generateFilters() {
         const amenitiesSet = new Set<string>();

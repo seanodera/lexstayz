@@ -19,17 +19,19 @@ export default function AccountInfo() {
     const [gender, setGender] = useState("");
 
     const handleCancel = () => {
-        setFirstName(user.firstName || "");
-        setLastName(user.lastName || "");
-        setPhone(user.phone || "");
-        setDateOfBirth(user.dob || "");
+        setFirstName(user?.firstName || "");
+        setLastName(user?.lastName || "");
+        setPhone(user?.phone || "");
+        setDateOfBirth(user?.dob || "");
         setEditMode(false);
     }
     const handleEditMode = () => {
-        setFirstName(user.firstName || "");
-        setLastName(user.lastName || "");
-        setPhone(user.phone || "");
-        setDateOfBirth(user.dob || "");
+        if (user){
+            setFirstName(user.firstName || "");
+            setLastName(user.lastName || "");
+            setPhone(user.phone || "");
+            setDateOfBirth(user.dob || "");
+        }
         setEditMode(true);
     }
     const handleApply = () => {
@@ -47,6 +49,7 @@ export default function AccountInfo() {
     if (!user) {
         return <div></div>
     } else {
+        // @ts-ignore
         return <Card title={'Profile Information'} className={''} extra={<div className={'flex gap-2'}>
             {!editMode && <Button type={'primary'} ghost onClick={handleEditMode}>{'Edit'}</Button>}
             {editMode && <Button danger onClick={handleCancel}>Cancel</Button>}
@@ -87,7 +90,7 @@ export default function AccountInfo() {
                             <h3 className={'mb-0'}>Date Of Birth</h3>
                             {editMode ? <DatePicker className={'w-full'} format={'DD MMMM YYYY'} value={dateOfBirth && dayjs(dateOfBirth)}
                                                     defaultValue={user.dob && dayjs(user.dob)}
-                                                    onChange={(e) => setDateOfBirth(e.toISOString())}/> :
+                                                    onChange={(e) => setDateOfBirth(e.toString())}/> :
                                 <h3 className={'font-bold'}>{user.dob ? dateReader({date: user.dob}) : '-'}</h3>}
                         </div>
                         <div>
