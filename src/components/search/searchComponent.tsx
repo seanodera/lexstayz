@@ -45,7 +45,7 @@ export default function SearchComponent() {
     const [hoveredDate, setHoveredDate] = useState(null);
     const isMobile = useMediaQuery({maxWidth: 640});
     const [options, setOptions] = useState<any[]>([]);
-
+    const [count,setCount] = useState(0);
 
 
     const handleChange = (value: any) => {
@@ -77,13 +77,14 @@ export default function SearchComponent() {
             const cityCountry = `${hit.location.city}, ${hit.location.country}`;
             return [
                 {
+                    value: cityCountry,
+                    label: cityCountry,
+                },
+                {
                     value: fullLocation,
                     label: fullLocation,
                 },
-                {
-                    value: cityCountry,
-                    label: cityCountry,
-                }
+
             ];
         });
         setOptions(processed);
@@ -117,6 +118,8 @@ export default function SearchComponent() {
         };
     }, [debouncedHandleSearch]);
 
+
+    console.log('Stays: ', stays.length, 'preFilter: ', preFilter.length, 'DisplayStays: ', displayStays.length);
     return (
         <div className={'bg-white'}>
             <Affix offsetTop={0} className={'z-30'}>
@@ -129,9 +132,10 @@ export default function SearchComponent() {
                                            displayValue={(item: any) => item}
                                            onChange={(e) => debouncedHandleSearch(e.target.value)}/>
                             <ComboboxOptions anchor="bottom"
-                                             className="border empty:invisible bg-white rounded-lg px-8 py-2 text-nowrap">
-                                {options.map((option, index) => <ComboboxOption key={index}
-                                                                                value={option.value}>{option.label}</ComboboxOption>)}
+                                             className="border-0 shadow-md empty:invisible bg-white rounded-lg py-2 text-nowrap gap-2">
+                                {options.map((option, index) => <ComboboxOption
+                                    className={'hover:bg-dark hover:bg-opacity-20 px-8'} key={index}
+                                    value={option.value}>{option.label}</ComboboxOption>)}
                             </ComboboxOptions>
                         </Combobox>
                         <RangePicker
