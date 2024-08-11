@@ -21,10 +21,11 @@ import {FilterOutlined, MinusOutlined, PlusOutlined} from "@ant-design/icons";
 import HotelItem from "@/components/Grid Items/HotelItem";
 import HomeItem from "@/components/Grid Items/HomeItem";
 import SearchFilter from "@/components/search/searchFilter";
+import dayjs from "dayjs";
 
 const {RangePicker} = DatePicker;
 
-export default function SearchComponent(){
+export default function SearchComponent() {
     const stays = useAppSelector(selectAllStays);
     const [preFilter, setPreFilter] = useState<any[]>(stays)
     const [displayStays, setDisplayStays] = useState<any[]>(stays); // Initialize with all stays
@@ -99,7 +100,7 @@ export default function SearchComponent(){
         value.split(',').forEach((item, index) => {
             filteredStays.filter(stay => {
                 let locationString = JSON.stringify(stay.location);
-                const values = Object.values(stay.location).map((value:any) => String(value).toLowerCase());
+                const values = Object.values(stay.location).map((value: any) => String(value).toLowerCase());
 
                 return values.includes(item)
             })
@@ -139,15 +140,24 @@ export default function SearchComponent(){
                                     {panelNode}
                                 </div>
                             )}
+                            value={[dayjs(booking.checkInDate), dayjs(booking.checkOutDate)]}
+                            onChange={(value) => {
+                                if (value) {
+                                    setStartDate(dayjs(value[ 0 ]).toString());
+                                    setEndDate(dayjs(value[ 1 ]).toString());
+                                }
+                            }}
                             className="bg-gray-200 rounded-lg border-0"
                             format="DD MMMM"
                             placeholder={["Check-in", "Check-out"]}
-                            dropdownClassName="custom-popover"
+                            popupClassName=""
                         />
                         <Popover className={'block'}>
                             <PopoverButton
                                 className={'bg-gray-200 rounded-lg border-0 flex items-center w-max h-full gap-2'}>
-                                <Button icon={<MinusOutlined/>}/> {numGuests} Guests <Button icon={<PlusOutlined/>}/>
+                                <Button icon={<MinusOutlined/>}
+                                        onClick={() => setNumGuests((prev) => prev > 1 ? prev - 1 : prev)}/> {numGuests} Guests <Button
+                                onClick={() => setNumGuests((prev) => prev + 1)} icon={<PlusOutlined/>}/>
                             </PopoverButton>
                             <PopoverPanel>
 
@@ -155,7 +165,6 @@ export default function SearchComponent(){
                         </Popover>
                     </div>
                     <Button className={'bg-gray-200 text-gray-500'} onClick={showDrawer} size={'large'} type={'text'}
-                            ghost
                             icon={<FilterOutlined/>}>Filter</Button>
                 </div>
             </Affix>
