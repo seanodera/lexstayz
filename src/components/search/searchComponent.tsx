@@ -35,6 +35,7 @@ const {RangePicker} = DatePicker;
 
 export default function SearchComponent() {
     const dispatch = useAppDispatch();
+
     const allStays = useAppSelector(selectAllStays)
     const stays = useAppSelector(selectSearchResults);
     const preFilter = useAppSelector(selectPreFilteredList);
@@ -72,6 +73,8 @@ export default function SearchComponent() {
         if (params.has('loc')) {
             const location = params.get('loc') || '';
             if (location) {
+                setSelectedLocation(location);
+                setSearchTerm(location);
                 // @ts-ignore
                 dispatch(searchAsync(location));
             }

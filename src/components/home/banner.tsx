@@ -21,7 +21,7 @@ export default function Banner() {
                                 backgroundImage: `url("${stay.poster}")`,
                             }}>
                             <div
-                                className={'h-full w-full flex flex-col justify-end text-white bg-dark bg-opacity-30 pt-24 pb-16 md:px-12 px-7 '}>
+                                className={'h-full w-full flex flex-col justify-end text-white bg-primary-950 bg-opacity-30 pt-24 pb-16 md:px-12 px-7 '}>
                                 <div className={'md:w-1/2 lg:w-1/3'}>
                                     <h1 className={'md:text-2xl lg:text-5xl mb-0'}>{stay.name}</h1>
                                     <h2 className={'font-light text-gray-200 line-clamp-1 mb-0'}>

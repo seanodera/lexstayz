@@ -70,7 +70,9 @@ export default function ContextProvider({children}: { children: React.ReactNode 
         return <div className={''}>
             <Navbar/>
             {children}
+
             <ErrorDialog/>
+
         </div>
     }
 }

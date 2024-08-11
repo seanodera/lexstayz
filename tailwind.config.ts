@@ -31,7 +31,7 @@ const config: Config = {
     extend: {
       colors: {
         primary: primaryColor,
-        dark: primaryColor[950],
+        dark: '#001529',
         danger: '#FF4D4F',
         warning: '#faad14',
       },
