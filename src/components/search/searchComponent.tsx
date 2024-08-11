@@ -1,10 +1,8 @@
 'use client'
-import {useAppSelector} from "@/hooks/hooks";
-import {selectAllStays} from "@/slices/staysSlice";
+import {useAppSelector, useAppDispatch} from "@/hooks/hooks";
+import {selectConfirmBooking} from "@/slices/confirmBookingSlice";
 import {useEffect, useMemo, useState} from "react";
 import {useRouter, useSearchParams} from "next/navigation";
-import {selectConfirmBooking} from "@/slices/confirmBookingSlice";
-import {searchClient} from "@/lib/firebase";
 import {useMediaQuery} from "react-responsive";
 import debounce from "lodash/debounce";
 import {Affix, Button, DatePicker, Drawer} from "antd";
@@ -22,31 +20,38 @@ import HotelItem from "@/components/Grid Items/HotelItem";
 import HomeItem from "@/components/Grid Items/HomeItem";
 import SearchFilter from "@/components/search/searchFilter";
 import dayjs from "dayjs";
+import {
+    searchAsync,
+    selectSearchResults,
+    selectIsLoading,
+    selectProcessedList,
+    selectPreFilteredList,
+    updatePreFilter
+} from '@/slices/searchSlice';
 
 const {RangePicker} = DatePicker;
 
 export default function SearchComponent() {
-    const stays = useAppSelector(selectAllStays);
-    const [preFilter, setPreFilter] = useState<any[]>(stays)
+    const dispatch = useAppDispatch();
+    const stays = useAppSelector(selectSearchResults);
+    const preFilter = useAppSelector(selectPreFilteredList);
+    const processedOptions = useAppSelector(selectProcessedList);
+    const isLoading = useAppSelector(selectIsLoading);
     const [displayStays, setDisplayStays] = useState<any[]>(stays); // Initialize with all stays
     const [open, setOpen] = useState(false);
     const params = useSearchParams();
     const booking = useAppSelector(selectConfirmBooking);
-    const [searchTerms, setSearchTerms] = useState('');
     const [selectedLocation, setSelectedLocation] = useState('');
     const [startDate, setStartDate] = useState(booking.checkInDate);
     const [endDate, setEndDate] = useState(booking.checkOutDate);
     const [numRooms, setNumRooms] = useState(1);
     const [numGuests, setNumGuests] = useState(2);
-    const indexName = 'stays';
-    const index = searchClient.initIndex(indexName);
     const router = useRouter();
     const [dates, setDates] = useState<any[]>([]);
     const [hoveredDate, setHoveredDate] = useState(null);
     const isMobile = useMediaQuery({maxWidth: 640});
-    const [options, setOptions] = useState<any[]>([]);
-    const [count,setCount] = useState(0);
-
+    const [options, setOptions] = useState<any[]>(processedOptions);
+    const [count, setCount] = useState(0);
 
     const handleChange = (value: any) => {
         setDates(value);
@@ -62,55 +67,42 @@ export default function SearchComponent() {
 
     useEffect(() => {
         if (params.has('loc')) {
-            if (params.get('loc')) {
-                setSearchTerms(params.get('loc') || '');
+            const location = params.get('loc') || '';
+            if (location) {
+                // @ts-ignore
+                dispatch(searchAsync(location));
             }
         }
-    }, [params]);
+    }, [params, dispatch]);
 
-    const debouncedHandleSearch = useMemo(() => debounce(async (value: string) => {
+    const debouncedHandleSearch = useMemo(() => debounce((value: string) => {
         if (!value) return;
-        setOptions([]);
-        const data = await index.search(value);
-        const processed = data.hits.flatMap((hit: any) => {
-            const fullLocation = `${hit.location.street}, ${hit.location.city}, ${hit.location.country}`;
-            const cityCountry = `${hit.location.city}, ${hit.location.country}`;
-            return [
-                {
-                    value: cityCountry,
-                    label: cityCountry,
-                },
-                {
-                    value: fullLocation,
-                    label: fullLocation,
-                },
-
-            ];
-        });
-        setOptions(processed);
-        setSearchTerms(value);
-
-        // Update displayStays with search results
-        // setDisplayStays(data.hits);
-        setPreFilter(data.hits)
-
-    }, 300), [index]);
+        // @ts-ignore
+        dispatch(searchAsync(value));
+    }, 300), [dispatch]);
 
     function handleSelect(value: string) {
         setSelectedLocation(value);
-        let filteredStays = stays;
-        console.log('Selected Location:', value);
-        value.split(',').forEach((item, index) => {
+        let filteredStays = stays
+        // Implement filtering logic here using the stays or preFilter data from Redux
+        value.split(',').forEach((item) => {
             filteredStays.filter(stay => {
-                let locationString = JSON.stringify(stay.location);
-                const values = Object.values(stay.location).map((value: any) => String(value).toLowerCase());
-
-                return values.includes(item)
-            })
+                const values = Object.values(stay.location).map((val: any) => String(val).toLowerCase());
+                console.log(values.includes(item.toLowerCase()), 'values: ', values)
+                return values.includes(item.toLowerCase());
+            });
         })
-        console.log(filteredStays);
-        setPreFilter(filteredStays);
+        setDisplayStays(filteredStays);
+        console.log('Filtered', filteredStays, 'value: ', value);
+        dispatch(updatePreFilter(filteredStays))
     }
+
+    useEffect(() => {
+        if (stays.length > 0) {
+            setDisplayStays(stays);
+            dispatch(updatePreFilter(stays))
+        }
+    }, [stays]);
 
     useEffect(() => {
         return () => {
@@ -118,8 +110,6 @@ export default function SearchComponent() {
         };
     }, [debouncedHandleSearch]);
 
-
-    console.log('Stays: ', stays.length, 'preFilter: ', preFilter.length, 'DisplayStays: ', displayStays.length);
     return (
         <div className={'bg-white'}>
             <Affix offsetTop={0} className={'z-30'}>
@@ -133,9 +123,15 @@ export default function SearchComponent() {
                                            onChange={(e) => debouncedHandleSearch(e.target.value)}/>
                             <ComboboxOptions anchor="bottom"
                                              className="border-0 shadow-md empty:invisible bg-white rounded-lg py-2 text-nowrap gap-2">
-                                {options.map((option, index) => <ComboboxOption
-                                    className={'hover:bg-dark hover:bg-opacity-20 px-8'} key={index}
-                                    value={option.value}>{option.label}</ComboboxOption>)}
+                                {processedOptions.map((option, index) => (
+                                    <ComboboxOption
+                                        className={'hover:bg-dark hover:bg-opacity-20 px-8'}
+                                        key={index}
+                                        value={option.value}
+                                    >
+                                        {option.label}
+                                    </ComboboxOption>
+                                ))}
                             </ComboboxOptions>
                         </Combobox>
                         <RangePicker
@@ -149,8 +145,8 @@ export default function SearchComponent() {
                             value={[dayjs(booking.checkInDate), dayjs(booking.checkOutDate)]}
                             onChange={(value) => {
                                 if (value) {
-                                    setStartDate(dayjs(value[ 0 ]).toString());
-                                    setEndDate(dayjs(value[ 1 ]).toString());
+                                    setStartDate(dayjs(value[0]).toString());
+                                    setEndDate(dayjs(value[1]).toString());
                                 }
                             }}
                             className="bg-gray-200 rounded-lg border-0"
@@ -162,8 +158,12 @@ export default function SearchComponent() {
                             <PopoverButton
                                 className={'bg-gray-200 rounded-lg border-0 flex items-center w-max h-full gap-2'}>
                                 <Button icon={<MinusOutlined/>}
-                                        onClick={() => setNumGuests((prev) => prev > 1 ? prev - 1 : prev)}/> {numGuests} Guests <Button
-                                onClick={() => setNumGuests((prev) => prev + 1)} icon={<PlusOutlined/>}/>
+                                        onClick={() => setNumGuests((prev) => prev > 1 ? prev - 1 : prev)}/>
+                                {numGuests} Guests
+                                <Button
+                                    onClick={() => setNumGuests((prev) => prev + 1)}
+                                    icon={<PlusOutlined/>}
+                                />
                             </PopoverButton>
                             <PopoverPanel>
 
@@ -175,13 +175,20 @@ export default function SearchComponent() {
                 </div>
             </Affix>
             <div
-                className={'px-7 py-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8'}>{displayStays.map((stay: any, index) => (stay.type === 'Hotel') ?
-                <HotelItem
-                    key={index} hotel={stay}/> : <HomeItem stay={stay} key={index}/>)}</div>
+                className={'px-7 py-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8'}>
+                {displayStays.map((stay: any, index) => (
+                    stay.type === 'Hotel' ?
+                        <HotelItem key={index} hotel={stay}/>
+                        : <HomeItem stay={stay} key={index}/>
+                ))}
+            </div>
             <Drawer title="Filter Stays" onClose={onClose} open={open} classNames={{
                 body: 'p-0'
             }}>
-                <SearchFilter stays={preFilter} onFilter={(filteredList) => setDisplayStays(filteredList)}/>
+                <SearchFilter stays={preFilter} onFilter={(filteredList) => {
+                    console.log('Prefilter: ',preFilter,' Filtered list: ', filteredList);
+                    setDisplayStays(filteredList)
+                }}/>
             </Drawer>
         </div>
     );

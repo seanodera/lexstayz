@@ -4,6 +4,7 @@ import AuthenticationReducer from '@/slices/authenticationSlice';
 import ConfirmBookingReducer from "@/slices/confirmBookingSlice";
 import staysReducer from "@/slices/staysSlice";
 import messagingReducer from "@/slices/messagingSlice";
+import SearchReducer from "@/slices/searchSlice";
 import {bookingResetMiddleware} from "@/data/middleware.ts";
 
 
@@ -13,7 +14,8 @@ const store = configureStore({
         authentication: AuthenticationReducer,
         confirmBooking: ConfirmBookingReducer,
         stays: staysReducer,
-        messaging: messagingReducer
+        messaging: messagingReducer,
+        search: SearchReducer,
     },
     middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(bookingResetMiddleware),
 });
