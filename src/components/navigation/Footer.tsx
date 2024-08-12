@@ -6,8 +6,8 @@ import Link from "next/link";
 export default function Footer() {
 
     return <footer className="bg-[#001529] text-white py-8 px-16">
-        <div className={'flex w-full gap-6 py-8'}>
-            <div className={'w-1/3'}>
+        <div className={'md:flex w-full gap-6 py-8'}>
+            <div className={'md:w-1/3'}>
                 <img src={'/logo/lexstayz-high-resolution-logo-transparent.png'} alt={'Logo square logo'} className={'object-contain w-full max-w-xs'}/>
             </div>
             <div className={'flex-1'}>

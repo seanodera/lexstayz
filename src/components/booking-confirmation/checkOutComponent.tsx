@@ -62,6 +62,7 @@ export default function CheckOutComponent() {
        }
     }, [userID, bookingID]);
 
+
     return <div className={'h-full w-full flex flex-col justify-center'}>
         {contextHolder}
         {isLoading ? <Skeleton active/> : <Result

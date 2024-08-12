@@ -26,7 +26,7 @@ export default function Navbar() {
             window.removeEventListener("scroll", navBarTop);
         };
     }, []);
-    return <Affix offsetTop={0}>
+    return <Affix offsetTop={0} className={'z-30'}>
         <div
             className={`w-full lg:px-24 px-7 flex items-center justify-between py-3 z-30 ${pathName === '/' ? windowHeight >= 100 ? 'bg-white text-dark' : 'text-white fixed top-0 left-0' : 'bg-white text-dark shadow-md shadow-primary-50'} transition-all duration-300 ease-linear`}>
             <Link href={'/'} className={'text-3xl font-semibold block'}><img

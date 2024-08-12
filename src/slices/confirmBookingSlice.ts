@@ -70,7 +70,7 @@ export const createBooking: any = createAsyncThunk(
         try {
             const user = getCurrentUser();
             const batch = writeBatch(firestore);
-            const userDoc = doc(firestore, 'user', user.uid, 'bookings', id);
+            const userDoc = doc(firestore, 'users', user.uid, 'bookings', id);
 
             const booking = {
                 id: id,
@@ -128,7 +128,7 @@ export const handlePaymentAsync:any = createAsyncThunk(
                 email: booking.contact.email,
                 amount:  amount,// Amount in KES
                 currency: booking.currency,
-                callback_url: `https://lexstayz.vercel.app/checkout?userID=${user.uid}&booking=${id}`,
+                callback_url: `${process.env.NEXT_PUBLIC_HOST}/checkout?userID=${user.uid}&booking=${id}`,
                 reference: id
             });
 

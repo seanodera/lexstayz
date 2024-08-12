@@ -35,7 +35,7 @@ export default function Banner() {
                                     <p className={'line-clamp-5'}>{stay.description}</p>
                                     <div>
                                         <Link href={`/stay/${stay.id}`}
-                                              className={'block bg-primary rounded px-4 py-2 w-max text-white z-40'}>See
+                                              className={'block bg-primary rounded px-4 py-2 w-max text-white'}>See
                                             More
                                         </Link>
                                     </div>
@@ -45,7 +45,7 @@ export default function Banner() {
                     </div>
                 ))}
             </Carousel>
-            <div className="absolute max-xl:hidden top-1/2 left-1/4 flex items-center justify-center z-10">
+            <div className="absolute max-xl:hidden top-1/2 left-1/4 flex items-center justify-center">
                 <SearchComponent/>
             </div>
         </section>
