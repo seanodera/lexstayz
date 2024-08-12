@@ -21,41 +21,45 @@ export default function CheckOutComponent() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('')
+    const [hasRun,setHasRun] = useState(false)
     useEffect(() => {
 
-        if (userID && bookingID) {
-            verifyPayment(bookingID).then((res) => {
-                if (res.status === 'success') {
-                    completeBooking({
-                        userId: userID,
-                        id: bookingID,
-                        isConfirmed: true,
-                        status: 'Confirmed'
-                    }).then((value) => {
-                        messageApi.info('booking successfully made')
-                        setIsLoading(false)
-                    })
-                } else {
-                    completeBooking({
-                        userId: userID,
-                        id: bookingID,
-                        isConfirmed: false,
-                        status: 'Rejected',
-                    }).then((value) => {
-                        setIsLoading(false)
-                    })
-                    messageApi.error('An error occurred with your payment')
-                    setErrorMessage('An error occurred with your payment')
-                    setError(true)
-                }
+       if (!hasRun){
+           if (userID && bookingID) {
+               verifyPayment(bookingID).then((res) => {
+                   if (res.status === 'success') {
+                       completeBooking({
+                           userId: userID,
+                           id: bookingID,
+                           isConfirmed: true,
+                           status: 'Confirmed'
+                       }).then((value) => {
+                           messageApi.info('booking successfully made')
+                           setIsLoading(false)
+                       })
+                   } else {
+                       completeBooking({
+                           userId: userID,
+                           id: bookingID,
+                           isConfirmed: false,
+                           status: 'Rejected',
+                       }).then((value) => {
+                           setIsLoading(false)
+                       })
+                       messageApi.error('An error occurred with your payment')
+                       setErrorMessage('An error occurred with your payment')
+                       setError(true)
+                   }
 
-            })
+               })
 
-        } else {
-            setErrorMessage('An error has occurred')
-            setError(true)
-            messageApi.error('An error has occurred')
-        }
+           } else {
+               setErrorMessage('An error has occurred')
+               setError(true)
+               messageApi.error('An error has occurred')
+           }
+           setHasRun(true)
+       }
     }, [userID, bookingID]);
 
     return <div className={'h-full w-full flex flex-col justify-center'}>

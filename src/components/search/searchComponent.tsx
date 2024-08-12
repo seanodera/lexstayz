@@ -70,6 +70,10 @@ export default function SearchComponent() {
     };
 
     useEffect(() => {
+        setDisplayStays(allStays)
+    }, []);
+
+    useEffect(() => {
         if (params.has('loc')) {
             const location = params.get('loc') || '';
             if (location) {
@@ -142,10 +146,10 @@ export default function SearchComponent() {
                                            }}/>
                             <ComboboxOptions anchor="bottom"
                                              className="border-0 shadow-md empty:invisible bg-white rounded-lg py-2 text-nowrap gap-2">
-                                <ComboboxOption className={'hover:bg-dark px-8'} value={searchTerm}>{searchTerm}</ComboboxOption>
+                                <ComboboxOption className={'hover:bg-dark hover:bg-opacity-10 px-8 py-2'} value={searchTerm}>{searchTerm}</ComboboxOption>
                                 {processedOptions.map((option, index) => (
                                     <ComboboxOption
-                                        className={'hover:bg-dark hover:bg-opacity-20 px-8'}
+                                        className={'hover:bg-dark hover:bg-opacity-10 px-8 py-2'}
                                         key={index}
                                         value={option.value}
                                     >
@@ -169,26 +173,22 @@ export default function SearchComponent() {
                                     setEndDate(dayjs(value[1]).toString());
                                 }
                             }}
-                            className="bg-gray-200 rounded-lg border-0"
+                            className="bg-gray-200 rounded-lg border-0 "
                             format="DD MMMM"
                             placeholder={["Check-in", "Check-out"]}
                             popupClassName=""
                         />
-                        <Popover className={'block'}>
-                            <PopoverButton
-                                className={'bg-gray-200 rounded-lg border-0 flex items-center w-max h-full gap-2'}>
-                                <Button icon={<MinusOutlined/>}
-                                        onClick={() => setNumGuests((prev) => prev > 1 ? prev - 1 : prev)}/>
-                                {numGuests} Guests
-                                <Button
-                                    onClick={() => setNumGuests((prev) => prev + 1)}
-                                    icon={<PlusOutlined/>}
-                                />
-                            </PopoverButton>
-                            <PopoverPanel>
+                        <div
+                            className={'bg-gray-200 rounded-lg border-0 flex items-center w-max px-2 gap-2'}>
+                            <Button icon={<MinusOutlined/>}
+                                    onClick={() => setNumGuests((prev) => prev > 1 ? prev - 1 : prev)}/>
+                            {numGuests} Guests
+                            <Button
+                                onClick={() => setNumGuests((prev) => prev + 1)}
+                                icon={<PlusOutlined/>}
+                            />
+                        </div>
 
-                            </PopoverPanel>
-                        </Popover>
                     </div>
                     <Button className={'bg-gray-200 text-gray-500'} onClick={showDrawer} size={'large'} type={'text'}
                             icon={<FilterOutlined/>}>Filter</Button>
