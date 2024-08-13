@@ -2,9 +2,10 @@
 
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {RootState} from "@/data/types";
-import {collection, getDocs} from "firebase/firestore";
+import {collection, doc, getDoc, getDocs} from "firebase/firestore";
 import {firestore} from "@/lib/firebase";
 import {query, where} from "@firebase/firestore";
+
 
 
 export interface Stay {
@@ -63,6 +64,32 @@ export const fetchStaysAsync = createAsyncThunk(
     }
 );
 
+export const setCurrentStayFromId = createAsyncThunk('stays/setCurrentStayFromId',
+    async (id:string,{getState,dispatch,rejectWithValue}) => {
+    try {
+        const {stays} = getState() as {stays: StaysState}
+
+        const currentStay = stays.stays.find((value) => value.id === id);
+        if (currentStay) {
+            console.log('Current Stay local')
+           return currentStay;
+        } else {
+            const staysRef = collection(firestore, 'stays');
+            const snapshot = await getDoc(doc(staysRef, id));
+            const data = snapshot.data() as Stay
+            console.log('Gotten from firebase: ', data)
+            dispatch(setAllStays([...stays.stays, data]))
+            return data;
+        }
+    } catch (error){
+        if (error instanceof Error) {
+            return rejectWithValue(error.message);
+        } else {
+            return rejectWithValue('An unknown error occurred');
+        }
+    }
+    })
+
 const staysSlice = createSlice({
     name: "stays",
     initialState: initialState,
@@ -73,9 +100,9 @@ const staysSlice = createSlice({
         setCurrentStay: (state, action: PayloadAction<Stay>) => {
             state.currentStay = action.payload;
             state.currentId = -1;
-
         },
-        setCurrentStayFromId: (state, action: PayloadAction<string | number>) => {
+
+        setCurrentStayFromIdAsync: (state, action: PayloadAction<string | number>) => {
             state.currentId = action.payload;
             const currentStay = state.stays.find((value) => value.id === action.payload);
             if (currentStay) {
@@ -106,14 +133,26 @@ const staysSlice = createSlice({
                 state.isLoading = false;
                 state.hasError = true;
                 state.errorMessage = action.payload as string || 'Failed to fetch stays';
-            });
+            })
+            .addCase(setCurrentStayFromId.pending, (state, action) => {
+                state.isLoading = true;
+            })
+            .addCase(setCurrentStayFromId.fulfilled,(state,action) => {
+                state.isLoading = false;
+                state.currentStay = action.payload as Stay
+            })
+            .addCase(setCurrentStayFromId.rejected, (state, action) => {
+                state.isLoading = false;
+                state.hasError = true;
+                state.errorMessage = action.payload as string || 'Failed to set current stay';
+        });
     }
 });
 
 export const selectCurrentStay = (state: RootState) => state.stays.currentStay;
 export const selectAllStays = (state: RootState) => state.stays.stays;
 export const selectCurrentId = (state: RootState) => state.stays.currentId;
-export const selectIsLoading = (state: RootState) => state.stays.isLoading;
+export const selectIsStayLoading = (state: RootState) => state.stays.isLoading;
 export const selectHasError = (state: RootState) => state.stays.hasError;
 export const selectErrorMessage = (state: RootState) => state.stays.errorMessage;
 export const selectHasRun = (state: RootState) => state.stays.hasRun;
@@ -122,7 +161,6 @@ export const selectStayById = (state: RootState, id: string | number) => state.s
 export const {
     setAllStays,
     setCurrentStay,
-    setCurrentStayFromId,
     resetError,
 } = staysSlice.actions;
 

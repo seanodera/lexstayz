@@ -9,8 +9,9 @@ import {usePathname, useRouter} from "next/navigation";
 import {getAuth} from "firebase/auth";
 import {getUserDetails} from "@/data/usersData";
 import {loginUser, selectCurrentUser} from "@/slices/authenticationSlice";
-import {fetchStaysAsync, selectHasRun} from "@/slices/staysSlice";
+import {fetchStaysAsync, selectHasRun, selectIsStayLoading} from "@/slices/staysSlice";
 import ErrorDialog from "@/components/dialogs/ErrorDialog";
+import Footer from "@/components/navigation/Footer";
 
 const authNeededRoutes = ['/bookings', '/booking-confirmation', '/checkout', '/wishlist', '/profile', '/messages']
 
@@ -19,6 +20,7 @@ export default function ContextProvider({children}: { children: React.ReactNode 
     const dispatch = useAppDispatch();
     const hasRun = useAppSelector(selectHasRun)
     const isLoading = useAppSelector(selectIsLoading)
+    const isStayLoading = useAppSelector(selectIsStayLoading)
     const currentUser = useAppSelector(selectCurrentUser)
 
     const router = useRouter();
@@ -30,7 +32,7 @@ export default function ContextProvider({children}: { children: React.ReactNode 
                if (!hasRun) {
                    setHasRunLocal(true)
 
-                   // @ts-ignore
+
                    dispatch(fetchStaysAsync());
 
                }
@@ -58,7 +60,7 @@ export default function ContextProvider({children}: { children: React.ReactNode 
             }
         }
     })
-    if (isLoading) {
+    if (isLoading || isStayLoading) {
         return <div className={'h-screen w-screen'}>
             <LoadingScreen/>
         </div>;
@@ -70,7 +72,7 @@ export default function ContextProvider({children}: { children: React.ReactNode 
         return <div className={''}>
             <Navbar/>
             {children}
-
+            <Footer/>
             <ErrorDialog/>
 
         </div>

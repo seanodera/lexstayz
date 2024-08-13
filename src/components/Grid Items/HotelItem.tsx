@@ -25,12 +25,12 @@ export default function HotelItem({hotel}: {
         e.preventDefault();
         if (wishlist.includes(id)) {
 
-            // @ts-ignore
+
             dispatch(deleteFromWishList({stayId: id})).then((value) => {
                 console.log(value)
             })
         } else {
-            // @ts-ignore
+
             dispatch(updateWishList({stayId: id})).then((value) => {
                 console.log(value)
             })
@@ -38,8 +38,7 @@ export default function HotelItem({hotel}: {
     }
     return <div
         className={'text-current rounded-xl transition-all duration-300 ease-in-out'}>
-
-        <div className={'relative z-0'}>
+        <div className={'relative'}>
             <Link href={`/stay/${id}`} className={'block aspect-video '}>
                 <Image.PreviewGroup>
                     <Carousel>
@@ -52,7 +51,7 @@ export default function HotelItem({hotel}: {
             </Link>
             <div className={'absolute right-0 top-0 p-3 z-20'}>
                 <Tooltip title={'Wishlist'}>
-                    <Button className={'bg-white'} size={'large'} onClick={handleWishlist}
+                    <Button  className={'bg-white'} size={'large'} onClick={handleWishlist}
                             icon={(wishlist.includes(id)) ? <HeartFilled className={'text-primary'}/> :
                                 <HeartOutlined/>} shape={'circle'}/>
                 </Tooltip>
@@ -65,13 +64,11 @@ export default function HotelItem({hotel}: {
                     <h3 className={'font-light   leading-none text-gray-400 line-clamp-1'}>{location.city}, {location.country}</h3>
                 </div>
                 <div className={'flex flex-col justify-start'}>
-                    <Rate count={5} disabled value={3} className={'text-primary text-sm my-0'}/>
+                    <Rate count={5} disabled value={hotel.rating} className={'text-primary text-sm my-0'}/>
                 </div>
             </div>
             <div className={'max-md:text-sm flex flex-nowrap'}>
-                <p className={'line-clamp-1 text-nowrap flex-nowrap'}>{description}</p>{(description.length > descriptionLimit) &&
-                <Ellipsis
-                    className={'flex-nowrap text-nowrap'}/>}
+                <p className={'line-clamp-1 text-nowrap flex-nowrap'}>{description}</p>
             </div>
             <h4 className={'text-primary leading-none font-medium text-nowrap'}>From
                 $ {toMoneyFormat(getLowestPrice(rooms))} / night</h4>

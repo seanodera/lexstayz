@@ -20,15 +20,15 @@ export default function Footer() {
                     </div>
                     <div className={'space-y-2'}>
                         <div className={'font-bold'}>About</div>
-                        <Link className={'block text-sm text-gray-300'} href={'/about'}>About Us</Link>
+                        <Link className={'block text-sm text-gray-300'} href={'/about-us'}>About Us</Link>
                         <Link className={'block text-sm text-gray-300'} href={'/contact'}>Contact Us</Link>
                         <Link className={'block text-sm text-gray-300'} href={'/faq'}>FAQ</Link>
                         <Link className={'block text-sm text-gray-300'} href={'/careers'}>Careers</Link>
                     </div>
                     <div className={'space-y-2'}>
                         <div className={'font-bold mb-2'}>Terms And Privacy</div>
-                        <Link className={'block text-sm text-gray-300 '} href={'/terms'}>Terms of Service</Link>
-                        <Link className={'block text-sm text-gray-300 '} href={'/privacy'}>Privacy Policy</Link>
+                        <Link className={'block text-sm text-gray-300 '} href={'/terms-of-service'}>Terms of Service</Link>
+                        <Link className={'block text-sm text-gray-300 '} href={'/privacy-policy'}>Privacy Policy</Link>
 
                     </div>
                 </div>

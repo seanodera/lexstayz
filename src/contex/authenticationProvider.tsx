@@ -51,10 +51,10 @@ export default function AuthenticationProvider({children}: { children: ReactNode
         const user = getAuth().currentUser
         if (user && !hasBookingsRun) {
             console.log('bookings')
-            // @ts-ignore
+
             dispatch(fetchBookingsAsync());
 
-            // @ts-ignore
+
             dispatch(fetchUserChatsAsync())
         }
     });

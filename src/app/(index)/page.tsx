@@ -2,7 +2,6 @@ import Image from "next/image";
 import Banner from "@/components/home/banner";
 import Destination from "@/components/home/destination";
 import SearchComponent from "@/components/home/searchComponent";
-import Footer from "@/components/navigation/Footer";
 
 export default function Home() {
   return (
@@ -12,7 +11,6 @@ export default function Home() {
           <SearchComponent/>
         </div>
         <Destination/>
-      <Footer/>
     </div>
   );
 }

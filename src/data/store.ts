@@ -5,7 +5,7 @@ import ConfirmBookingReducer from "@/slices/confirmBookingSlice";
 import staysReducer from "@/slices/staysSlice";
 import messagingReducer from "@/slices/messagingSlice";
 import SearchReducer from "@/slices/searchSlice";
-import {bookingResetMiddleware} from "@/data/middleware.ts";
+import {bookingResetMiddleware} from "@/data/middleware";
 
 
 const store = configureStore({

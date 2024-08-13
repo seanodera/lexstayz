@@ -1,3 +1,4 @@
+'use client'
 import {Button, Carousel, Image, Rate, Tooltip} from "antd";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import {deleteFromWishList, selectWishlist, updateWishList} from "@/slices/authenticationSlice";
@@ -17,12 +18,12 @@ export default function HomeItem({stay}: { stay: any }) {
         e.preventDefault();
         if (wishlist.includes(id)) {
 
-            // @ts-ignore
+
             dispatch(deleteFromWishList({stayId: id})).then((value) => {
                 console.log(value)
             })
         } else {
-            // @ts-ignore
+
             dispatch(updateWishList({stayId: id})).then((value) => {
                 console.log(value)
             })
@@ -30,8 +31,7 @@ export default function HomeItem({stay}: { stay: any }) {
     }
     return <div
         className={'text-current rounded-xl transition-all duration-300 ease-in-out'}>
-
-        <div className={'relative z-0'}>
+        <div className={'relative'}>
             <Link href={`/stay/${id}`} className={'block aspect-video '}>
                 <Image.PreviewGroup>
                     <Carousel>
@@ -42,7 +42,7 @@ export default function HomeItem({stay}: { stay: any }) {
                     </Carousel>
                 </Image.PreviewGroup>
             </Link>
-            <div className={'absolute right-0 top-0 p-3 z-20'}>
+            <div className={'absolute right-0 top-0 p-3'}>
                 <Tooltip title={'Wishlist'}>
                     <Button className={'bg-white'} size={'large'} onClick={handleWishlist}
                             icon={(wishlist.includes(id)) ? <HeartFilled className={'text-primary'}/> :
