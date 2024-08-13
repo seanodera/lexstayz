@@ -9,7 +9,7 @@ const PrivacyPolicy = () => {
 
                 <h2 className="text-2xl font-semibold mt-6 mb-2">Introduction</h2>
                 <p className="text-gray-700 mb-4">
-                    LexStayz (&quot;we,&quot; &quot;us,&quot; &quot;our&quot;) is committed to protecting and respecting your privacy. This Privacy Policy explains how we collect, use, share, and protect personal data that we obtain from users ("you," "your") of our website and mobile application (collectively, the "Platform"). It also outlines your rights regarding the personal data we hold about you under the General Data Protection Regulation (GDPR).
+                    LexStayz (&quot;we,&quot; &quot;us,&quot; &quot;our&quot;) is committed to protecting and respecting your privacy. This Privacy Policy explains how we collect, use, share, and protect personal data that we obtain from users (&quot;you,&quot; &quot;your&quot;) of our website and mobile application (collectively, the &quot;Platform&quot;). It also outlines your rights regarding the personal data we hold about you under the General Data Protection Regulation (GDPR).
                 </p>
 
                 <h2 className="text-2xl font-semibold mt-6 mb-2">1. Information We Collect</h2>
@@ -20,7 +20,7 @@ const PrivacyPolicy = () => {
                     <li><strong>Booking Information</strong>: Details of accommodation bookings made through our Platform.</li>
                     <li><strong>Technical Data</strong>: IP address, browser type, device information, operating system, and other technical information obtained through cookies and similar technologies.</li>
                     <li><strong>Usage Data</strong>: Information about how you use our Platform, including your search history, preferences, and interaction with our services.</li>
-                    <li><strong>Location Data</strong>: Geographical location data based on your device's GPS, IP address, or other location-based technology.</li>
+                    <li><strong>Location Data</strong>: Geographical location data based on your device&apos;s GPS, IP address, or other location-based technology.</li>
                 </ul>
 
                 <h2 className="text-2xl font-semibold mt-6 mb-2">2. How We Use Your Information</h2>
