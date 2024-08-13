@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export default function AboutUsPage() {
     return (
-        <div className="md:px-16 px-7 py-4 bg-gradient-to-t from-primary-100 via-primary-100 via-60% to-transparent">
+        <div className="md:px-16 px-7 py-8 bg-gradient-to-t from-primary-100 via-primary-100 via-60% to-transparent ">
             <div className="grid grid-cols-3 gap-6 md:w-3/4 mx-auto">
                 <div className="px-7 flex justify-end">
                     <Menu className="rounded-xl fixed ms-auto" items={[
