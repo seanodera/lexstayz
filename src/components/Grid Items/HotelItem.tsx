@@ -49,7 +49,7 @@ export default function HotelItem({hotel}: {
                     </Carousel>
                 </Image.PreviewGroup>
             </Link>
-            <div className={'absolute right-0 top-0 p-3 z-20'}>
+            <div className={'absolute right-0 top-0 p-3'}>
                 <Tooltip title={'Wishlist'}>
                     <Button  className={'bg-white'} size={'large'} onClick={handleWishlist}
                             icon={(wishlist.includes(id)) ? <HeartFilled className={'text-primary'}/> :

@@ -28,7 +28,7 @@ export default function Navbar() {
     }, []);
     return <Affix offsetTop={0} className={'z-30'}>
         <div
-            className={`w-full lg:px-24 px-7 flex items-center justify-between py-3 z-30 ${pathName === '/' ? windowHeight >= 100 ? 'bg-white text-dark' : 'text-white fixed top-0 left-0' : 'bg-white text-dark shadow-md shadow-primary-50'} transition-all duration-300 ease-linear`}>
+            className={`w-full lg:px-24 px-7 flex items-center justify-between py-3 z-50 ${pathName === '/' ? windowHeight >= 100 ? 'bg-white text-dark' : 'text-white fixed top-0 left-0' : 'bg-white text-dark shadow-md shadow-primary-50'} transition-all duration-300 ease-linear`}>
             <Link href={'/'} className={'text-3xl font-semibold block'}><img
                 className={`${pathName === '/' ? windowHeight >= 100 ? 'h-12' : ' h-16' : 'h-12'} transition-all duration-300 ease-linear`}
                 src={`/logo/${pathName === '/' ? windowHeight >= 100 ? 'lexstayz-high-resolution-logo-transparent.png' : 'lexstayz-high-resolution-logo-white-transparent.png' : 'lexstayz-high-resolution-logo-transparent.png'}`}

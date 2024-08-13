@@ -26,7 +26,7 @@ const config: Config = {
   corePlugins: {preflight: false},
   theme: {
     fontFamily: {
-      sans: 'Duru Sans'
+      sans: 'Avenir'
     },
     extend: {
       colors: {

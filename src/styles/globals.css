@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Duru+Sans&display=swap');
+@import './avenir/stylesheet.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
