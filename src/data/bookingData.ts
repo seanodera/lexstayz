@@ -153,7 +153,7 @@ export async function getBookings() {
     try {
         let bookings: any = []
         const user = getCurrentUser()
-        const bookingsRef = collection(firestore, 'user', user.uid, 'bookings')
+        const bookingsRef = collection(firestore, 'users', user.uid, 'bookings')
         const snapshot = await getDocs(bookingsRef)
 
         snapshot.docs.forEach((document) => {

@@ -20,7 +20,7 @@ export const getUserDetailsAsync:any = createAsyncThunk('authentication/user',
         }
     });
 
-export const signInUserAsync: any = createAsyncThunk('authentication/signIn',
+export const signInUserAsync = createAsyncThunk('authentication/signIn',
     async ({email, password}: { email: string, password: string }, {dispatch, rejectWithValue}) => {
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -36,7 +36,7 @@ export const signInUserAsync: any = createAsyncThunk('authentication/signIn',
     }
 );
 
-export const updateUserAsync: any = createAsyncThunk('authentication/updateUser',
+export const updateUserAsync = createAsyncThunk('authentication/updateUser',
     async ({details}:{details: any}, {rejectWithValue}) => {
         try {
             const user = getCurrentUser()
@@ -193,7 +193,7 @@ const AuthenticationSlice = createSlice({
             .addCase(updateUserAsync.rejected, (state, action) => {
                 state.isLoading = false;
                 state.hasError = true;
-                state.errorMessage = action.payload || 'Failed to update user';
+                state.errorMessage = action.payload as string || 'Failed to update user';
             })
             .addCase(updateUserAsync.pending, (state) => {
                 state.isLoading = true;
