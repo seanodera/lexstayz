@@ -11,6 +11,9 @@ import BookingUserDetails from "@/components/bookings/BookingUserDetails";
 import RoomsWidget from "@/components/bookings/RoomsWidget";
 import {startChatAsync} from "@/slices/messagingSlice";
 import ReviewDialog from "@/components/bookings/reviewDialog";
+import {verifyPayment} from "@/data/payment";
+import {completeBooking} from "@/data/bookingData";
+import {selectCurrentUser} from "@/slices/authenticationSlice";
 
 
 
@@ -19,7 +22,8 @@ export default function Page(){
     const [booking, setBooking] = useState<any>();
     const [stay, setStay] = useState<any>()
     const bookings = useAppSelector(selectBookings);
-    const stays = useAppSelector(selectAllStays)
+    const stays = useAppSelector(selectAllStays);
+    const userDetails = useAppSelector(selectCurrentUser)
     const router =useRouter()
     const dispatch = useAppDispatch();
     const [openDialog, setOpenDialog] = useState(false);
@@ -28,6 +32,34 @@ export default function Page(){
         setBooking(_booking)
         if (_booking){
             const _stay = stays.find((value) => value.id === _booking.accommodationId)
+            if (!_booking.isConfirmed && userDetails){
+                verifyPayment(_booking.id).then((res) => {
+                    if (res.status === 'success') {
+                        completeBooking({
+                            userId: userDetails.uid,
+                            id: _booking.id,
+                            isConfirmed: true,
+                            status: 'Confirmed'
+                        }).then((value) => {
+                            router.refresh()
+                            setBooking({
+                                ..._booking,
+                                isConfirmed: true,
+                                status: 'Confirmed',
+                            })
+                        })
+                    } else {
+                        completeBooking({
+                            userId: userDetails.uid,
+                            id: _booking.id,
+                            isConfirmed: false,
+                            status: 'Rejected',
+                        }).then((value) => {
+                        })
+                    }
+
+                })
+            }
             if (_stay){
                 setStay(_stay)
             } else {
@@ -37,10 +69,8 @@ export default function Page(){
             }
 
         }
-    },[bookingId, stays, bookings]);
+    },[bookingId, stays, bookings, userDetails, router, dispatch]);
     function handleContactHost() {
-
-        // @ts-ignore
         dispatch(startChatAsync({
             hostId: booking.hostId,
             })).then((value: any) => {

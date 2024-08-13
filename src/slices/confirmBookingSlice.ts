@@ -50,7 +50,7 @@ const initialState: ConfirmBookingState = {
     bookingStatus: 'Pending', // Default status
 }
 
-export const createBooking: any = createAsyncThunk(
+export const createBooking = createAsyncThunk(
     'confirmBooking/createBooking',
     async ({ paymentData, id }: { paymentData: any, id: string }, { getState, rejectWithValue }) => {
         const state = getState() as { confirmBooking: ConfirmBookingState };
@@ -111,7 +111,7 @@ export const createBooking: any = createAsyncThunk(
     }
 );
 
-export const handlePaymentAsync:any = createAsyncThunk(
+export const handlePaymentAsync = createAsyncThunk(
     'confirmBooking/handlePaymentAsync',
     async (_, { dispatch, getState, rejectWithValue }) => {
         const state = getState() as { confirmBooking: ConfirmBookingState };

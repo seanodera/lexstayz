@@ -28,6 +28,7 @@ export const fetchBookingsAsync = createAsyncThunk(
     'bookings/fetchBookings',
     async () => {
         const bookings = await getBookings();
+
         return bookings;
     }
 );

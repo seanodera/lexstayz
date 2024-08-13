@@ -5,13 +5,13 @@ import Link from "next/link";
 
 export default function Footer() {
 
-    return <footer className="bg-[#001529] text-white py-8 px-16">
-        <div className={'md:flex w-full gap-6 '}>
+    return <footer className="bg-[#001529] text-white py-8 px-7 md:px-16">
+        <div className={'md:flex w-full gap-6 space-y-8'}>
             <div className={'md:w-1/3'}>
-                <img src={'/logo/lexstayz-high-resolution-logo-transparent.png'} alt={'Logo square logo'} className={'object-contain w-full max-w-60'}/>
+                <img src={'/logo/lexstayz-high-resolution-logo-transparent.png'} alt={'Logo square logo'} className={'object-contain w-full max-w-56 md:max-w-60'}/>
             </div>
-            <div className={'flex-1'}>
-                <div className={'grid grid-cols-1 md:grid-cols-3'}>
+            <div className={'flex-1 '}>
+                <div className={'grid grid-cols-1 md:grid-cols-3 gap-8'}>
                     <div className={'space-y-2'}>
                         <div className={'font-bold'}>Partners</div>
                         <Link className={'block text-sm text-gray-300'} href={'/list-your-property'}>List your Property</Link>
