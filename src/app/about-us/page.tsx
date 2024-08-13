@@ -4,10 +4,10 @@ import Link from "next/link";
 
 export default function AboutUsPage() {
     return (
-        <div className="md:px-24 px-7 py-4 bg-gradient-to-t from-primary-100 to-transparent">
-            <div className="grid grid-cols-4 gap-6">
-                <div className="px-7">
-                    <Menu className="rounded-xl fixed" items={[
+        <div className="md:px-16 px-7 py-4 bg-gradient-to-t from-primary-100 via-primary-100 via-60% to-transparent">
+            <div className="grid grid-cols-3 gap-6 w-3/4">
+                <div className="px-7 flex justify-end">
+                    <Menu className="rounded-xl fixed ms-auto" items={[
                         {
                             key: 'About Us',
                             label: <Link href="#about">About Us</Link>,
@@ -46,7 +46,7 @@ export default function AboutUsPage() {
                         },
                     ]}/>
                 </div>
-                <div className="col-span-3 space-y-4">
+                <div className="col-span-2 space-y-8">
                     <div id="about" className="py-12 px-7 bg-white rounded-xl shadow-md ">
                         <h1 className="text-3xl font-bold mb-4">About Us</h1>
                         <p>Welcome to LexStayz, your comprehensive platform for discovering, booking, and managing
