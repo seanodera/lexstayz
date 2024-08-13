@@ -35,7 +35,7 @@ export async function completeBooking({
                                       }: BookingParams) {
     try {
         const batch = writeBatch(firestore);
-        const userDoc = doc(firestore, 'user', userId, 'bookings', id);
+        const userDoc = doc(firestore, 'users', userId, 'bookings', id);
         const bookingSnap = await getDoc(userDoc);
 
         if (!bookingSnap.exists()) {
