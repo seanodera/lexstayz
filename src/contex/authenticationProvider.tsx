@@ -58,10 +58,7 @@ export default function AuthenticationProvider({children}: { children: ReactNode
             dispatch(fetchUserChatsAsync())
         }
     });
-    return <Suspense fallback={null}>
-        <div className={''}>
-            <Navbar/>
-            <main className={''}>{children}</main>
-        </div>
-    </Suspense>
-}
+    return <div className={''}>
+        <Navbar/>
+        <main className={''}>{children}</main>
+    </div>}

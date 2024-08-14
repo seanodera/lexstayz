@@ -2,7 +2,7 @@
 import Navbar from "@/components/navigation/Navbar";
 import {useEffect, useState} from "react";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
-import {selectIsLoading} from "@/slices/bookingSlice";
+import {fetchBookingsAsync, selectIsLoading} from "@/slices/bookingSlice";
 import LoadingScreen from "@/components/LoadingScreen";
 import AuthenticationProvider, {authRoutes} from "@/contex/authenticationProvider";
 import {usePathname, useRouter} from "next/navigation";
@@ -31,9 +31,10 @@ export default function ContextProvider({children}: { children: React.ReactNode 
 
                if (!hasRun) {
                    setHasRunLocal(true)
-
-
                    dispatch(fetchStaysAsync());
+                   if (user){
+                       dispatch(fetchBookingsAsync())
+                   }
 
                }
 

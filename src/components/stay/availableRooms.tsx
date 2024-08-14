@@ -17,8 +17,6 @@ export default function AvailableRooms({ stay}: { stay: any }) {
                     let available = true
                     let lowest = room.available;
                     for (let i = 0; i <= len; ++i) {
-                        console.log(booking.checkInDate)
-                        console.log()
                         let current = dayjs(booking.checkInDate).add(i,'day').toDate().toISOString().split('T')[0]
                         if (room.fullDates && room.fullDates.includes(current)) {
                             available = false;

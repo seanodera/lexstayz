@@ -75,7 +75,32 @@ export default function StayPage() {
                 </div>
                 {stay.type === 'Hotel' ?
                     <div className="max-lg:hidden lg:ps-12 col-span-1 md:col-span-2 lg:col-span-1">
-                        <FeaturedRoom stay={stay}/>
+                            <Calendar
+                                fullscreen={false}
+                                disabledDate={(date) =>
+                                {
+
+                                    return date.isBefore(dayjs()) || (stay.fullDates && stay.fullDates.includes(date.toISOString().split("T")[0]));
+                                }}
+                                fullCellRender={(date) => {
+                                    const isCheckIn = date.isSame(checkInDate, 'date');
+                                    const isCheckOut = date.isSame(checkOutDate, 'date');
+                                    const inRange = date.isBetween(checkInDate, checkOutDate);
+
+                                    let className = 'ant-picker-cell-inner  hover:text-primary';
+                                    if (isCheckIn || isCheckOut || inRange) {
+                                        className += ' ant-picker-cell-selected bg-primary text-white hover:text-white';
+                                    }
+                                    if (date.toDate().getDate() === 17) {
+                                        console.log(isCheckOut, date, checkOutDate);
+                                    }
+                                    return (
+                                        <div className={className + ''}>
+                                            {date.date()}
+                                        </div>
+                                    );
+                                }}
+                            />
                         <CartSummary stay={stay}/>
                     </div> : <div className="max-lg:hidden lg:ps-12 col-span-1 md:col-span-2 lg:col-span-1 ">
                         <Card className={'rounded-xl'}>
