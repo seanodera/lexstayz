@@ -1,8 +1,10 @@
 'use client';
 
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { getBookings } from "@/data/bookingData";
+import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
+import {completeBooking, getBookings, getCurrentUser} from "@/data/bookingData";
 import {RootState} from "@/data/types";
+import {verifyPayment} from "@/data/payment";
+import {state} from "sucrase/dist/types/parser/traverser/base";
 
 interface BookingState {
     cart: any[];
@@ -11,7 +13,7 @@ interface BookingState {
     isLoading: boolean;
     hasError: boolean;
     errorMessage: string;
-    hasBookingRun:boolean
+    hasBookingRun: boolean
 }
 
 const initialState: BookingState = {
@@ -33,6 +35,56 @@ export const fetchBookingsAsync = createAsyncThunk(
     }
 );
 
+export const checkUnpaidBookingAsync = createAsyncThunk('bookings/checkUnpaidBooking', async (id: string, {
+    getState,
+    rejectWithValue
+}) => {
+    try {
+        const {bookings} = getState() as RootState
+        const _booking = bookings.bookings.find((value) => value.id === id)
+        const user = getCurrentUser()
+        const res = await verifyPayment(id)
+        if (res.status === 'success' && !_booking.isConfirmed) {
+            await completeBooking({
+                userId: user.uid,
+                id: _booking.id,
+                isConfirmed: true,
+                status: 'Confirmed'
+            })
+            return {
+                booking: {
+                    ..._booking,
+                    isConfirmed: true,
+                    status: 'Confirmed',
+                }, updated: true
+            }
+        } else if (res.status === 'success' && _booking.isConfirmed) {
+            return {booking: _booking, updated: false};
+        } else if (_booking.isConfirmed) {
+            completeBooking({
+                userId: user.uid,
+                id: _booking.id,
+                isConfirmed: false,
+                status: 'Rejected',
+            })
+            return {
+                booking: {
+                    ..._booking,
+                    isConfirmed: false,
+                    status: 'Rejected',
+                }, updated: true
+            }
+        } else {
+            return {booking: _booking, updated: false};
+        }
+
+    } catch (error) {
+        if (error instanceof Error) {
+            return rejectWithValue(error.message);
+        }
+        return rejectWithValue('An unknown error occurred');
+    }
+})
 const bookingsSlice = createSlice({
     name: "bookings",
     initialState: initialState,
@@ -60,7 +112,19 @@ const bookingsSlice = createSlice({
                 state.isLoading = false;
                 state.hasError = true;
                 state.errorMessage = action.error.message || 'Failed to fetch bookings';
-            });
+            }).addCase(checkUnpaidBookingAsync.pending, (state, action) => {
+            state.isLoading = true;
+        }).addCase(checkUnpaidBookingAsync.fulfilled, (state, action) => {
+            if (action.payload.updated) {
+                const pos = state.bookings.findIndex(value => value.id === action.payload.booking.id)
+                state.bookings[ pos ] = action.payload;
+            }
+            state.isLoading = false;
+        }).addCase(checkUnpaidBookingAsync.rejected, (state, action) => {
+            state.isLoading = false;
+            state.hasError = true;
+            state.errorMessage = action.error.message || 'Failed to fetch bookings';
+        });
     }
 });
 
@@ -69,7 +133,7 @@ export const selectBookings = (state: RootState) => state.bookings.bookings;
 export const selectIsLoading = (state: RootState) => state.bookings.isLoading;
 export const selectHasError = (state: RootState) => state.bookings.hasError;
 export const selectErrorMessage = (state: RootState) => state.bookings.errorMessage;
-export const selectHasBookingRun =  (state: RootState) => state.bookings.hasBookingRun;
+export const selectHasBookingRun = (state: RootState) => state.bookings.hasBookingRun;
 
 export const {
     resetBooking,

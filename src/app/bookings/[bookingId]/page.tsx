@@ -2,7 +2,7 @@
 import {useParams, useRouter} from "next/navigation";
 import {useEffect, useState} from "react";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
-import {selectBookings} from "@/slices/bookingSlice";
+import {checkUnpaidBookingAsync, selectBookings} from "@/slices/bookingSlice";
 import {selectAllStays, setCurrentStayFromId} from "@/slices/staysSlice";
 import StayWidget from "@/components/bookings/StayWidget";
 import {Button, Col, Row, Skeleton} from "antd";
@@ -32,34 +32,7 @@ export default function Page(){
         setBooking(_booking)
         if (_booking){
             const _stay = stays.find((value) => value.id === _booking.accommodationId)
-            if (!_booking.isConfirmed && userDetails){
-                verifyPayment(_booking.id).then((res) => {
-                    if (res.status === 'success') {
-                        completeBooking({
-                            userId: userDetails.uid,
-                            id: _booking.id,
-                            isConfirmed: true,
-                            status: 'Confirmed'
-                        }).then((value) => {
-                            router.refresh()
-                            setBooking({
-                                ..._booking,
-                                isConfirmed: true,
-                                status: 'Confirmed',
-                            })
-                        })
-                    } else {
-                        completeBooking({
-                            userId: userDetails.uid,
-                            id: _booking.id,
-                            isConfirmed: false,
-                            status: 'Rejected',
-                        }).then((value) => {
-                        })
-                    }
-
-                })
-            }
+            dispatch(checkUnpaidBookingAsync(_booking.id))
             if (_stay){
                 setStay(_stay)
             } else {
