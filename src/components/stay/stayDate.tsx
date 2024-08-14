@@ -78,7 +78,7 @@ export default function StayDate({stay}: {stay: any}) {
                         </div>
                     </PopoverPanel>
                 </Popover>
-                <Button size={'large'} type={'primary'}>Check Availability</Button>
+                {stay.type === 'Home' && <Button size={'large'} type={'primary'}>Book Now</Button>}
             </div>
         </div>
     );
