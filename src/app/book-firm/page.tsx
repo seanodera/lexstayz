@@ -6,7 +6,7 @@ import ContactForm from "@/components/booking-confirmation/contactForm";
 import {LeftOutlined} from "@ant-design/icons";
 import Link from "next/link";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
-import {createBooking, selectConfirmBooking} from "@/slices/confirmBookingSlice";
+import {createBooking, selectConfirmBooking, setBookingStay} from "@/slices/confirmBookingSlice";
 import {dateReader, toMoneyFormat} from "@/lib/utils";
 import {selectCurrentStay} from "@/slices/staysSlice";
 import {useRouter} from "next/navigation";
@@ -34,12 +34,14 @@ export default function BookFirmPage() {
 
     });
     useEffect(() => {
+        dispatch(setBookingStay(stay))
         setLength(differenceInDays(booking.checkOutDate, booking.checkInDate));
     }, [booking.checkInDate, booking.checkOutDate]);
+
     if (!booking || !stay) {
         return <div></div>;
     }
-    console.log(stay)
+    console.log(booking)
 
     function handleConfirm() {
         const id = generateID()
@@ -47,7 +49,7 @@ export default function BookFirmPage() {
             id: id, paymentData: {}
         })).then(action => {
             console.log(action);
-            router.push('/bookings');
+            // router.push('/bookings');
         })
     }
 
@@ -90,7 +92,7 @@ export default function BookFirmPage() {
                                 className={'rounded-xl bg-dark bg-opacity-50 aspect-video p-4 flex flex-col justify-end'}>
                                 <div>
                                     <div
-                                        className={'text-white font-medium'}>{stay.name} | {stay.location.city},{stay.location.country}</div>
+                                        className={'text-white font-medium'}>{stay.name} | {stay.location?.city},{stay.location?.country}</div>
                                     <div
                                         className={'flex text-gray-200'}>{stay.beds} Beds &bull; {stay.bathrooms} Bath &bull; {stay.bedrooms} Bedrooms
                                     </div>
@@ -122,19 +124,19 @@ export default function BookFirmPage() {
                             <hr/>
                             <div className={'grid grid-cols-2 gap-2 '}>
                                 <div className={'mb-0 text-gray-500'}>Price X <span
-                                    className={'text-dark'}>{length} night</span></div>
+                                    className={'text-dark'}>{booking.length} night</span></div>
                                 <div className={'text-end'}>
                                     <div className={'mb-0'}>{stay.currency} {toMoneyFormat(stay.price)}</div>
                                     <div
-                                        className={'mb-0 text-primary'}>{stay.currency} {toMoneyFormat(length * stay.price)}</div>
+                                        className={'mb-0 text-primary'}>{stay.currency} {toMoneyFormat(booking.totalPrice)}</div>
                                 </div>
                                 <div className={'mb-0 text-gray-500'}>Booking Fees</div>
                                 <div
-                                    className={'mb-0 text-end'}>{stay.currency} {toMoneyFormat(0.035 * length * stay.price)}</div>
+                                    className={'mb-0 text-end'}>{stay.currency} {toMoneyFormat(0.035 * booking.totalPrice)}</div>
                                 <hr className={'col-span-2 w-full'}/>
                                 <div className={'mb-0 text-lg font-medium'}>Total</div>
                                 <div
-                                    className={'mb-0 text-lg text-end font-medium'}>{stay.currency} {toMoneyFormat(1.035 * length * stay.price)}</div>
+                                    className={'mb-0 text-lg text-end font-medium'}>{stay.currency} {toMoneyFormat(1.035 * booking.totalPrice)}</div>
                             </div>
                         </div>
                         <Button block type={'primary'} size={'large'} onClick={handleConfirm}>Confirm</Button>

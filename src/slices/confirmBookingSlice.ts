@@ -182,9 +182,15 @@ const ConfirmBookingSlice = createSlice({
             state.numGuests = action.payload.numGuests;
             state.checkInDate = action.payload.checkInDate;
             state.checkOutDate = action.payload.checkOutDate;
+            if (state.stay.type && state.stay.type !== 'Hotel') {
+                state.totalPrice = differenceInDays(action.payload.checkOutDate, action.payload.checkInDate) * state.stay.price
+            }
         },
         setBookingStay: (state, action: PayloadAction<Stay>) => {
             state.stay = action.payload;
+            if (action.payload.type !== 'Hotel') {
+                state.totalPrice = state.length * state.stay.price;
+            }
         },
         convertCart: (state, action: PayloadAction<object[]>) => {
             state.rooms = action.payload;
