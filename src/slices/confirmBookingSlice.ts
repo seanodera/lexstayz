@@ -1,8 +1,8 @@
-import { Stay } from "@/lib/types";
-import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import { firestore } from "@/lib/firebase";
+import {Stay} from "@/lib/types";
+import {createSlice, createAsyncThunk, PayloadAction} from "@reduxjs/toolkit";
+import {firestore} from "@/lib/firebase";
 import {generateID, getCurrentUser} from "@/data/bookingData";
-import { writeBatch, doc, collection } from "firebase/firestore";
+import {writeBatch, doc, collection} from "firebase/firestore";
 import axios from 'axios';
 import {addDays, differenceInDays} from "date-fns";
 import {RootState} from "@/data/types";
@@ -30,7 +30,7 @@ interface ConfirmBookingState {
 const initialState: ConfirmBookingState = {
     stay: {} as Stay,
     checkInDate: new Date().toString(),
-    checkOutDate: addDays(new Date().toString(),1).toString(),
+    checkOutDate: addDays(new Date().toString(), 1).toString(),
     rooms: [],
     paymentData: {
         method: 'Pryzapay',
@@ -52,7 +52,7 @@ const initialState: ConfirmBookingState = {
 
 export const createBooking = createAsyncThunk(
     'confirmBooking/createBooking',
-    async ({ paymentData, id }: { paymentData: any, id: string }, { getState, rejectWithValue }) => {
+    async ({paymentData, id}: { paymentData: any, id: string }, {getState, rejectWithValue}) => {
         const state = getState() as { confirmBooking: ConfirmBookingState };
         const {
             stay,
@@ -71,8 +71,9 @@ export const createBooking = createAsyncThunk(
             const user = getCurrentUser();
             const batch = writeBatch(firestore);
             const userDoc = doc(firestore, 'users', user.uid, 'bookings', id);
+            const hostDoc = doc(firestore, 'hosts', stay.hostId, 'bookings', id);
 
-            const booking = {
+            const commonProperties = {
                 id: id,
                 accommodationId: stay.id,
                 accountId: user.uid,
@@ -87,18 +88,27 @@ export const createBooking = createAsyncThunk(
                 checkInDate,
                 checkOutDate,
                 createdAt: new Date().toISOString(),
-                rooms: rooms,
-                status: 'Unpaid',
                 numGuests: numGuests,
-                isConfirmed: false, // Updated after successful payment
-                specialRequest: specialRequest,
+                isConfirmed: false,
                 totalPrice: totalPrice,
+                fees: 0.035 * totalPrice,
                 currency: currency,
                 usedRate: usedRate,
-                paymentData: paymentData, // Include the payment data here
+                paymentData: paymentData,
+                specialRequest: specialRequest,
+            }
+            const unique = (stay.type === 'Hotel')? {rooms: rooms,status: 'Unpaid',} :{
+                status: 'Pending'
+            }
+            const booking = {
+                ...commonProperties,
+                ...unique
             };
 
             batch.set(userDoc, booking);
+            if (stay.type !== 'Hotel'){
+                batch.set(hostDoc,booking)
+            }
             await batch.commit();
             return booking;
         } catch (error) {
@@ -113,7 +123,7 @@ export const createBooking = createAsyncThunk(
 
 export const handlePaymentAsync = createAsyncThunk(
     'confirmBooking/handlePaymentAsync',
-    async (_, { dispatch, getState, rejectWithValue }) => {
+    async (_, {dispatch, getState, rejectWithValue}) => {
         const state = getState() as { confirmBooking: ConfirmBookingState };
         const booking = state.confirmBooking;
 
@@ -126,19 +136,19 @@ export const handlePaymentAsync = createAsyncThunk(
             const amount = parseInt((booking.totalPrice * 1.035 * booking.usedRate).toFixed(2));
             const res = await axios.post('/api/createTransaction', {
                 email: booking.contact.email,
-                amount:  amount,// Amount in KES
+                amount: amount,// Amount in KES
                 currency: booking.currency,
                 callback_url: `${process.env.NEXT_PUBLIC_HOST}/checkout?userID=${user.uid}&booking=${id}`,
                 reference: id
             });
 
             // Extract access code and reference from the response
-            const { access_code: accessCode, reference, authorization_url } = res.data.data.data;
+            const {access_code: accessCode, reference, authorization_url} = res.data.data.data;
             console.log('Access Code:', accessCode, 'Reference:', reference);
 
             // Dispatch booking action and handle success or failure
-            const paymentData = { accessCode, reference, authorization_url };
-            await dispatch(createBooking({ paymentData, id }));
+            const paymentData = {accessCode, reference, authorization_url};
+            await dispatch(createBooking({paymentData, id}));
             return authorization_url;
         } catch (error) {
             return rejectWithValue(`An error occurred. Please try again. ${error}`);

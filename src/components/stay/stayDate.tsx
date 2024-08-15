@@ -8,6 +8,7 @@ import {Popover, PopoverButton, PopoverPanel} from "@headlessui/react";
 import {MdPersonOutline} from "react-icons/md";
 import {useEffect, useState} from "react";
 import {useMediaQuery} from 'react-responsive';
+import Link from "next/link";
 
 
 const { RangePicker } = DatePicker;
@@ -78,7 +79,7 @@ export default function StayDate({stay}: {stay: any}) {
                         </div>
                     </PopoverPanel>
                 </Popover>
-                {stay.type === 'Home' && <Button size={'large'} type={'primary'}>Book Now</Button>}
+                {stay.type === 'Home' && <Link href={'/book-firm'}><Button size={'large'} type={'primary'}>Book Now</Button></Link>}
             </div>
         </div>
     );

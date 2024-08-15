@@ -70,9 +70,11 @@ export default function ContextProvider({children}: { children: React.ReactNode 
     } else if (authNeededRoutes.includes(pathname)) {
         return <AuthenticationProvider>{children}</AuthenticationProvider>
     } else {
-        return <div className={''}>
+        return <div className={'min-h-screen'}>
             <Navbar/>
-            {children}
+            <div className={'h-full'}>
+                {children}
+            </div>
             <Footer/>
             <ErrorDialog/>
 
