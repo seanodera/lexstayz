@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
             },
         });
 
-        if (response.data.data.status === 'success') {
+        if (response.data.status) {
             return NextResponse.json({ status: 'success',data: response.data });
         } else {
             return NextResponse.json({ status: 'error', message: 'Transaction verification failed' }, { status: 400 });

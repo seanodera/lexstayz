@@ -92,9 +92,9 @@ export default function BookFirmPage() {
 
     return (
         <div>
-            <div className={'grid grid-cols-3 gap-2 '}>
-                <div className={'col-span-2'}>
-                    <Card className={'px-20 pb-16 rounded-none'}>
+            <div className={'grid grid-cols-1 md:grid-cols-3 gap-2 '}>
+                <div className={'md:col-span-2'}>
+                    <Card className={'md:px-20 pb-16 rounded-none'}>
                         <Button type={'text'} icon={<LeftOutlined/>} onClick={() => router.back()}>Stay</Button>
                         <div className={'py-8'}>
                             <ContactForm/>
@@ -117,7 +117,7 @@ export default function BookFirmPage() {
                         <SpecialRequests/>
                     </Card>
                 </div>
-                <div className={'pe-16'}>
+                <div className={'md:pe-16'}>
                     <Card className={'bg-transparent'} classNames={{
                         body: 'space-y-4'
                     }}>
