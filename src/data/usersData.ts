@@ -1,6 +1,7 @@
 import {auth, firestore} from "@/lib/firebase";
-import {addDoc, doc, getDoc, getDocs, setDoc} from "firebase/firestore";
+import {addDoc, arrayUnion, doc, FieldPath, FieldValue, getDoc, getDocs, setDoc, updateDoc} from "firebase/firestore";
 import { sendPasswordResetEmail, verifyPasswordResetCode, confirmPasswordReset } from "firebase/auth";
+import {id} from "date-fns/locale";
 
 
 export async function createUser(user: any, id: string) {
@@ -52,3 +53,18 @@ export async function passwordReset(code: string, newPassword: string) {
     }
 }
 
+
+
+export async function savePaymentMethod(data: any, userId: string) {
+    try {
+        const authorization = data.data.data.authorization;
+        console.log(authorization);
+
+        const userDoc = doc(firestore, 'users', userId);
+
+        await updateDoc(userDoc, { paymentMethods: arrayUnion(authorization) });
+
+    } catch (error){
+        console.error(error);
+    }
+}

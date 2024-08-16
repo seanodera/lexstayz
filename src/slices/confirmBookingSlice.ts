@@ -40,7 +40,7 @@ const initialState: ConfirmBookingState = {
     numGuests: 2,
     specialRequest: '',
     totalPrice: 0,
-    currency: 'USD',
+    currency: 'KES',
     fees: 0,
     usedRate: 1,
     exchanged: false,
@@ -96,9 +96,10 @@ export const createBooking = createAsyncThunk(
                 usedRate: usedRate,
                 paymentData: paymentData,
                 specialRequest: specialRequest,
+                status: 'Unpaid',
             }
-            const unique = (stay.type === 'Hotel')? {rooms: rooms,status: 'Unpaid',} :{
-                status: 'Pending'
+            const unique = (stay.type === 'Hotel')? {rooms: rooms,} :{
+
             }
             const booking = {
                 ...commonProperties,
@@ -106,9 +107,9 @@ export const createBooking = createAsyncThunk(
             };
 
             batch.set(userDoc, booking);
-            if (stay.type !== 'Hotel'){
-                batch.set(hostDoc,booking)
-            }
+            // if (stay.type !== 'Hotel'){
+            //     batch.set(hostDoc,booking)
+            // }
             await batch.commit();
             return booking;
         } catch (error) {
@@ -123,7 +124,7 @@ export const createBooking = createAsyncThunk(
 
 export const handlePaymentAsync = createAsyncThunk(
     'confirmBooking/handlePaymentAsync',
-    async (_, {dispatch, getState, rejectWithValue}) => {
+    async ({preserve = false}: {preserve?: boolean}, {dispatch, getState, rejectWithValue}) => {
         const state = getState() as { confirmBooking: ConfirmBookingState };
         const booking = state.confirmBooking;
 
@@ -138,7 +139,7 @@ export const handlePaymentAsync = createAsyncThunk(
                 email: booking.contact.email,
                 amount: amount,// Amount in KES
                 currency: booking.currency,
-                callback_url: `${process.env.NEXT_PUBLIC_HOST}/checkout?userID=${user.uid}&booking=${id}`,
+                callback_url: `${process.env.NEXT_PUBLIC_HOST}/confirm-booking?userID=${user.uid}&booking=${id}${preserve? `&preserve=${preserve}` : ''}`,
                 reference: id
             });
 

@@ -27,6 +27,7 @@ export default function CheckOutComponent() {
        if (!hasRun){
            if (userID && bookingID) {
                verifyPayment(bookingID).then((res) => {
+                   console.log(res)
                    if (res.status === 'success') {
                        completeBooking({
                            userId: userID,

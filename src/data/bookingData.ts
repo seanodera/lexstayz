@@ -43,7 +43,7 @@ export async function completeBooking({
         }
 
         const booking = bookingSnap.data();
-        console.log(booking);
+
         if (booking.status === status && booking.isConfirmed === isConfirmed)  {
             throw new Error("Booking status or confirmation status is already set!");
         }
@@ -65,8 +65,7 @@ export async function completeBooking({
             const checkOut = new Date(booking.checkOutDate);
 
             if (stayData.type === 'Hotel') {
-                console.log('Transaction created!');
-                console.log(stayData)
+
                 const {updatedRooms, fullyBookedDates} = processHotelBooking(stayData, booking, checkIn, checkOut);
                 console.log(updatedRooms, fullyBookedDates);
                 transaction.update(stayRef, {rooms: updatedRooms, fullyBookedDates});
@@ -99,7 +98,7 @@ function processHotelBooking(stayData: any, booking: any, checkIn: Date, checkOu
     rooms.forEach((room: any) => {
 
         if (bookingIds.includes(room.id)) {
-            console.log('Processing hb', bookingIds, room.id);
+
             const bookedRoomData = bookedRooms.find((r: any) => r.roomId === room.id);
             let {bookedDates, fullDates} = room;
             console.log(bookedDates,fullDates, room)

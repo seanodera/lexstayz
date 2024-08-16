@@ -6,7 +6,7 @@ import ContactForm from "@/components/booking-confirmation/contactForm";
 import {LeftOutlined} from "@ant-design/icons";
 import Link from "next/link";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
-import {createBooking, selectConfirmBooking, setBookingStay} from "@/slices/confirmBookingSlice";
+import {createBooking, handlePaymentAsync, selectConfirmBooking, setBookingStay} from "@/slices/confirmBookingSlice";
 import {dateReader, toMoneyFormat} from "@/lib/utils";
 import {selectCurrentStay} from "@/slices/staysSlice";
 import {useRouter} from "next/navigation";
@@ -15,6 +15,7 @@ import {getAuth} from "firebase/auth";
 import {count} from "@firebase/firestore";
 import {differenceInDays} from "date-fns";
 import {generateID} from "@/data/bookingData";
+import axios from "axios";
 
 
 export default function BookFirmPage() {
@@ -41,16 +42,52 @@ export default function BookFirmPage() {
     if (!booking || !stay) {
         return <div></div>;
     }
-    console.log(booking)
 
-    function handleConfirm() {
-        const id = generateID()
-        dispatch(createBooking({
-            id: id, paymentData: {}
-        })).then(action => {
-            console.log(action);
-            // router.push('/bookings');
+
+    async function handleConfirm() {
+        // const id = generateID()
+        // const testResponse = await axios.post('/api/createCharge', {
+        //     email: booking.contact.email, amount: booking.totalPrice,  reference:id
+        // })
+        // console.log(testResponse)
+
+        dispatch(handlePaymentAsync({preserve: true})).then((value: any) => {
+            if (value.meta.requestStatus === 'fulfilled'){
+                router.push(value.payload)
+            } else {
+                // messageApi.error(value.payload)
+            }
+            const errObj = {
+                "type": "confirmBooking/handlePaymentAsync/rejected",
+                "payload": "An error occurred. Please try again. AxiosError: Request failed with status code 400",
+                "meta": {
+                    "requestId": "oCMUSpkxfyB6kukDNDz5e",
+                    "rejectedWithValue": true,
+                    "requestStatus": "rejected",
+                    "aborted": false,
+                    "condition": false
+                },
+                "error": {
+                    "message": "Rejected"
+                }
+            }
+            const successObj = {
+                "type": "confirmBooking/handlePaymentAsync/fulfilled",
+                "payload": "https://checkout.paystack.com/pm2dcx9va7dbdqe",
+                "meta": {
+                    "requestId": "OUpeWvkm0ndDGy2sxzw93",
+                    "requestStatus": "fulfilled"
+                }
+            }
+
         })
+
+        // dispatch(createBooking({
+        //     id: id, paymentData: {}
+        // })).then(action => {
+        //     console.log(action);
+        //     // router.push('/bookings');
+        // })
     }
 
     return (
