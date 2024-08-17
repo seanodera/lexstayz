@@ -79,9 +79,9 @@ export default function ListYourPropertyPage() {
             <div className={'grid grid-cols-1 lg:grid-cols-2 gap-6'}>
                 <div className={'flex flex-col justify-center max-lg:items-center'}>
                     <h1 className={'text-2xl sm:text-3xl md:text-4xl font-semibold'}>Partner with LexStayz</h1>
-                    <h1 className={'text-3xl sm:text-4xl md:text-5xl font-bold text-center'}>
+                    <h1 className={'text-3xl sm:text-4xl md:text-5xl lg:text-4xl xl:text-5xl font-bold max-lg:text-center lg:text-nowrap'}>
                         List Your
-                        <span className={'text-primary flex lg:inline-flex items-center '}>
+                        <span className={'text-primary flex lg:inline-flex items-center lg:ms-2'}>
                              {strings[textIndex].slice(0, index)}
                             <span className="animate-blink text-dark font-thin ms-1 text-3xl items-center lg:hidden">|</span>
                         </span>
