@@ -128,7 +128,7 @@ export default function ListYourPropertyPage() {
                 </div>
                 <div className={'flex flex-col justify-center'}>
                     <h3 className={'font-semibold mb-3'}>Mint Reality Project</h3>
-                    <div className={'bg-primary-50 rounded-2xl p-8 space-y-4'}>
+                    <div className={'bg-primary-100 rounded-2xl p-8 space-y-4'}>
                         <div className={'flex items-start gap-4'}>
                             <FaQuoteLeft className={'text-6xl text-primary '}/>
                             <div className={'font-light leading-normal'}>
