@@ -16,6 +16,7 @@ import {count} from "@firebase/firestore";
 import {differenceInDays} from "date-fns";
 import {generateID} from "@/data/bookingData";
 import axios from "axios";
+import PaymentMethods from "@/components/confirm-booking/paymentMethods";
 
 
 export default function BookFirmPage() {
@@ -24,6 +25,7 @@ export default function BookFirmPage() {
     const router = useRouter()
     const [length, setLength] = useState(0);
     const dispatch = useAppDispatch();
+    const [loading,setLoading] = useState(false);
     useEffect(() => {
         if (!stay) {
             router.push('/');
@@ -45,6 +47,7 @@ export default function BookFirmPage() {
 
 
     async function handleConfirm() {
+        setLoading(true)
         // const id = generateID()
         // const testResponse = await axios.post('/api/createCharge', {
         //     email: booking.contact.email, amount: booking.totalPrice,  reference:id
@@ -52,8 +55,11 @@ export default function BookFirmPage() {
         // console.log(testResponse)
 
         dispatch(handlePaymentAsync({preserve: true})).then((value: any) => {
+            setLoading(false)
             if (value.meta.requestStatus === 'fulfilled'){
+
                 router.push(value.payload)
+
             } else {
                 // messageApi.error(value.payload)
             }
@@ -90,12 +96,23 @@ export default function BookFirmPage() {
         // })
     }
 
+    if (loading){
+        return <div className={'flex flex-col items-center justify-center h-full w-full min-h-96 bg-white'}>
+            <div className={'loader-circle w-12'}></div>
+        </div>
+    }
     return (
         <div>
             <div className={'grid grid-cols-1 md:grid-cols-3 gap-2 '}>
                 <div className={'md:col-span-2'}>
+
+
                     <Card className={'md:px-20 pb-16 rounded-none'}>
                         <Button type={'text'} icon={<LeftOutlined/>} onClick={() => router.back()}>Stay</Button>
+
+                        <div className={'border-solid border-gray-200 p-4 rounded-xl my-8'}>
+                            <PaymentMethods/>
+                        </div>
                         <div className={'py-8'}>
                             <ContactForm/>
                         </div>

@@ -123,6 +123,7 @@ interface AuthenticationState {
         dob?:string;
         gender?:string;
         address?: any;
+        paymentMethods?: any[];
     },
     wishlist: string[],
     isLoading: boolean,

@@ -25,6 +25,7 @@ interface ConfirmBookingState {
     status: 'idle' | 'loading' | 'succeeded' | 'failed',
     error: string | null,
     bookingStatus: 'Pending' | 'Confirmed' | 'Canceled' | 'Rejected',
+    paymentMethod: any,
 }
 
 const initialState: ConfirmBookingState = {
@@ -47,6 +48,7 @@ const initialState: ConfirmBookingState = {
     length: 0,
     status: 'idle',
     error: null,
+    paymentMethod: 'new',
     bookingStatus: 'Pending', // Default status
 }
 
@@ -135,6 +137,8 @@ export const handlePaymentAsync = createAsyncThunk(
             const user = getCurrentUser();
             // Make a POST request to create the transaction
             const amount = parseInt((booking.totalPrice * 1.035 * booking.usedRate).toFixed(2));
+            if (state.confirmBooking.paymentMethod === 'new'){
+
             const res = await axios.post('/api/createTransaction', {
                 email: booking.contact.email,
                 amount: amount,// Amount in KES
@@ -151,7 +155,22 @@ export const handlePaymentAsync = createAsyncThunk(
             const paymentData = {accessCode, reference, authorization_url};
             await dispatch(createBooking({paymentData, id}));
             return authorization_url;
+            } else {
+                const res = await axios.post('/api/createCharge', {
+                    email: booking.contact.email,
+                    amount: amount,
+                    currency: booking.currency,
+                    authorization_code: state.confirmBooking.paymentMethod,
+                    callback_url: `${process.env.NEXT_PUBLIC_HOST}/confirm-booking?userID=${user.uid}&booking=${id}${preserve? `&preserve=${preserve}` : ''}`,
+                    reference: id
+                })
+                console.log(res)
+                await dispatch(createBooking({paymentData: res.data.data, id}));
+
+                    return `/confirm-booking?userID=${user.uid}&booking=${id}`;
+            }
         } catch (error) {
+            console.log(error)
             return rejectWithValue(`An error occurred. Please try again. ${error}`);
         }
     }
@@ -213,6 +232,9 @@ const ConfirmBookingSlice = createSlice({
         },
         updateBookingStatus: (state, action: PayloadAction<'Pending' | 'Confirmed' | 'Canceled' | 'Rejected'>) => {
             state.bookingStatus = action.payload;
+        },
+        setPaymentMethod: (state,action: PayloadAction<string>) => {
+            state.paymentMethod = action.payload;
         }
     },
     extraReducers: (builder) => {
@@ -253,6 +275,7 @@ export const {
     updateBookingData,
     setBookingStay,
     convertCart,
+    setPaymentMethod,
 } = ConfirmBookingSlice.actions;
 
 // Selectors
@@ -273,5 +296,6 @@ export const selectStatus = (state: RootState) => state.confirmBooking.status;
 export const selectError = (state: RootState) => state.confirmBooking.error;
 export const selectBookingStatus = (state: RootState) => state.confirmBooking.bookingStatus;
 export const selectConfirmBooking = (state: RootState) => state.confirmBooking;
+export const selectPaymentMethod = (state: RootState) => state.confirmBooking.paymentMethod;
 
 export default ConfirmBookingSlice.reducer;
