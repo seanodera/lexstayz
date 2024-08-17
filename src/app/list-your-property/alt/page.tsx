@@ -101,13 +101,13 @@ const LexStayzListing = () => {
                 <Row gutter={[24, 24]}>
                     <Col xs={24} md={12}>
                         <Card>
-                            <p>"LexStayz has transformed the way we manage our properties."</p>
+                            <p>&quot;LexStayz has transformed the way we manage our properties.&quot;</p>
                             <div className="mt-4 font-semibold">— Host Name, Property Location</div>
                         </Card>
                     </Col>
                     <Col xs={24} md={12}>
                         <Card>
-                            <p>The exposure we’ve gained through LexStayz has been remarkable.</p>
+                            <p>&quot;The exposure we’ve gained through LexStayz has been remarkable.&quot;</p>
                             <div className="mt-4 font-semibold">— Host Name, Property Location</div>
                         </Card>
                     </Col>
