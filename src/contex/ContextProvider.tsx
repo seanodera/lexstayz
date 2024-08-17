@@ -13,7 +13,7 @@ import {fetchStaysAsync, selectHasRun, selectIsStayLoading} from "@/slices/stays
 import ErrorDialog from "@/components/dialogs/ErrorDialog";
 import Footer from "@/components/navigation/Footer";
 
-const authNeededRoutes = ['/bookings', '/booking-confirmation', '/checkout', '/wishlist', '/profile', '/messages']
+const authNeededRoutes = ['bookings', 'booking-confirmation', 'checkout', 'wishlist', 'profile', 'messages', 'book-firm']
 
 export default function ContextProvider({children}: { children: React.ReactNode }) {
     const pathname = usePathname()
@@ -61,13 +61,15 @@ export default function ContextProvider({children}: { children: React.ReactNode 
             }
         }
     })
+
     if (isLoading || isStayLoading) {
         return <div className={'h-screen w-screen'}>
             <LoadingScreen/>
         </div>;
     } else if (authRoutes.includes(pathname)) {
         return <div>{children}</div>
-    } else if (authNeededRoutes.includes(pathname)) {
+    } else if (pathname.split('/').length > 1 &&  authNeededRoutes.includes(pathname.split('/')[1])) {
+        console.log('authRoute', pathname.split('/')[1]);
         return <AuthenticationProvider>{children}</AuthenticationProvider>
     } else {
         return <div className={'min-h-screen'}>

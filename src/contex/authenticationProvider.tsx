@@ -58,7 +58,7 @@ export default function AuthenticationProvider({children}: { children: ReactNode
             dispatch(fetchUserChatsAsync())
         }
     });
-    return <div className={''}>
+    return <div className={'min-h-screen'}>
         <Navbar/>
-        <main className={''}>{children}</main>
+        <main className={'h-full'}>{children}</main>
     </div>}
