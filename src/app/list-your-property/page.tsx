@@ -1,6 +1,6 @@
 'use client'
 import {Avatar, Button, Card, Col, Row, Steps} from "antd";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {DashOutlined, LeftOutlined, RightOutlined} from "@ant-design/icons";
 import {FaQuoteLeft} from "react-icons/fa";
 
@@ -30,12 +30,59 @@ export default function ListYourPropertyPage() {
         },
     ];
 
+    const strings = [
+        "Home",
+        "Hotel",
+        "Property",
+        "Apartment",
+        "Guest House",
+    ];
+
+
+    const [textIndex, setTextIndex] = useState(0); // Tracks the current string in the list
+    const [index, setIndex] = useState(0); // Tracks the character index of the current string
+    const [direction, setDirection] = useState("forward"); // Determines typing or backspacing
+    const [isPaused, setIsPaused] = useState(false); // Handles pause after typing
+
+    useEffect(() => {
+        if (isPaused) {
+            const pauseTimeout = setTimeout(() => {
+                setIsPaused(false);
+                setDirection("backward");
+            }, 1000); // Adjust pause duration here
+            return () => clearTimeout(pauseTimeout);
+        }
+
+        const timeout = setTimeout(() => {
+            const currentText = strings[textIndex];
+
+            if (direction === "forward") {
+                if (index < currentText.length) {
+                    setIndex((prev) => prev + 1);
+                } else {
+                    setIsPaused(true);
+                }
+            } else {
+                if (index > 0) {
+                    setIndex((prev) => prev - 1);
+                } else {
+                    setDirection("forward");
+                    setTextIndex((prev) => (prev + 1) % strings.length); // Move to the next string
+                }
+            }
+        }, direction === "forward" ? 200 : 100); // Typing is slower, backspacing is faster
+
+        return () => clearTimeout(timeout);
+    }, [index, direction, textIndex, strings, isPaused]);
+
     return <div>
         <section className={'px-7 lg:px-24 py-20'}>
             <div className={'grid grid-cols-2 gap-6'}>
                 <div className={'flex flex-col justify-center'}>
                     <h1 className={'text-3xl font-semibold'}>Partner with LexStayz</h1>
-                    <h1 className={'text-5xl font-bold'}>List Your <span className={'text-primary'}>Property</span></h1>
+                    <h1 className={'text-5xl font-bold'}>List Your <span
+                        className={'text-primary inline-flex items-center'}>{strings[ textIndex ].slice(0, index)}<span
+                        className="animate-blink text-dark font-thin ms-1 text-3xl items-center hidden">|</span></span></h1>
                     <div className={'text-gray-700 max-w-md text-lg'}>
                         Start your journey with LexStayz and experience the benefits of partnering with a leading
                         platform in the accommodation industry. Click the link below to get started.
