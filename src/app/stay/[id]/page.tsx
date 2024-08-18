@@ -79,8 +79,15 @@ export default function StayPage() {
                                 fullscreen={false}
                                 disabledDate={(date) =>
                                 {
-
-                                    return date.isBefore(dayjs()) || (stay.fullDates && stay.fullDates.includes(date.toISOString().split("T")[0]));
+                                    const curr = date.toISOString().split('T')[ 0 ]
+                                    let booked = false;
+                                    if (stay.type === 'Home'){
+                                        booked = stay.bookedDates?.includes(curr);
+                                        console.log(booked)
+                                    } else {
+                                        booked = stay.fullyBookedDates?.includes(curr)
+                                    }
+                                    return date.isBefore(dayjs()) || booked || (stay.fullDates && stay.fullDates.includes(date.toISOString().split("T")[0]));
                                 }}
                                 fullCellRender={(date) => {
                                     const isCheckIn = date.isSame(checkInDate, 'date');

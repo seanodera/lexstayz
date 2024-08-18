@@ -24,8 +24,15 @@ export default function StayDate({stay}: {stay: any}) {
 
     const disabledDate: RangePickerProps['disabledDate'] = (current) => {
         const curr = current.toISOString().split('T')[ 0 ]
-
-        return stay.fullyBookedDates?.includes(curr) || current.isBefore(dayjs().subtract(1,'day'));
+        console.log(stay)
+        let booked = false;
+        if (stay.type === 'Home'){
+            booked = stay.bookedDates?.includes(curr);
+            console.log(booked)
+        } else {
+            booked = stay.fullyBookedDates?.includes(curr)
+        }
+        return booked || current.isBefore(dayjs().subtract(1,'day'));
     };
 
     useEffect(() => {

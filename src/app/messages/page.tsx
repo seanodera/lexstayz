@@ -1,9 +1,10 @@
 'use client'
-import {Col, Input, Row} from "antd";
+import {Button, Col, Drawer, Input, Row} from "antd";
 import RecipientsBox from "@/components/messages/recipentBox";
-import {SearchOutlined} from "@ant-design/icons";
+import {MenuOutlined, SearchOutlined} from "@ant-design/icons";
 import ChatBox from "@/components/messages/chatBox";
 import {useMediaQuery} from "react-responsive";
+import {useState} from "react";
 
 
 export default function MessagePage() {
@@ -26,5 +27,83 @@ export default function MessagePage() {
                 <ChatBox/>
             </Col>
         </Row>;
+    }
+}
+
+ function MessagePageNew() {
+    const isMobile = useMediaQuery({query: '(max-width: 768px)'});
+    const [showReservation, setShowReservation] = useState(false);
+    console.log(isMobile);
+    if (isMobile) {
+        return <div className={'h-full py-4 bg-white px-4'}>
+            <div className={'text-2xl'}>Messages</div>
+            <RecipientsBox/>
+        </div>
+    } else {
+
+
+        return (
+            <div className="h-screen flex flex-col md:flex-row">
+                {/* Chats Panel */}
+                <div className="md:w-1/4 w-full h-full bg-gray-100 border-r overflow-y-auto">
+                    <div className="p-4">
+                        <h2 className="text-lg font-semibold mb-4">Chats</h2>
+                        {/* Example Chats */}
+                        <ul>
+                            <li className="mb-4 p-2 bg-white rounded shadow-sm">Chat 1</li>
+                            <li className="mb-4 p-2 bg-white rounded shadow-sm">Chat 2</li>
+                            <li className="mb-4 p-2 bg-white rounded shadow-sm">Chat 3</li>
+                            {/* More chats here */}
+                        </ul>
+                        <Button
+                            className="md:hidden mt-4"
+                            type="primary"
+                            icon={<MenuOutlined />}
+                            onClick={() => setShowReservation(true)}
+                        >
+                            Show Reservation
+                        </Button>
+                    </div>
+                </div>
+
+                {/* Messages Panel */}
+                <div className="md:w-1/2 w-full h-full bg-white border-r overflow-y-auto">
+                    <div className="p-4">
+                        <h2 className="text-lg font-semibold mb-4">Messages</h2>
+                        {/* Example Messages */}
+                        <div className="mb-4 p-4 bg-gray-100 rounded">Message 1</div>
+                        <div className="mb-4 p-4 bg-gray-100 rounded">Message 2</div>
+                        <div className="mb-4 p-4 bg-gray-100 rounded">Message 3</div>
+                        {/* More messages here */}
+                    </div>
+                </div>
+
+                {/* Reservations Panel (hidden on mobile) */}
+                <div className="md:w-1/4 w-full h-full bg-gray-50 overflow-y-auto hidden md:block">
+                    <div className="p-4">
+                        <h2 className="text-lg font-semibold mb-4">Reservations</h2>
+                        {/* Example Reservations */}
+                        <div className="mb-4 p-4 bg-white rounded shadow-sm">Reservation 1</div>
+                        <div className="mb-4 p-4 bg-white rounded shadow-sm">Reservation 2</div>
+                        <div className="mb-4 p-4 bg-white rounded shadow-sm">Reservation 3</div>
+                        {/* More reservations here */}
+                    </div>
+                </div>
+
+                {/* Drawer for mobile reservations */}
+                <Drawer
+                    title="Reservations"
+                    placement="right"
+                    onClose={() => setShowReservation(false)}
+                    open={showReservation}
+                >
+                    {/* Example Reservations */}
+                    <div className="mb-4 p-4 bg-white rounded shadow-sm">Reservation 1</div>
+                    <div className="mb-4 p-4 bg-white rounded shadow-sm">Reservation 2</div>
+                    <div className="mb-4 p-4 bg-white rounded shadow-sm">Reservation 3</div>
+                    {/* More reservations here */}
+                </Drawer>
+            </div>
+        );
     }
 }

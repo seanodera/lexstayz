@@ -1,6 +1,6 @@
 'use client'
 import {useAppSelector, useAppDispatch} from "@/hooks/hooks";
-import {selectConfirmBooking} from "@/slices/confirmBookingSlice";
+import {selectConfirmBooking, updateBookingData} from "@/slices/confirmBookingSlice";
 import {useEffect, useMemo, useState} from "react";
 import {useRouter, useSearchParams} from "next/navigation";
 import {useMediaQuery} from "react-responsive";
@@ -49,7 +49,7 @@ export default function SearchComponent() {
     const [startDate, setStartDate] = useState(booking.checkInDate);
     const [endDate, setEndDate] = useState(booking.checkOutDate);
     const [numRooms, setNumRooms] = useState(1);
-    const [numGuests, setNumGuests] = useState(2);
+    const [numGuests, setNumGuests] = useState(booking.numGuests);
     const router = useRouter();
     const [dates, setDates] = useState<any[]>([]);
     const [hoveredDate, setHoveredDate] = useState(null);
@@ -79,7 +79,7 @@ export default function SearchComponent() {
             if (location) {
                 setSelectedLocation(location);
                 setSearchTerm(location);
-                // @ts-ignore
+
                 dispatch(searchAsync(location));
             }
         }
@@ -87,7 +87,7 @@ export default function SearchComponent() {
 
     const debouncedHandleSearch = useMemo(() => debounce((value: string) => {
         if (!value) return;
-        // @ts-ignore
+
         dispatch(searchAsync(value));
     }, 300), [dispatch]);
 
@@ -129,6 +129,14 @@ export default function SearchComponent() {
             debouncedHandleSearch.cancel();
         };
     }, [debouncedHandleSearch]);
+
+    useEffect(() => {
+        dispatch(updateBookingData({
+            numGuests: numGuests,
+            checkInDate: startDate,
+            checkOutDate: endDate,
+        }));
+    }, [numGuests, startDate, endDate]);
 
     return (
         <div className={'bg-white'}>

@@ -2,15 +2,24 @@
 import { AutoComplete, AutoCompleteProps, Button, DatePicker, InputNumber, Space } from "antd";
 import { RangePickerProps } from "antd/es/date-picker";
 import dayjs from "dayjs";
-import { SearchOutlined } from "@ant-design/icons";
+import {MinusOutlined, PlusOutlined, SearchOutlined} from "@ant-design/icons";
 import { useEffect, useState, useMemo } from "react";
-import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
+import {
+    Combobox,
+    ComboboxInput,
+    ComboboxOption,
+    ComboboxOptions,
+    Popover,
+    PopoverButton,
+    PopoverPanel
+} from "@headlessui/react";
 import { MdPersonOutline } from "react-icons/md";
 import { BsRecordFill } from "react-icons/bs";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { selectConfirmBooking, updateBookingData } from "@/slices/confirmBookingSlice";
 import algoliasearch from "algoliasearch/lite";
 import debounce from "lodash/debounce";
+import {useMediaQuery} from "react-responsive";
 
 const { RangePicker } = DatePicker;
 
@@ -20,14 +29,15 @@ export default function SearchComponent() {
     };
 
     const booking = useAppSelector(selectConfirmBooking);
-    const [searchTerms, setSearchTerms] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
     const [selectedLocation, setSelectedLocation] = useState('');
     const [startDate, setStartDate] = useState(booking.checkInDate);
     const [endDate, setEndDate] = useState(booking.checkOutDate);
-
+    const isMobile = useMediaQuery({maxWidth: 640});
     const [numRooms, setNumRooms] = useState(1);
-    const [numGuests, setNumGuests] = useState(2);
+    const [numGuests, setNumGuests] = useState(booking.numGuests);
     const searchClient = algoliasearch("S192CBDSDM", "07dbe0e186e0f74a4ce9915a7fb74233");
+    const [hoveredDate, setHoveredDate] = useState(null);
     const indexName = 'stays';
     const index = searchClient.initIndex(indexName);
     const dispatch = useAppDispatch();
@@ -40,7 +50,7 @@ export default function SearchComponent() {
         }));
     }, [numGuests, startDate, endDate]);
 
-    const [options, setOptions] = useState<AutoCompleteProps['options']>([]);
+    const [options, setOptions] = useState<any>([]);
 
     // Debounced version of the search function
     const debouncedHandleSearch = useMemo(() => debounce(async (value: string) => {
@@ -62,7 +72,7 @@ export default function SearchComponent() {
             ];
         });
         setOptions(processed);
-        setSearchTerms(value);
+        setSearchTerm(value);
     }, 300), [index]);
 
     function handleSelect(value: string) {
@@ -78,63 +88,62 @@ export default function SearchComponent() {
     }, [debouncedHandleSearch]);
 
     return (
-        <div className={'py-8 md:px-24 xl:p-0 px-7 flex justify-center w-full'}>
-            <Space.Compact className={'xl:bg-black max-xl:bg-white xl:bg-opacity-60 xl:text-white rounded-lg xl:w-full max-lg:flex max-lg:flex-col max-md:w-full max-lg:space-y-4'}>
-                <AutoComplete
-                    className={'lg:w-1/3 bg-transparent text-dark rounded-l-lg max-lg:rounded-lg xl:text-white xl:placeholder-gray-400'}
-                    size={'large'}
-                    placeholder={'Where are you going?'}
-                    options={options}
-                    onSelect={handleSelect}
-                    onSearch={debouncedHandleSearch} // Use debounced search
-                    filterOption={false}
-                />
+        <div className={'py-8 md:px-7 xl:p-0 px-7 flex justify-center w-full'}>
+            <div className={'flex gap-2 max-md:flex-col'}>
+                <Combobox value={selectedLocation} onChange={(value) => handleSelect(value || '')}>
+                    <ComboboxInput className={'bg-dark text-white placeholder-gray-300 bg-opacity-75 rounded-lg border-0'} placeholder={'Anywhere'}
+                                   displayValue={(item: any) => item}
+                                   onChange={(e) => {
+                                       debouncedHandleSearch(e.target.value)
+                                       setSearchTerm(e.target.value)
+                                   }}/>
+                    <ComboboxOptions anchor="bottom"
+                                     className="border-0 shadow-md empty:invisible bg-white rounded-lg py-2 text-nowrap gap-2">
+                        <ComboboxOption className={'hover:bg-dark hover:bg-opacity-10 px-8 py-2'}
+                                        value={searchTerm}>{searchTerm}</ComboboxOption>
+                        {options.map((option:any, index: number) => (
+                            <ComboboxOption
+                                className={'hover:bg-dark hover:bg-opacity-10 px-8 py-2'}
+                                key={index}
+                                value={option.value}
+                            >
+                                {option.label}
+                            </ComboboxOption>
+                        ))}
+                    </ComboboxOptions>
+                </Combobox>
                 <RangePicker
-                    disabledDate={disabledDate}
-                    format={'DD MMMM YYYY'}
+                    panelRender={(panelNode) => (
+                        <div className={`flex ${isMobile ? "flex-col" : "flex-row"}`}>
+                            {panelNode}
+                        </div>
+                    )}
                     value={[dayjs(booking.checkInDate), dayjs(booking.checkOutDate)]}
-                    size={'large'}
-                    className={'lg:w-1/3 xl:w-max bg-transparent text-current placeholder-gray-400 max-lg:rounded-lg'}
+
                     onChange={(value) => {
                         if (value) {
                             setStartDate(dayjs(value[0]).toString());
                             setEndDate(dayjs(value[1]).toString());
                         }
                     }}
+                    className="bg-dark text-white placeholder-gray-200 bg-opacity-75 rounded-lg border-0 py-2"
+                    format="DD MMMM"
+                    placeholder={["Check-in", "Check-out"]}
+                    popupClassName=""
                 />
-                <Popover className="relative">
-                    <PopoverButton
-                        as={Button}
-                        size={'large'} className={'bg-transparent text-current w-full max-lg:rounded-lg'}>
-                        <MdPersonOutline className={'text-lg'} /> {numGuests} Guests <BsRecordFill size={8} /> {numRooms} Rooms
-                    </PopoverButton>
-
-                    <PopoverPanel anchor="bottom" className="flex flex-col p-4 z-20 shadow-xl rounded-xl ">
-                        <div className={'grid grid-cols-2 bg-white items-center justify-center rounded-xl gap-2 px-8 py-4'}>
-                            <h4>Guests</h4>
-                            <div>
-                                <InputNumber
-                                    className={'rounded-lg'}
-                                    value={numGuests}
-                                    onChange={(value) => setNumGuests(value || 0)}
-                                    min={1}
-                                />
-                            </div>
-                            <h4>Rooms</h4>
-                            <div>
-                                <InputNumber
-                                    className={'rounded-lg'}
-                                    value={numRooms}
-                                    onChange={(value) => setNumRooms(value || 0)}
-                                    min={1}
-                                />
-                            </div>
-                        </div>
-                    </PopoverPanel>
-                </Popover>
+                <div
+                    className={'bg-dark text-white placeholder-gray-200 bg-opacity-75 rounded-lg border-0 flex max-md:justify-between items-center md:w-max py-2 px-2 gap-2 font-thin'}>
+                    <Button shape={'circle'} ghost icon={<MinusOutlined/>} size={'small'}
+                            onClick={() => setNumGuests((prev) => prev > 1 ? prev - 1 : prev)}/>
+                    {numGuests} Guests
+                    <Button  shape={'circle'} ghost size={'small'}
+                        onClick={() => setNumGuests((prev) => prev + 1)}
+                        icon={<PlusOutlined/>}
+                    />
+                </div>
                 <Button href={`/search?loc=${selectedLocation}`} className={'max-lg:hidden rounded-r-lg'} type={'primary'} size={'large'} icon={<SearchOutlined />}></Button>
                 <Button href={`/search?loc=${selectedLocation}`} className={'lg:hidden block rounded-lg'} type={'primary'} size={'large'}>Search</Button>
-            </Space.Compact>
+            </div>
         </div>
     );
 }

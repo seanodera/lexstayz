@@ -29,6 +29,7 @@ export default function HomeItem({stay}: { stay: any }) {
             })
         }
     }
+
     return <div
         className={'text-current rounded-xl transition-all duration-300 ease-in-out'}>
         <div className={'relative'}>
@@ -57,13 +58,11 @@ export default function HomeItem({stay}: { stay: any }) {
                     <h3 className={'font-light   leading-none text-gray-400 line-clamp-1'}>{location.city}, {location.country}</h3>
                 </div>
                 <div className={'flex flex-col justify-start'}>
-                    <Rate count={5} disabled value={3} className={'text-primary text-sm my-0'}/>
+                    <Rate count={5} disabled value={rating} className={'text-primary text-sm my-0'}/>
                 </div>
             </div>
             <div className={'max-md:text-sm flex flex-nowrap'}>
-                <p className={'line-clamp-1 text-nowrap flex-nowrap'}>{description}</p>{(description.length > descriptionLimit) &&
-                <Ellipsis
-                    className={'flex-nowrap text-nowrap'}/>}
+                <p className={'line-clamp-1 text-nowrap flex-nowrap'}>{description}</p>
             </div>
             <h4 className={'text-primary leading-none font-medium text-nowrap'}>From
                 $ {toMoneyFormat(stay.price)} / night</h4>
