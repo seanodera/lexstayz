@@ -1,7 +1,7 @@
 'use client'
 import Link from "next/link";
 import {Button, Carousel, Image, Rate, Tooltip} from "antd";
-import {toMoneyFormat} from "@/lib/utils";
+import {roundToNearest5, toMoneyFormat} from "@/lib/utils";
 import {Ellipsis} from "react-bootstrap/PageItem";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import {deleteFromWishList, selectCurrentUser, selectWishlist, updateWishList} from "@/slices/authenticationSlice";
@@ -36,6 +36,7 @@ export default function HotelItem({hotel}: {
             })
         }
     }
+
     return <div
         className={'text-current rounded-xl transition-all duration-300 ease-in-out'}>
         <div className={'relative'}>
@@ -51,7 +52,7 @@ export default function HotelItem({hotel}: {
             </Link>
             <div className={'absolute right-0 top-0 p-3'}>
                 <Tooltip title={'Wishlist'}>
-                    <Button  className={'bg-white'} size={'large'} onClick={handleWishlist}
+                    <Button className={'bg-white'} size={'large'} onClick={handleWishlist}
                             icon={(wishlist.includes(id)) ? <HeartFilled className={'text-primary'}/> :
                                 <HeartOutlined/>} shape={'circle'}/>
                 </Tooltip>
@@ -64,7 +65,8 @@ export default function HotelItem({hotel}: {
                     <h3 className={'font-light   leading-none text-gray-400 line-clamp-1'}>{location.city}, {location.country}</h3>
                 </div>
                 <div className={'flex flex-col justify-start'}>
-                    <Rate count={5} disabled value={hotel.rating} className={'text-primary text-sm my-0'}/>
+                    <Rate count={5} disabled value={roundToNearest5((rating || 0) * 10) / 10} allowHalf
+                          className={'text-primary text-sm my-0'}/>
                 </div>
             </div>
             <div className={'max-md:text-sm flex flex-nowrap'}>

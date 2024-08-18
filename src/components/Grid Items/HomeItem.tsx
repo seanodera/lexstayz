@@ -5,7 +5,7 @@ import {deleteFromWishList, selectWishlist, updateWishList} from "@/slices/authe
 import Link from "next/link";
 import {HeartFilled, HeartOutlined} from "@ant-design/icons";
 import {Ellipsis} from "react-bootstrap/PageItem";
-import {toMoneyFormat} from "@/lib/utils";
+import {roundToNearest5, toMoneyFormat} from "@/lib/utils";
 
 
 export default function HomeItem({stay}: { stay: any }) {
@@ -58,7 +58,7 @@ export default function HomeItem({stay}: { stay: any }) {
                     <h3 className={'font-light   leading-none text-gray-400 line-clamp-1'}>{location.city}, {location.country}</h3>
                 </div>
                 <div className={'flex flex-col justify-start'}>
-                    <Rate count={5} disabled value={rating} className={'text-primary text-sm my-0'}/>
+                    <Rate count={5} disabled value={roundToNearest5((rating || 0) * 10) / 10} allowHalf className={'text-primary text-sm my-0'}/>
                 </div>
             </div>
             <div className={'max-md:text-sm flex flex-nowrap'}>

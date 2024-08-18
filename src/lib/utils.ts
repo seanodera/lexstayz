@@ -178,4 +178,6 @@ export const getExchangeRate = async (fromCurrency: string, toCurrency: string) 
     }
 };
 
+export function roundToNearest5(x: number) { return x % 5 < 3 ? (x % 5 === 0 ? x : Math.floor(x / 5) * 5) : Math.ceil(x / 5) * 5 }
+
 
