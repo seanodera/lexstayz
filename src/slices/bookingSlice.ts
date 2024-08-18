@@ -1,12 +1,13 @@
 'use client';
 
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {completeBooking, getBookings, getCurrentUser} from "@/data/bookingData";
+import {completeBooking, generateID, getBookings, getCurrentUser} from "@/data/bookingData";
 import {RootState} from "@/data/types";
 import {verifyPayment} from "@/data/payment";
-import {collection, doc, getDoc} from "firebase/firestore";
+import {arrayUnion, collection, doc, getDoc, setDoc} from "firebase/firestore";
 import {firestore} from "@/lib/firebase";
-
+import {writeBatch} from "@firebase/firestore";
+import {state} from "sucrase/dist/types/parser/traverser/base";
 
 
 interface BookingState {
@@ -51,12 +52,14 @@ export const checkUnpaidBookingAsync = createAsyncThunk('bookings/checkUnpaidBoo
             await completeBooking({
                 userId: user.uid,
                 id: _booking.id,
+                paymentData: res.data.data,
                 isConfirmed: true,
                 status: 'Confirmed'
             })
             return {
                 booking: {
                     ..._booking,
+                    paymentData: res.data.data,
                     isConfirmed: true,
                     status: 'Confirmed',
                 }, updated: true
@@ -67,12 +70,14 @@ export const checkUnpaidBookingAsync = createAsyncThunk('bookings/checkUnpaidBoo
             await completeBooking({
                 userId: user.uid,
                 id: _booking.id,
+                paymentData: res.data.data,
                 isConfirmed: false,
                 status: 'Rejected',
             })
             return {
                 booking: {
                     ..._booking,
+                    paymentData: res.data.data,
                     isConfirmed: false,
                     status: 'Rejected',
                 }, updated: true
@@ -116,6 +121,84 @@ export const fetchBookingAsync = createAsyncThunk('bookings/fetchBooking', async
         }
     }
 )
+
+interface Review {
+    id: string;
+    bookingId: string;
+    userId: string;
+    stayId: string;
+    name: string;
+    rating: number;
+    createdAt: string;
+    valueForMoney: number;
+    facilities: number;
+    location: number;
+    staff: number;
+    cleanliness: number;
+    comfort: number;
+}
+
+export const writeReview = createAsyncThunk('bookings/writeReview', async (review: Review, {
+    rejectWithValue,
+    getState
+}) => {
+    try {
+
+        const { bookings } = getState() as RootState;
+
+
+        const user = getCurrentUser();
+        if (!user) {
+            throw new Error('User not authenticated');
+        }
+
+
+        const bookingRef = doc(collection(firestore, 'users', user.uid, 'bookings'), review.bookingId);
+        const stayRef = doc(collection(firestore, 'stays'), review.stayId);
+
+
+        const snapshot = await getDoc(stayRef);
+        const data = snapshot.data();
+        if (!data) {
+            throw new Error('Stay not found');
+        }
+
+
+        if (data.reviews && data.reviews.some((r: any) => r.bookingId === review.bookingId)) {
+            throw new Error('A review already exists for this booking');
+        }
+
+
+        const newNumReviews = (data.numReviews || 0) + 1;
+        const newRating = ((data.rating || 0) * (data.numReviews || 0) + review.rating) / newNumReviews;
+
+
+        const batch = writeBatch(firestore);
+
+
+        batch.update(bookingRef, { review: true, reviewData: review });
+
+
+        batch.update(stayRef, {
+            reviews: arrayUnion(review),
+            numReviews: newNumReviews,
+            rating: newRating
+        });
+
+
+        await batch.commit();
+
+
+        const booking = bookings.bookings.find((value) => value.id === review.bookingId);
+        return { ...booking, review: true, reviewData: review };
+    } catch (error) {
+        if (error instanceof Error) {
+            return rejectWithValue(error.message);
+        }
+        return rejectWithValue('An unknown error occurred');
+    }
+});
+
 const bookingsSlice = createSlice({
     name: "bookings",
     initialState: initialState,
@@ -149,7 +232,7 @@ const bookingsSlice = createSlice({
             if (action.payload.updated) {
                 const pos = state.bookings.findIndex(value => value.id === action.payload.booking.id)
                 state.bookings[ pos ] = action.payload.booking;
-                if (state.currentBooking.id === action.payload.booking.id){
+                if (state.currentBooking.id === action.payload.booking.id) {
                     state.currentBooking = action.payload.booking;
                 }
             }
@@ -162,8 +245,8 @@ const bookingsSlice = createSlice({
             state.isLoading = true
         })
             .addCase(fetchBookingAsync.fulfilled, (state, action) => {
-                const localBooking = state.bookings.find((value) => value.id ===action.payload.id)
-                if (!localBooking)  {
+                const localBooking = state.bookings.find((value) => value.id === action.payload.id)
+                if (!localBooking) {
                     state.bookings.push(action.payload);
                 }
                 state.currentBooking = action.payload;
@@ -173,6 +256,21 @@ const bookingsSlice = createSlice({
                 state.isLoading = false;
                 state.hasError = true;
                 state.errorMessage = action.payload as string || 'Failed to fetch booking';
+            })
+            .addCase(writeReview.pending, (state, action) => {
+                state.isLoading = true;
+                state.hasError = false;
+                state.errorMessage = '';
+            })
+            .addCase(writeReview.fulfilled, (state, action) => {
+                state.isLoading = false;
+                const bookingIndex = state.bookings.findIndex((value) => value.id === action.payload.id)
+                state.bookings[ bookingIndex ] = action.payload
+            })
+            .addCase(writeReview.rejected, (state, action) => {
+                state.isLoading = false;
+                state.hasError = true;
+                state.errorMessage = 'Failed to write review';
             });
     }
 });

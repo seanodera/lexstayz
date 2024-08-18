@@ -35,7 +35,7 @@ export default function Page() {
                 }
             },)
         }
-    }, [booking, bookingId, dispatch]);
+    }, [bookingId, dispatch]);
 
 
     function handleContactHost() {
@@ -51,8 +51,8 @@ export default function Page() {
         <div className={'md:col-span-3 flex justify-between'}>
             <div className={'text-2xl font-bold'}>Booking</div>
             {booking.id && booking.status !== 'Rejected' ? <div className={'flex gap-2'}>
-                <Button className={'animate-bounce'} type={'primary'}
-                        onClick={() => setOpenDialog(true)}>Review</Button>
+                {!booking.review && <Button className={'animate-bounce'} type={'primary'}
+                         onClick={() => setOpenDialog(true)}>Review</Button>}
                 <Button type={'primary'} onClick={() => handleContactHost()}>Message Host</Button>
                 {booking.status === 'Confirmed' ? <Button type={'primary'} danger>Cancel</Button> : ''}
             </div> : <div></div>}

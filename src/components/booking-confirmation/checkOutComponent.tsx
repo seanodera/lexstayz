@@ -32,6 +32,7 @@ export default function CheckOutComponent() {
                        completeBooking({
                            userId: userID,
                            id: bookingID,
+                           paymentData: res.data.data,
                            isConfirmed: true,
                            status: 'Confirmed'
                        }).then((value) => {
@@ -42,6 +43,7 @@ export default function CheckOutComponent() {
                        completeBooking({
                            userId: userID,
                            id: bookingID,
+                           paymentData: res.data.data,
                            isConfirmed: false,
                            status: 'Rejected',
                        }).then((value) => {

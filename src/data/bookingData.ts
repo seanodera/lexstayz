@@ -21,6 +21,7 @@ export function generateID() {
 interface BookingParams {
     userId: string,
     id: string,
+    paymentData: any,
     isConfirmed?: boolean,
     status?: string
 }
@@ -30,6 +31,7 @@ interface BookingParams {
 export async function completeBooking({
                                           userId,
                                           id,
+                                          paymentData,
                                           isConfirmed = true,
                                           status = 'Confirmed'
                                       }: BookingParams) {
@@ -48,8 +50,8 @@ export async function completeBooking({
             throw new Error("Booking status or confirmation status is already set!");
         }
         const hostDoc = doc(firestore, 'hosts', booking.hostId, 'bookings', id);
-        batch.update(userDoc, {status, isConfirmed});
-        batch.set(hostDoc, {...booking, status, isConfirmed});
+        batch.update(userDoc, {status, isConfirmed, paymentData});
+        batch.set(hostDoc, {...booking, status, isConfirmed, paymentData});
 
         const stayRef = doc(firestore, 'stays', booking.accommodationId);
 

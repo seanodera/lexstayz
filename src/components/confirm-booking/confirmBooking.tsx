@@ -28,8 +28,9 @@ export default function ConfirmBooking() {
                 completeBooking({
                     userId: userID,
                     id: bookingID,
+                    paymentData: response.data.data,
                     isConfirmed: true,
-                    status: 'Pending'
+                    status: 'Pending',
                 }).then((value) => {
                     messageApi.info('booking successfully made')
                     setIsLoading(false)
@@ -41,6 +42,7 @@ export default function ConfirmBooking() {
                 completeBooking({
                     userId: userID,
                     id: bookingID,
+                    paymentData: response.data.data,
                     isConfirmed: false,
                     status: 'Failed',
                 }).then((value) => {
