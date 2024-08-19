@@ -6,6 +6,7 @@ import {Stay} from "@/lib/types";
 import Link from "next/link";
 import {selectAllStays} from "@/slices/staysSlice";
 import SearchComponent from "@/components/home/searchComponent";
+import {getRandomSubarray} from "@/lib/utils";
 
 
 export default function Banner() {
@@ -13,7 +14,7 @@ export default function Banner() {
     return (
         <section className={'relative'}>
             <Carousel arrows autoplay >
-                {stays.slice(0, 3).map((stay: Stay, index: number) => (
+                {getRandomSubarray(stays, 5).map((stay: Stay, index: number) => (
                     <div key={index}>
                         <div
                             className={'bg-center bg-cover w-screen aspect-[10/15] md:aspect-[10/8] lg:aspect-[18/7] '}

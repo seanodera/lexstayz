@@ -7,6 +7,8 @@ import {Select} from "@headlessui/react";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import {selectCart, updateCart} from "@/slices/bookingSlice";
 import {Button, Divider, Image} from "antd";
+import {toMoneyFormat} from "@/lib/utils";
+import {selectExchangeRate, selectGlobalCurrency} from "@/slices/staysSlice";
 
 
 export default function RoomComponent({room, stay, className = '', available = true, lowest = 10}: { room: any, stay: any, className?: string, available?: boolean, lowest?: number }) {
@@ -122,6 +124,8 @@ export function RoomComponentPortrait({room, stay, className = '', available = t
     const [numRooms, setNumRooms] = useState<number>(0);
     const [open, setOpen] = useState(false);
     const [roomIndex, setRoomIndex] = useState<number>(-1);
+    const exchangeRates = useAppSelector(selectExchangeRate)
+    const globalCurrency = useAppSelector(selectGlobalCurrency)
 
     useEffect(() => {
         let _roomIndex = globalCart.findIndex((value: any) => value.roomId === room.id);
@@ -168,6 +172,16 @@ export function RoomComponentPortrait({room, stay, className = '', available = t
         dispatch(updateCart(newCart));
     }
 
+    function calculatePrice(amount: number) {
+        let price = 0
+        if (exchangeRates[stay.currency] && stay.currency !== globalCurrency){
+            price = amount * 1.02 / exchangeRates[stay.currency]
+        } else {
+            price = amount
+        }
+        return toMoneyFormat(price);
+    }
+
     return <div className={`${(roomIndex !== -1) && 'shadow-primary'} ${className ? className : 'rounded-2xl p-4 shadow-md'}`}>
         <div className={'relative aspect-video'}>
             <Image className={'aspect-video rounded-xl object-cover'} src={room.poster} alt={room.name}/>
@@ -178,9 +192,7 @@ export function RoomComponentPortrait({room, stay, className = '', available = t
         </div>
         <div className={'my-4 flex justify-between'}><h3
             className={'text-xl font-medium'}>{room.name}</h3>  <span
-            className={'font-medium text-primary text-xl'}>{'$'} {room.price.toLocaleString(undefined, {
-            minimumFractionDigits: 2, maximumFractionDigits: 2
-        })} <span className={'font-light text-sm'}>/night</span></span></div>
+            className={'font-medium text-primary text-xl'}>{globalCurrency} {calculatePrice(room.price)} <span className={'font-light text-sm'}>/night</span></span></div>
         <div className={'flex flex-wrap gap-2 my-4'}>{room.amenities.slice(0, 3).map((amenity: string, index: number) =>
             <div
                 className={'border border-gray-500 shadow-md rounded py-1 px-3 text-balance text-sm'}
