@@ -11,16 +11,21 @@ const handlePaymentAsync = createAsyncThunk(
         const booking = state.confirmBooking;
 
         const id = generateID();
+        const paymentCurrency = 'KES'
+
 
         try {
             const user = getCurrentUser();
-            const amount = parseInt((booking.grandTotal).toFixed(2));
+            let amount = parseInt((booking.grandTotal).toFixed(2));
+            if (booking.currency !== paymentCurrency) {
+                amount = parseInt((booking.exchangeRates[paymentCurrency] * 1.02 * booking.grandTotal).toFixed(2));
+            }
 
             if (state.confirmBooking.paymentMethod === 'new') {
                 const res = await axios.post('/api/createTransaction', {
                     email: booking.contact.email,
                     amount: amount,
-                    currency: booking.currency,
+                    currency: paymentCurrency,
                     callback_url: `${process.env.NEXT_PUBLIC_HOST}/${booking.stay.type === 'Hotel'? 'checkout': 'confirm-booking'}?userID=${user.uid}&booking=${id}${preserve ? `&preserve=${preserve}` : ''}`,
                     reference: id
                 });
@@ -34,7 +39,7 @@ const handlePaymentAsync = createAsyncThunk(
                 const res = await axios.post('/api/createCharge', {
                     email: booking.contact.email,
                     amount: amount,
-                    currency: booking.currency,
+                    currency: paymentCurrency,
                     authorization_code: state.confirmBooking.paymentMethod,
                     callback_url: `${process.env.NEXT_PUBLIC_HOST}/${booking.stay.type === 'Hotel'? 'checkout': 'confirm-booking'}?userID=${user.uid}&booking=${id}${preserve ? `&preserve=${preserve}` : ''}`,
                     reference: id

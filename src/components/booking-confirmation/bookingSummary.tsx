@@ -7,41 +7,42 @@ import {message} from "antd";
 import {selectConfirmBooking, setBookingStay, updateCostData} from "@/slices/confirmBookingSlice";
 
 
-const BookingSummary = ({ stay }: any) => {
+const BookingSummary = ({stay}: any) => {
     const cart = useAppSelector(selectCart);
     const [subTotal, setSubTotal] = useState(0);
     const [exchangeRate, setExchangeRate] = useState(0)
-    const [currency,setCurrency] = useState('USD')
-    const  booking = useAppSelector(selectConfirmBooking)
+    const [currency, setCurrency] = useState('USD')
+    const booking = useAppSelector(selectConfirmBooking)
     const [messageApi, contextHolder] = message.useMessage();
-    const dispatch =useAppDispatch()
+    const dispatch = useAppDispatch()
     useEffect(() => {
         let _subTotal = 0;
 
         cart.forEach((value: any) => {
-            _subTotal += value.numRooms * stay.rooms.find((stay: any) => stay.id === value.roomId).price * booking.length ;
+            _subTotal += value.numRooms * stay.rooms.find((stay: any) => stay.id === value.roomId).price * booking.length;
         });
         setSubTotal(_subTotal);
     }, [cart]);
 
     useEffect(() => {
-       const fetchExchangeRate = async () => {
-           const country = await getCountry();
+        const fetchExchangeRate = async () => {
 
-             // Change as needed
+            // Change as needed
             const toCurrency = 'KES'; // Change as needed
-            if (toCurrency){
-                const rate = await getExchangeRate(booking.currency, toCurrency);
-                if (rate) {
-                    setCurrency(toCurrency)
-                    setExchangeRate(rate * 1.02);
-                } else {
-                    //messageApi.error(`Failed to get exchange Rate`, )
-                }
+
+            const rate = booking.exchangeRates[ currency ];
+            ;
+            if (rate) {
+                setCurrency(toCurrency)
+                setExchangeRate(rate * 1.02);
+            } else {
+                //messageApi.error(`Failed to get exchange Rate`, )
             }
+
         };
-       fetchExchangeRate()
-    },[stay.currency]);
+        fetchExchangeRate()
+    }, [stay.currency]);
+
     function calculatePrice(amount: number) {
         let price = 0
         if (booking.exchangeRates[ stay.currency ] && stay.currency !== booking.currency) {
@@ -51,10 +52,11 @@ const BookingSummary = ({ stay }: any) => {
         }
         return toMoneyFormat(price);
     }
-    useEffect(()=>{
+
+    useEffect(() => {
         dispatch(setBookingStay(stay))
 
-    },[currency, exchangeRate, subTotal])
+    }, [currency, exchangeRate, subTotal])
     return (
         <div className="border border-gray-200 rounded-xl p-4 shadow-md shadow-primary">
             <h3 className="text-xl font-semibold">Price Summary</h3>
@@ -76,8 +78,10 @@ const BookingSummary = ({ stay }: any) => {
                     {booking.currency} {toMoneyFormat(booking.grandTotal)}
                 </div>
             </div>
-            <small className={'italic text-gray-400 text-center'}>We currently only accept payments GHS</small>
-            <div className={'text-primary text-center font-medium h4 my-2'}> 1 {booking.currency} = {toMoneyFormat(exchangeRate)} {currency}</div>
+            <small className={'italic text-gray-400 text-center'}>We currently only accept payments
+                in {currency}</small>
+            <div
+                className={'text-primary text-center font-medium h4 my-2'}> 1 {booking.currency} = {toMoneyFormat(exchangeRate)} {currency}</div>
             <div className={'text-lg font-medium'}>You will Pay</div>
             <div className={'text-xl font-bold'}>{currency} {toMoneyFormat(booking.grandTotal * exchangeRate)}</div>
         </div>
