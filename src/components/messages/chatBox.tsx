@@ -44,7 +44,7 @@ export default function ChatBox() {
     };
 
     const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
-
+    const pathname = usePathname()
     if (!chat) {
         return (
             <div className="h-full w-full">
@@ -54,7 +54,7 @@ export default function ChatBox() {
     } else {
         return (
             <div className="h-full overscroll-y-none overflow-y-hidden flex" ref={setContainer}>
-                {!isMobile && usePathname().split('/').length >= 3 && <div><RecipientsBox/></div>}
+                {!isMobile && pathname.split('/').length >= 3 && <div><RecipientsBox/></div>}
                 <div className="flex flex-col justify-between overscroll-none overflow-y-hidden h-full w-full items-center transition-all duration-300 ease-in-out">
                     <div className="flex justify-between bg-white py-3 w-full px-4 static">
                         <div className="flex items-center gap-1">
