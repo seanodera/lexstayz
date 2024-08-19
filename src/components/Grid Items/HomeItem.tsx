@@ -3,9 +3,9 @@ import {Button, Carousel, Image, Rate, Tooltip} from "antd";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import {deleteFromWishList, selectWishlist, updateWishList} from "@/slices/authenticationSlice";
 import Link from "next/link";
-import {HeartFilled, HeartOutlined} from "@ant-design/icons";
+import {HeartFilled, HeartOutlined, StarFilled} from "@ant-design/icons";
 import {Ellipsis} from "react-bootstrap/PageItem";
-import {roundToNearest5, toMoneyFormat} from "@/lib/utils";
+import {formatRating, roundToNearest5, toMoneyFormat} from "@/lib/utils";
 import {selectExchangeRate, selectGlobalCurrency} from "@/slices/staysSlice";
 
 
@@ -30,10 +30,10 @@ export default function HomeItem({stay}: { stay: any }) {
         }
     }
 
-    function calculatePrice (){
+    function calculatePrice() {
         let price = 0
-        if (exchangeRates[stay.currency] && stay.currency !== globalCurrency){
-           price = stay.price * 1.02 / exchangeRates[stay.currency]
+        if (exchangeRates[ stay.currency ] && stay.currency !== globalCurrency) {
+            price = stay.price * 1.02 / exchangeRates[ stay.currency ]
         } else {
             price = stay.price
         }
@@ -67,9 +67,9 @@ export default function HomeItem({stay}: { stay: any }) {
                     <h3 className={'font-medium  mb-0 leading-none'}>{name}</h3>
                     <h3 className={'font-light   leading-none text-gray-400 line-clamp-1'}>{location.city}, {location.country}</h3>
                 </div>
-                <div className={'flex flex-col justify-start'}>
-                    <Rate count={5} disabled value={roundToNearest5((rating || 0) * 10) / 10} allowHalf className={'text-primary text-sm my-0'}/>
-                </div>
+
+                <span><StarFilled className={'text-primary'}/> {formatRating(rating || 0.0)}</span>
+
             </div>
             <div className={'max-md:text-sm flex flex-nowrap'}>
                 <p className={'line-clamp-1 text-nowrap flex-nowrap'}>{description}</p>

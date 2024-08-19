@@ -162,6 +162,14 @@ export function getRandomSubarray(arr: Array<any>, size: number) {
     return shuffled.slice(0, size);
 }
 
+export function formatRating(num: number) {
+    // If the number is an integer, return it with '.0'
+    if (Number.isInteger(num)) {
+        return num.toFixed(1);
+    }
+    // Otherwise, round to two decimal places
+    return num.toFixed(2);
+}
 
 export const getExchangeRate = async (fromCurrency: string, toCurrency: string) => {
     try {
