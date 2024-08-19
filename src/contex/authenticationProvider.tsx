@@ -20,6 +20,7 @@ export default function AuthenticationProvider({children}: { children: ReactNode
     const router = useRouter();
     const isAuthRoute = authRoutes.includes(pathname);
     const hasBookingsRun = useAppSelector(selectHasBookingRun);
+    const pathName = usePathname()
     console.log('Authentication Provider')
     useEffect(() => {
         const initializeAuth = async () => {
@@ -58,7 +59,9 @@ export default function AuthenticationProvider({children}: { children: ReactNode
             dispatch(fetchUserChatsAsync())
         }
     });
-    return <div className={'min-h-screen'}>
+    const isMessagePage = pathName.startsWith('/messages')
+    return <main className={`${isMessagePage ? 'h-screen overflow-hidden' : 'h-screen overflow-auto'}`}>
         <Navbar/>
-        <main className={'h-full'}>{children}</main>
-    </div>}
+        <div className="h-full overflow-auto">{children}</div>
+    </main>
+}

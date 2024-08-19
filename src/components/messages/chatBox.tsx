@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Affix, Avatar, Button, Empty, Input } from 'antd';
+import {Affix, Avatar, Button, Card, Drawer, Empty, Input} from 'antd';
 import { ArrowUpOutlined, ExclamationCircleOutlined, PaperClipOutlined } from '@ant-design/icons';
 import { dateReader, timeFromDate } from "@/lib/utils";
 import dayjs from "dayjs";
@@ -10,6 +10,8 @@ import { selectFocusChat, sendMessageAsync } from "@/slices/messagingSlice";
 import { listenToMessages } from "@/lib/firebaseListener";
 import { useMediaQuery } from "react-responsive";
 import RecipientsBox from "@/components/messages/recipentBox";
+import {usePathname} from "next/navigation";
+import {CloseIcon} from "next/dist/client/components/react-dev-overlay/internal/icons/CloseIcon";
 
 const { TextArea } = Input;
 
@@ -18,6 +20,7 @@ export default function ChatBox() {
     const dispatch = useAppDispatch();
     const chat = useAppSelector(selectFocusChat);
     const [container, setContainer] = useState<HTMLDivElement | null>(null);
+    const [showReservation, setShowReservation] = useState<boolean>(false);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setInputValue(e.target.value);
@@ -25,14 +28,12 @@ export default function ChatBox() {
 
     useEffect(() => {
         if (chat) {
-            // Set up the listener for messages in the focused chat
             const messagesUnsubscribe = listenToMessages(chat.id);
-
             return () => {
-                // Clean up the listener for messages
                 messagesUnsubscribe();
             };
         }
+
     }, [chat]);
 
     const handleSubmit = () => {
@@ -42,7 +43,7 @@ export default function ChatBox() {
         }
     };
 
-    const isMobile = useMediaQuery({ query: '(max-width: 1024px)' });
+    const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
 
     if (!chat) {
         return (
@@ -53,8 +54,8 @@ export default function ChatBox() {
     } else {
         return (
             <div className="h-full overscroll-y-none overflow-y-hidden flex" ref={setContainer}>
-                {/* {!isMobile && <div><RecipientsBox/></div>} */}
-                <div className="flex flex-col justify-between overscroll-none overflow-y-hidden h-full w-full items-center">
+                {!isMobile && usePathname().split('/').length >= 3 && <div><RecipientsBox/></div>}
+                <div className="flex flex-col justify-between overscroll-none overflow-y-hidden h-full w-full items-center transition-all duration-300 ease-in-out">
                     <div className="flex justify-between bg-white py-3 w-full px-4 static">
                         <div className="flex items-center gap-1">
                             <Avatar className="bg-primary h-8 w-8" shape="circle">
@@ -62,7 +63,10 @@ export default function ChatBox() {
                             </Avatar>
                             <div className="font-bold">{chat.host.name}</div>
                         </div>
-                        <Button type="text" icon={<ExclamationCircleOutlined />} />
+                        <div>
+                            {!showReservation && <Button className={'rounded-lg'} type={'primary'} ghost onClick={() => setShowReservation(true)}>Show Reservation</Button>}
+                            <Button type="text" icon={<ExclamationCircleOutlined />} />
+                        </div>
                     </div>
                     <div className="flex flex-col justify-end py-2 px-4 overflow-y-scroll overscroll-contain h-full w-full pt-2">
                         {chat.messages?.map((message, index) => {
@@ -106,7 +110,7 @@ export default function ChatBox() {
                             );
                         })}
                     </div>
-                    <div className="flex gap-2 md:max-w-xl bg-white w-full px-4 py-2 text-lg rounded-3xl items-end">
+                    <div className="flex gap-2 md:max-w-xl bg-white w-full px-4 py-2 text-lg rounded-3xl items-end mb-4">
                         <Button icon={<PaperClipOutlined />} shape="circle" />
                         <TextArea
                             autoSize={{ minRows: 1, maxRows: 4 }}
@@ -130,9 +134,20 @@ export default function ChatBox() {
                         />
                     </div>
                 </div>
-                <div className="h-full w-full max-w-sm max-md:hidden">
-                    <BookingBox />
+                <div className={`h-full w-full max-w-sm max-lg:hidden ${showReservation ? 'animate-slideIn' : 'animate-slideOut'} transition-all duration-300 ease-in-out`}>
+
+                    <Card className={'w-full h-full rounded-none'} title="Recent Booking" extra={<Button type={'text'} onClick={() => setShowReservation(false)} icon={<CloseIcon/>}/> }>
+                        <BookingBox/>
+                    </Card>
                 </div>
+                <Drawer
+                    title="Recent Booking"
+                    placement="right"
+                    onClose={() => setShowReservation(false)}
+                    open={showReservation}
+                >
+                    <BookingBox/>
+                </Drawer>
             </div>
         );
     }

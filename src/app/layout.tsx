@@ -18,9 +18,6 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-        <head>
-            <script src="https://js.paystack.co/v2/inline.js" defer/>
-        </head>
         <body className={'h-screen bg-[#f5f5f5]'}><AntdRegistry><StoreProvider>
             {children}
         </StoreProvider></AntdRegistry>

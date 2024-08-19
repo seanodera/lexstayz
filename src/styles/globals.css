@@ -146,3 +146,37 @@ body {
 .animate-blink {
   animation: blink 1s step-start infinite;
 }
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+    display: block;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+    display: block;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+    display: block;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+    display: none;
+  }
+}
+
+.animate-slideIn {
+  animation: slideIn 0.3s forwards;
+}
+
+.animate-slideOut {
+  animation: slideOut 0.3s forwards;
+}

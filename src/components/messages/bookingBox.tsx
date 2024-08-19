@@ -6,6 +6,7 @@ import {selectBookings} from "@/slices/bookingSlice";
 import {useEffect, useState} from "react";
 import {dateReader, toMoneyFormat} from "@/lib/utils";
 import {selectAllStays} from "@/slices/staysSlice";
+import {CloseIcon} from "next/dist/client/components/react-dev-overlay/internal/icons/CloseIcon";
 
 
 
@@ -36,59 +37,55 @@ export default function BookingBox() {
     }, [currentChatUser]);
 
     if (!booking || !stay) {
-        return <Card className={'w-full h-full rounded-none'} title={'Recent Booking'}>
-            <Skeleton active/>
-        </Card>
+        return <Skeleton active/>
     } else {
-        return <Card className={'w-full h-full rounded-none'} title="Recent Booking">
-            <div className={'px-4 space-y-4'}>
-                <div>
+        return <div className={'px-4 space-y-4'}>
+            <div>
 
+            </div>
+            <div>
+                <h3 className={'text-gray-500 font-medium'}>Guest Name</h3>
+                <h3 className={'font-semibold'}>{booking.user.firstName} {booking.user.lastName}</h3>
+            </div>
+            <div>
+                <h3 className={'text-gray-500 font-medium'}>Email</h3>
+                <h3 className={'font-semibold'}>{booking.user.email}</h3>
+            </div>
+            <div>
+                <h3 className={'text-gray-500 font-medium'}>Phone Number</h3>
+                <h3 className={'font-semibold'}>{booking.user.phone}</h3>
+            </div>
+            <div>
+                <h3 className={'text-gray-500 font-medium'}>Reference</h3>
+                <h3 className={'font-semibold'}>{booking.id.slice(0, 8).toUpperCase()}</h3>
+            </div>
+            <div className={'grid grid-cols-2'}>
+                <div>
+                    <h3 className={'text-gray-500 font-medium'}>Check In</h3>
+                    <h3 className={'font-semibold'}>{dateReader({date: booking.checkInDate})}</h3>
                 </div>
                 <div>
-                    <h3 className={'text-gray-500 font-medium'}>Guest Name</h3>
-                    <h3 className={'font-semibold'}>{booking.user.firstName} {booking.user.lastName}</h3>
-                </div>
-                <div>
-                    <h3 className={'text-gray-500 font-medium'}>Email</h3>
-                    <h3 className={'font-semibold'}>{booking.user.email}</h3>
-                </div>
-                <div>
-                    <h3 className={'text-gray-500 font-medium'}>Phone Number</h3>
-                    <h3 className={'font-semibold'}>{booking.user.phone}</h3>
-                </div>
-                <div>
-                    <h3 className={'text-gray-500 font-medium'}>Reference</h3>
-                    <h3 className={'font-semibold'}>{booking.id.slice(0, 8).toUpperCase()}</h3>
-                </div>
-                <div className={'grid grid-cols-2'}>
-                    <div>
-                        <h3 className={'text-gray-500 font-medium'}>Check In</h3>
-                        <h3 className={'font-semibold'}>{dateReader({date: booking.checkInDate})}</h3>
-                    </div>
-                    <div>
-                        <h3 className={'text-gray-500 font-medium'}>Check Out</h3>
-                        <h3 className={'font-semibold'}>{dateReader({date: booking.checkOutDate})}</h3>
-                    </div>
-                </div>
-
-                <div>
-                    <h3 className={'text-gray-500 font-medium'}>Accommodation</h3>
-                    <h3 className={'font-semibold'}>{stay.name}</h3>
-                </div>
-                <div>
-                    <h3 className={'text-gray-500 font-medium'}>Rooms</h3>
-                    {/*    todo: rooms*/}
-                </div>
-                <div>
-                    <h3 className={'text-gray-500 font-medium'}>Total Cost</h3>
-                    <h3 className={'font-bold mb-0'}>{booking.currency} {toMoneyFormat(booking.totalPrice * 1.035 * booking.usedRate)}</h3>
-                    <h4 className={'text-gray-400'}>{booking.currency} {toMoneyFormat(booking.totalPrice * 0.035 * booking.usedRate)} Fees</h4>
-                </div>
-                <div className={'text-center'}>
-                    <Button type={'primary'} ghost>View Booking</Button>
+                    <h3 className={'text-gray-500 font-medium'}>Check Out</h3>
+                    <h3 className={'font-semibold'}>{dateReader({date: booking.checkOutDate})}</h3>
                 </div>
             </div>
-        </Card>
+
+            <div>
+                <h3 className={'text-gray-500 font-medium'}>Accommodation</h3>
+                <h3 className={'font-semibold'}>{stay.name}</h3>
+            </div>
+            <div>
+                <h3 className={'text-gray-500 font-medium'}>Rooms</h3>
+                {/*    todo: rooms*/}
+            </div>
+            <div>
+                <h3 className={'text-gray-500 font-medium'}>Total Cost</h3>
+                <h3 className={'font-bold mb-0'}>{booking.currency} {toMoneyFormat(booking.totalPrice * 1.035 * booking.usedRate)}</h3>
+                <h4 className={'text-gray-400'}>{booking.currency} {toMoneyFormat(booking.totalPrice * 0.035 * booking.usedRate)} Fees</h4>
+            </div>
+            <div className={'text-center'}>
+                <Button type={'primary'} ghost>View Booking</Button>
+            </div>
+        </div>
     }
 }

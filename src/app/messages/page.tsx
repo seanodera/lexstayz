@@ -6,31 +6,52 @@ import ChatBox from "@/components/messages/chatBox";
 import {useMediaQuery} from "react-responsive";
 import {useState} from "react";
 
-
 export default function MessagePage() {
-    const isMobile = useMediaQuery({query: '(max-width: 768px)'});
-    console.log(isMobile);
-    if (isMobile) {
-        return <div className={'h-full py-4 bg-white px-4'}>
-            <div className={'text-2xl'}>Messages</div>
-            <RecipientsBox/>
-        </div>
-    } else {
-        return <Row className={'h-full py-4'}>
-            <Col className={'bg-white h-full px-4 py-8'} span={6}>
-                <div>
-                    <Input placeholder={'Search'} prefix={<SearchOutlined/>}/>
+    return (
+        <div className="w-full grid lg:grid-cols-5 h-full">
+            <div className="bg-white h-full p-4 border-solid border-0 border-t border-gray-200 overflow-auto">
+                <RecipientsBox />
+            </div>
+            <div className="col-span-4 flex flex-col h-full max-lg:hidden ">
+                <div className="flex-1 overflow-auto">
+                    <ChatBox />
                 </div>
-                <RecipientsBox/>
-            </Col>
-            <Col span={18}>
-                <ChatBox/>
-            </Col>
-        </Row>;
-    }
+                <div className="p-4 border-t border-gray-200">
+                    <input
+                        type="text"
+                        name="message"
+                        placeholder="Type a message"
+                        className="w-full p-2 border border-gray-300 rounded-md"
+                    />
+                </div>
+            </div>
+        </div>
+    );
 }
+// export default function MessagePage() {
+//     const isMobile = useMediaQuery({query: '(max-width: 768px)'});
+//     console.log(isMobile);
+//     if (isMobile) {
+//         return <div className={'h-full py-4 bg-white px-4'}>
+//             <div className={'text-2xl'}>Messages</div>
+//             <RecipientsBox/>
+//         </div>
+//     } else {
+//         return <Row className={'h-full py-4'}>
+//             <Col className={'bg-white h-full px-4 py-8'} span={6}>
+//                 <div>
+//                     <Input placeholder={'Search'} prefix={<SearchOutlined/>}/>
+//                 </div>
+//                 <RecipientsBox/>
+//             </Col>
+//             <Col span={18}>
+//                 <ChatBox/>
+//             </Col>
+//         </Row>;
+//     }
+// }
 
- function MessagePageNew() {
+function MessagePageNew() {
     const isMobile = useMediaQuery({query: '(max-width: 768px)'});
     const [showReservation, setShowReservation] = useState(false);
     console.log(isMobile);
@@ -58,7 +79,7 @@ export default function MessagePage() {
                         <Button
                             className="md:hidden mt-4"
                             type="primary"
-                            icon={<MenuOutlined />}
+                            icon={<MenuOutlined/>}
                             onClick={() => setShowReservation(true)}
                         >
                             Show Reservation

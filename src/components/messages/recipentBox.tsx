@@ -14,7 +14,7 @@ export default function RecipientsBox({}) {
     const chats = useAppSelector(selectUserChats)
     const focusChat = useAppSelector(selectFocusChat)
     const dispatch = useAppDispatch();
-    const isMobile = useMediaQuery({query: '(max-width: 1024px)'});
+    const isMobile = useMediaQuery({query: '(max-width: 768px)'});
     const router = useRouter()
     const formatTimeDifference = (timeStamp: string) => {
         const date = new Date(timeStamp);
