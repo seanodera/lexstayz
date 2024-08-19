@@ -9,9 +9,11 @@ import {usePathname, useRouter} from "next/navigation";
 import {getAuth} from "firebase/auth";
 import {getUserDetails} from "@/data/usersData";
 import {loginUser, selectCurrentUser} from "@/slices/authenticationSlice";
-import {fetchStaysAsync, selectHasRun, selectIsStayLoading} from "@/slices/staysSlice";
+import {fetchAppExchangeRates, fetchStaysAsync, selectHasRun, selectIsStayLoading} from "@/slices/staysSlice";
 import ErrorDialog from "@/components/dialogs/ErrorDialog";
 import Footer from "@/components/navigation/Footer";
+import {fetchExchangeRates} from "@/slices/confirmBookingSlice";
+
 
 const authNeededRoutes = ['bookings', 'booking-confirmation', 'checkout', 'wishlist', 'profile', 'messages', 'book-firm']
 
@@ -32,6 +34,8 @@ export default function ContextProvider({children}: { children: React.ReactNode 
                if (!hasRun) {
                    setHasRunLocal(true)
                    dispatch(fetchStaysAsync());
+                   dispatch(fetchExchangeRates())
+                   dispatch(fetchAppExchangeRates())
                    if (user){
                        dispatch(fetchBookingsAsync())
                    }

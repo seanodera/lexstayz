@@ -6,8 +6,14 @@ import ContactForm from "@/components/booking-confirmation/contactForm";
 import {LeftOutlined} from "@ant-design/icons";
 import Link from "next/link";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
-import {createBooking, handlePaymentAsync, selectConfirmBooking, setBookingStay} from "@/slices/confirmBookingSlice";
-import {dateReader, toMoneyFormat} from "@/lib/utils";
+import {
+    createBooking,
+    fetchExchangeRates,
+    handlePaymentAsync,
+    selectConfirmBooking,
+    setBookingStay
+} from "@/slices/confirmBookingSlice";
+import {dateReader, getFeePercentage, toMoneyFormat} from "@/lib/utils";
 import {selectCurrentStay} from "@/slices/staysSlice";
 import {useRouter} from "next/navigation";
 import {useEffect, useState} from "react";
@@ -41,6 +47,7 @@ export default function BookFirmPage() {
         setLength(differenceInDays(booking.checkOutDate, booking.checkInDate));
     }, [booking.checkInDate, booking.checkOutDate]);
 
+
     if (!booking || !stay) {
         return <div></div>;
     }
@@ -48,11 +55,7 @@ export default function BookFirmPage() {
 
     async function handleConfirm() {
         setLoading(true)
-        // const id = generateID()
-        // const testResponse = await axios.post('/api/createCharge', {
-        //     email: booking.contact.email, amount: booking.totalPrice,  reference:id
-        // })
-        // console.log(testResponse)
+
 
         dispatch(handlePaymentAsync({preserve: true})).then((value: any) => {
             setLoading(false)
@@ -63,40 +66,13 @@ export default function BookFirmPage() {
             } else {
                 // messageApi.error(value.payload)
             }
-            const errObj = {
-                "type": "confirmBooking/handlePaymentAsync/rejected",
-                "payload": "An error occurred. Please try again. AxiosError: Request failed with status code 400",
-                "meta": {
-                    "requestId": "oCMUSpkxfyB6kukDNDz5e",
-                    "rejectedWithValue": true,
-                    "requestStatus": "rejected",
-                    "aborted": false,
-                    "condition": false
-                },
-                "error": {
-                    "message": "Rejected"
-                }
-            }
-            const successObj = {
-                "type": "confirmBooking/handlePaymentAsync/fulfilled",
-                "payload": "https://checkout.paystack.com/pm2dcx9va7dbdqe",
-                "meta": {
-                    "requestId": "OUpeWvkm0ndDGy2sxzw93",
-                    "requestStatus": "fulfilled"
-                }
-            }
-
         })
 
-        // dispatch(createBooking({
-        //     id: id, paymentData: {}
-        // })).then(action => {
-        //     console.log(action);
-        //     // router.push('/bookings');
-        // })
-    }
 
-    if (loading){
+    }
+    console.log(booking, stay)
+
+    if (loading || !stay.id){
         return <div className={'flex flex-col items-center justify-center h-full w-full min-h-96 bg-white'}>
             <div className={'loader-circle w-12'}></div>
         </div>
@@ -108,7 +84,7 @@ export default function BookFirmPage() {
 
 
                     <Card className={'md:px-20 pb-16 rounded-none'}>
-                        <Button type={'text'} icon={<LeftOutlined/>} onClick={() => router.back()}>Stay</Button>
+                        <Button size={'large'} type={'text'} icon={<LeftOutlined/>} onClick={() => router.back()}>Stay</Button>
 
                         <div className={'border-solid border-gray-200 p-4 rounded-xl my-8'}>
                             <PaymentMethods/>
@@ -180,19 +156,20 @@ export default function BookFirmPage() {
                                 <div className={'mb-0 text-gray-500'}>Price X <span
                                     className={'text-dark'}>{booking.length} night</span></div>
                                 <div className={'text-end'}>
-                                    <div className={'mb-0'}>{stay.currency} {toMoneyFormat(stay.price)}</div>
+                                    <div className={'mb-0'}>{booking.currency} {toMoneyFormat(stay.price * booking.usedRate)}</div>
                                     <div
-                                        className={'mb-0 text-primary'}>{stay.currency} {toMoneyFormat(booking.totalPrice)}</div>
+                                        className={'mb-0 text-primary'}>{booking.currency} {toMoneyFormat(booking.totalPrice)}</div>
                                 </div>
                                 <div className={'mb-0 text-gray-500'}>Booking Fees</div>
                                 <div
-                                    className={'mb-0 text-end'}>{stay.currency} {toMoneyFormat(0.035 * booking.totalPrice)}</div>
+                                    className={'mb-0 text-end'}>{booking.currency} {toMoneyFormat(booking.fees)}</div>
                                 <hr className={'col-span-2 w-full'}/>
                                 <div className={'mb-0 text-lg font-medium'}>Total</div>
                                 <div
-                                    className={'mb-0 text-lg text-end font-medium'}>{stay.currency} {toMoneyFormat(1.035 * booking.totalPrice)}</div>
+                                    className={'mb-0 text-lg text-end font-medium'}>{booking.currency} {toMoneyFormat(booking.grandTotal)}</div>
                             </div>
                         </div>
+
                         <Button block type={'primary'} size={'large'} onClick={handleConfirm}>Confirm</Button>
                     </Card>
                 </div>

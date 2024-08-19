@@ -6,28 +6,38 @@ import Link from "next/link";
 import {HeartFilled, HeartOutlined} from "@ant-design/icons";
 import {Ellipsis} from "react-bootstrap/PageItem";
 import {roundToNearest5, toMoneyFormat} from "@/lib/utils";
+import {selectExchangeRate, selectGlobalCurrency} from "@/slices/staysSlice";
 
 
 export default function HomeItem({stay}: { stay: any }) {
     const {poster, name, id, location, rating, maxGuests, description, images} = stay;
-    const descriptionLimit = 50;
     const wishlist = useAppSelector(selectWishlist)
     const dispatch = useAppDispatch()
+    const globalCurrency = useAppSelector(selectGlobalCurrency)
+    const exchangeRates = useAppSelector(selectExchangeRate)
 
     function handleWishlist(e: any) {
         e.preventDefault();
         if (wishlist.includes(id)) {
-
-
             dispatch(deleteFromWishList({stayId: id})).then((value) => {
-                console.log(value)
+
             })
         } else {
 
             dispatch(updateWishList({stayId: id})).then((value) => {
-                console.log(value)
+
             })
         }
+    }
+
+    function calculatePrice (){
+        let price = 0
+        if (exchangeRates[stay.currency] && stay.currency !== globalCurrency){
+           price = stay.price * 1.02 / exchangeRates[stay.currency]
+        } else {
+            price = stay.price
+        }
+        return toMoneyFormat(price);
     }
 
     return <div
@@ -64,8 +74,8 @@ export default function HomeItem({stay}: { stay: any }) {
             <div className={'max-md:text-sm flex flex-nowrap'}>
                 <p className={'line-clamp-1 text-nowrap flex-nowrap'}>{description}</p>
             </div>
-            <h4 className={'text-primary leading-none font-medium text-nowrap'}>From
-                $ {toMoneyFormat(stay.price)} / night</h4>
+            <h4 className={'text-primary leading-none font-medium text-nowrap'}>
+                {globalCurrency} {calculatePrice()} / night</h4>
         </Link>
     </div>
 }

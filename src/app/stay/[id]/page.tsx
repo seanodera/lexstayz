@@ -18,9 +18,10 @@ import HouseRules from "@/components/stay/houseRules";
 import {Calendar, Card} from "antd";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
-import {selectConfirmBooking} from "@/slices/confirmBookingSlice";
+import {selectConfirmBooking, setBookingStay} from "@/slices/confirmBookingSlice";
 import {UnknownAction} from "redux";
 import {AppDispatch} from "@/data/types";
+import ReservePanel from "@/components/stay/reservePanel";
 
 // Extend dayjs with the required plugins
 dayjs.extend(isBetween);
@@ -34,26 +35,13 @@ export default function StayPage() {
     const cart = useAppSelector(selectCart);
     const booking = useAppSelector(selectConfirmBooking);
     const stayId = params.id as string;
-    // useEffect(() => {
-    //
-    //     if (stayId) {
-    //         dispatch(setCurrentStayFromId(stayId) as any);
-    //
-    //         let newCart = [...cart];
-    //         newCart.forEach((value, index) => {
-    //             if (value.stayId !== stayId) {
-    //                 newCart.splice(index, 1);
-    //             }
-    //         });
-    //         dispatch(updateCart(newCart));
-    //     }
-    // }, [stayId]);
+
 
     useEffect(() => {
         if (stayId && stayId !== stay.id){
             dispatch(setCurrentStayFromId(stayId))
         }
-        console.log(stayId)
+
     }, [dispatch, stayId]);
     if (!stay || stay.id === undefined) {
 
@@ -61,7 +49,7 @@ export default function StayPage() {
     }
     const checkInDate = dayjs(booking.checkInDate);
     const checkOutDate = dayjs(booking.checkOutDate);
-    console.log(stay)
+    console.log(booking)
     return (
         <div className="lg:px-24 px-7 py-4 bg-white text-dark">
             <Banner stay={stay}/>
@@ -69,7 +57,7 @@ export default function StayPage() {
                 <div className="col-span-2">
                     <Details stay={stay}/>
                     <Description stay={stay}/>
-                    <StayDate stay={stay}/>
+                    {stay.type === 'Hotel' && <StayDate stay={stay}/>}
                     {stay.type === 'Hotel' && <AvailableRooms stay={stay}/>}
                     <HouseRules stay={stay}/>
                 </div>
@@ -99,7 +87,7 @@ export default function StayPage() {
                                         className += ' ant-picker-cell-selected bg-primary text-white hover:text-white';
                                     }
                                     if (date.toDate().getDate() === 17) {
-                                        console.log(isCheckOut, date, checkOutDate);
+
                                     }
                                     return (
                                         <div className={className + ''}>
@@ -109,8 +97,11 @@ export default function StayPage() {
                                 }}
                             />
                         <CartSummary stay={stay}/>
-                    </div> : <div className="max-lg:hidden lg:ps-12 col-span-1 md:col-span-2 lg:col-span-1 ">
-                        <Card className={'rounded-xl'}>
+                    </div> : <div className="max-lg:hidden lg:ps-12 col-span-1 md:col-span-2 lg:col-span-1">
+                        <Card className="rounded-xl shadow-lg shadow-primary-50">
+                            <ReservePanel stay={stay}/>
+                        </Card>
+                        <Card className={'rounded-xl mt-4'}>
                             <Calendar
                                 fullscreen={false}
                                 disabledDate={(date) => {
@@ -125,9 +116,7 @@ export default function StayPage() {
                                     if (isCheckIn || isCheckOut || inRange) {
                                         className += ' ant-picker-cell-selected bg-primary text-white hover:text-white';
                                     }
-                                    if (date.toDate().getDate() === 17) {
-                                        console.log(isCheckOut, date, checkOutDate);
-                                    }
+
                                     return (
                                         <div className={className + ''}>
                                             {date.date()}

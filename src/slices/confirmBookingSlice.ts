@@ -1,31 +1,34 @@
-import {Stay} from "@/lib/types";
-import {createSlice, createAsyncThunk, PayloadAction} from "@reduxjs/toolkit";
-import {firestore} from "@/lib/firebase";
-import {generateID, getCurrentUser} from "@/data/bookingData";
-import {writeBatch, doc, collection} from "firebase/firestore";
-import axios from 'axios';
-import {addDays, differenceInDays} from "date-fns";
-import {RootState} from "@/data/types";
+import { Stay } from "@/lib/types";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";;
+import { addDays, differenceInDays } from "date-fns";
+import { RootState } from "@/data/types";
+import {getFeePercentage} from "@/lib/utils";
+import createBooking from "@/slices/confirmBookingThunks/createBooking";
+import handlePaymentAsync from '@/slices/confirmBookingThunks/handlePaymentAsync'
+import {state} from "sucrase/dist/types/parser/traverser/base";
+import {WritableDraft} from "immer";
 
-interface ConfirmBookingState {
-    stay: Stay,
-    checkInDate: string,
-    checkOutDate: string,
-    rooms: object[],
-    paymentData: any,
-    contact: any,
-    numGuests: number,
-    specialRequest: string,
-    totalPrice: number,
-    currency: string,
-    usedRate: number,
-    fees: number,
-    length: number,
-    exchanged: boolean,
-    status: 'idle' | 'loading' | 'succeeded' | 'failed',
-    error: string | null,
-    bookingStatus: 'Pending' | 'Confirmed' | 'Canceled' | 'Rejected',
-    paymentMethod: any,
+export interface ConfirmBookingState {
+    stay: Stay;
+    checkInDate: string;
+    checkOutDate: string;
+    rooms: object[];
+    paymentData: any;
+    contact: any;
+    numGuests: number;
+    specialRequest: string;
+    totalPrice: number;
+    currency: string;
+    usedRate: number;
+    fees: number;
+    grandTotal: number;  // Added grandTotal to the state
+    length: number;
+    exchanged: boolean;
+    status: 'idle' | 'loading' | 'succeeded' | 'failed';
+    error: string | null;
+    bookingStatus: 'Pending' | 'Confirmed' | 'Canceled' | 'Rejected';
+    paymentMethod: any;
+    exchangeRates: any;
 }
 
 const initialState: ConfirmBookingState = {
@@ -44,134 +47,79 @@ const initialState: ConfirmBookingState = {
     currency: 'KES',
     fees: 0,
     usedRate: 1,
+    grandTotal: 0,  // Initialize grandTotal
     exchanged: false,
     length: 0,
     status: 'idle',
     error: null,
     paymentMethod: 'new',
     bookingStatus: 'Pending', // Default status
-}
+    exchangeRates: {}
+};
 
-export const createBooking = createAsyncThunk(
-    'confirmBooking/createBooking',
-    async ({paymentData, id}: { paymentData: any, id: string }, {getState, rejectWithValue}) => {
-        const state = getState() as { confirmBooking: ConfirmBookingState };
-        const {
-            stay,
-            checkInDate,
-            checkOutDate,
-            rooms,
-            contact,
-            numGuests,
-            specialRequest,
-            totalPrice,
-            currency,
-            usedRate,
-        } = state.confirmBooking;
-
-        try {
-            const user = getCurrentUser();
-            const batch = writeBatch(firestore);
-            const userDoc = doc(firestore, 'users', user.uid, 'bookings', id);
-            const hostDoc = doc(firestore, 'hosts', stay.hostId, 'bookings', id);
-
-            const commonProperties = {
-                id: id,
-                accommodationId: stay.id,
-                accountId: user.uid,
-                hostId: stay.hostId,
-                user: {
-                    firstName: contact.firstName,
-                    lastName: contact.lastName,
-                    email: contact.email,
-                    phone: contact.phone,
-                    country: contact.country,
-                },
-                checkInDate,
-                checkOutDate,
-                createdAt: new Date().toISOString(),
-                numGuests: numGuests,
-                isConfirmed: false,
-                totalPrice: totalPrice,
-                fees: 0.035 * totalPrice,
-                currency: currency,
-                usedRate: usedRate,
-                paymentData: paymentData,
-                specialRequest: specialRequest,
-                status: 'Unpaid',
-            }
-            const unique = (stay.type === 'Hotel')? {rooms: rooms,} :{
-
-            }
-            const booking = {
-                ...commonProperties,
-                ...unique
-            };
-
-            batch.set(userDoc, booking);
-            // if (stay.type !== 'Hotel'){
-            //     batch.set(hostDoc,booking)
-            // }
-            await batch.commit();
-            return booking;
-        } catch (error) {
-            if (error instanceof Error) {
-                return rejectWithValue(error.message);
-            } else {
-                rejectWithValue('Error')
-            }
-        }
+const recalculateCosts = (state: any) => {
+    if (!state.stay.id){
+        return ;
     }
-);
+    console.log(state, state.stay.id)
+    //calculate totals
+    let subTotal = 0;
 
-export const handlePaymentAsync = createAsyncThunk(
-    'confirmBooking/handlePaymentAsync',
-    async ({preserve = false}: {preserve?: boolean}, {dispatch, getState, rejectWithValue}) => {
-        const state = getState() as { confirmBooking: ConfirmBookingState };
-        const booking = state.confirmBooking;
+    if (state.stay.type === 'Hotel'){
+        state.rooms.forEach((value: any) => {
+            subTotal += value.numRooms * state.stay.rooms.find((stay: any) => stay.id === value.roomId).price * state.length ;
+        });
+    } else {
+        subTotal = state.stay.price * state.length
+    }
 
-        // Generate a unique ID for the transaction
-        const id = generateID();
+    // Convert the total price to USD for fee calculation
+    let totalPriceInUSD = subTotal;
 
+    if (state.stay.currency !== 'USD') {
+
+        totalPriceInUSD = (subTotal * 1.02 / state.exchangeRates[state.stay.currency]) * state.exchangeRates['USD']
+    }
+
+    // Calculate fees using the fee percentage function based on the USD equivalent of totalPrice
+    const feePercentage = getFeePercentage(totalPriceInUSD) / 100;
+    const fees = subTotal * feePercentage;
+
+    // Convert the total price to the stay's currency if necessary
+    if (state.stay.currency && state.stay.currency !== state.currency) {
+
+        const exchangeRate =1.02 / state.exchangeRates[state.stay.currency];
+        state.usedRate = exchangeRate ;
+        state.fees = fees * exchangeRate;
+        state.totalPrice = subTotal * exchangeRate;
+
+        state.grandTotal = state.fees + state.totalPrice;
+    } else {
+        state.totalPrice = subTotal;
+        state.fees = fees;
+        state.usedRate = 1;
+        state.grandTotal = state.totalPrice + state.fees;
+    }
+};
+
+
+
+
+
+
+export const fetchExchangeRates = createAsyncThunk(
+    'confirmBooking/fetchExchangeRates',
+    async (_, { getState }) => {
+        const { confirmBooking } = getState() as { confirmBooking: ConfirmBookingState };
         try {
-            const user = getCurrentUser();
-            // Make a POST request to create the transaction
-            const amount = parseInt((booking.totalPrice * 1.035 * booking.usedRate).toFixed(2));
-            if (state.confirmBooking.paymentMethod === 'new'){
+            let fromCurrency = confirmBooking.currency;
 
-            const res = await axios.post('/api/createTransaction', {
-                email: booking.contact.email,
-                amount: amount,// Amount in KES
-                currency: booking.currency,
-                callback_url: `${process.env.NEXT_PUBLIC_HOST}/confirm-booking?userID=${user.uid}&booking=${id}${preserve? `&preserve=${preserve}` : ''}`,
-                reference: id
-            });
-
-            // Extract access code and reference from the response
-            const {access_code: accessCode, reference, authorization_url} = res.data.data.data;
-            console.log('Access Code:', accessCode, 'Reference:', reference);
-
-            // Dispatch booking action and handle success or failure
-            const paymentData = {accessCode, reference, authorization_url};
-            await dispatch(createBooking({paymentData, id}));
-            return authorization_url;
-            } else {
-                const res = await axios.post('/api/createCharge', {
-                    email: booking.contact.email,
-                    amount: amount,
-                    currency: booking.currency,
-                    authorization_code: state.confirmBooking.paymentMethod,
-                    callback_url: `${process.env.NEXT_PUBLIC_HOST}/confirm-booking?userID=${user.uid}&booking=${id}${preserve? `&preserve=${preserve}` : ''}`,
-                    reference: id
-                })
-                console.log(res)
-                await dispatch(createBooking({paymentData: res.data.data, id}));
-
-                    return `/confirm-booking?userID=${user.uid}&booking=${id}`;
-            }
+            const response = await fetch(`https://open.er-api.com/v6/latest/${fromCurrency}`);
+            console.log(response)
+            const data = await response.json();
+            return data.rates;
         } catch (error) {
-            console.log(error)
-            return rejectWithValue(`An error occurred. Please try again. ${error}`);
+            console.error('Error fetching exchange rates:', error);
         }
     }
 );
@@ -188,10 +136,11 @@ const ConfirmBookingSlice = createSlice({
         },
         updateCostData: (state, action: PayloadAction<{ price: number; currency: string; usedRate: number }>) => {
             state.totalPrice = action.payload.price;
-            state.fees = action.payload.price * 0.035;
             state.currency = action.payload.currency;
             state.usedRate = action.payload.usedRate;
             state.exchanged = state.stay.currency !== action.payload.currency;
+
+            recalculateCosts(state); // Recalculate costs when the price or currency changes
         },
         updateBookingData: (state, action: PayloadAction<{
             numGuests: number;
@@ -202,36 +151,20 @@ const ConfirmBookingSlice = createSlice({
             state.numGuests = action.payload.numGuests;
             state.checkInDate = action.payload.checkInDate;
             state.checkOutDate = action.payload.checkOutDate;
+
             if (state.stay.type && state.stay.type !== 'Hotel') {
-                state.totalPrice = differenceInDays(action.payload.checkOutDate, action.payload.checkInDate) * state.stay.price
+                state.totalPrice = state.length * state.stay.price;
             }
+
+            recalculateCosts(state); // Recalculate costs when booking dates or number of guests change
         },
         setBookingStay: (state, action: PayloadAction<Stay>) => {
             state.stay = action.payload;
-            if (action.payload.type !== 'Hotel') {
-                state.totalPrice = state.length * state.stay.price;
-            }
+            recalculateCosts(state); // Recalculate costs when the stay changes
         },
         convertCart: (state, action: PayloadAction<object[]>) => {
             state.rooms = action.payload;
-        },
-        setBookingInformation: (state, action: PayloadAction<ConfirmBookingState>) => {
-            state.stay = action.payload.stay;
-            state.checkInDate = action.payload.checkInDate;
-            state.checkOutDate = action.payload.checkOutDate;
-            state.rooms = action.payload.rooms;
-
-            state.contact = action.payload.contact;
-            state.numGuests = action.payload.numGuests;
-            state.specialRequest = action.payload.specialRequest;
-            state.totalPrice = action.payload.totalPrice;
-            state.currency = action.payload.currency;
-            state.usedRate = action.payload.usedRate;
-            state.fees = action.payload.totalPrice * 0.035;
-            state.exchanged = state.stay.currency !== action.payload.currency;
-        },
-        updateBookingStatus: (state, action: PayloadAction<'Pending' | 'Confirmed' | 'Canceled' | 'Rejected'>) => {
-            state.bookingStatus = action.payload;
+            recalculateCosts(state)
         },
         setPaymentMethod: (state,action: PayloadAction<string>) => {
             state.paymentMethod = action.payload;
@@ -262,23 +195,32 @@ const ConfirmBookingSlice = createSlice({
             .addCase(handlePaymentAsync.rejected, (state, action: PayloadAction<any>) => {
                 state.status = 'failed';
                 state.error = action.payload;
+            })
+            .addCase(fetchExchangeRates.fulfilled, (state, action) => {
+                state.exchangeRates = action.payload;
+                state.usedRate = action.payload[state.currency] * 1.02;
+                recalculateCosts(state); // Recalculate costs after exchange rates are fetched
+            })
+            .addCase(fetchExchangeRates.pending, (state, action) => {
+                state.status = 'loading'
+                console.log('Fetching Rates',action.payload)
             });
     }
+
 });
 
 export const {
     updateContact,
     updateSpecialRequest,
     updateCostData,
-    setBookingInformation,
-    updateBookingStatus,
     updateBookingData,
     setBookingStay,
     convertCart,
-    setPaymentMethod,
+    setPaymentMethod
 } = ConfirmBookingSlice.actions;
 
-// Selectors
+export {createBooking, handlePaymentAsync}
+
 export const selectStay = (state: RootState) => state.confirmBooking.stay;
 export const selectCheckInDate = (state: RootState) => state.confirmBooking.checkInDate;
 export const selectCheckOutDate = (state: RootState) => state.confirmBooking.checkOutDate;

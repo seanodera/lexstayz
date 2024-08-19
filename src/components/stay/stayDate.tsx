@@ -24,11 +24,11 @@ export default function StayDate({stay}: {stay: any}) {
 
     const disabledDate: RangePickerProps['disabledDate'] = (current) => {
         const curr = current.toISOString().split('T')[ 0 ]
-        console.log(stay)
+
         let booked = false;
         if (stay.type === 'Home'){
             booked = stay.bookedDates?.includes(curr);
-            console.log(booked)
+
         } else {
             booked = stay.fullyBookedDates?.includes(curr)
         }
@@ -69,7 +69,7 @@ export default function StayDate({stay}: {stay: any}) {
                         size={'large'}
                         className={'bg-transparent text-current max-md:rounded-lg border-black w-max'}
                     >
-                        <MdPersonOutline className={'text-lg'} /> {numGuests} Guests
+                        <MdPersonOutline className={'text-lg'} /> {booking.numGuests} Guests
                     </PopoverButton>
 
                     <PopoverPanel anchor="bottom" className="flex flex-col p-4 z-20 shadow-xl rounded-xl ">
@@ -78,7 +78,7 @@ export default function StayDate({stay}: {stay: any}) {
                             <div>
                                 <InputNumber
                                     className={' rounded-lg'}
-                                    value={numGuests}
+                                    value={booking.numGuests}
                                     onChange={(value) => setNumGuests(value ? value : 0)}
                                     min={1}
                                 />

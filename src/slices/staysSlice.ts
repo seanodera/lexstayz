@@ -5,7 +5,7 @@ import {RootState} from "@/data/types";
 import {collection, doc, getDoc, getDocs} from "firebase/firestore";
 import {firestore} from "@/lib/firebase";
 import {query, where} from "@firebase/firestore";
-
+import {ConfirmBookingState, setBookingStay} from "@/slices/confirmBookingSlice";
 
 
 export interface Stay {
@@ -29,6 +29,8 @@ interface StaysState {
     hasError: boolean;
     errorMessage: string;
     hasRun: boolean;
+    exchangeRates: any,
+    globalCurrency: string
 }
 
 const initialState: StaysState = {
@@ -39,6 +41,8 @@ const initialState: StaysState = {
     hasError: false,
     errorMessage: '',
     hasRun: false,
+    exchangeRates: {},
+    globalCurrency: 'KES'
 };
 
 export const fetchStaysAsync = createAsyncThunk(
@@ -65,30 +69,50 @@ export const fetchStaysAsync = createAsyncThunk(
 );
 
 export const setCurrentStayFromId = createAsyncThunk('stays/setCurrentStayFromId',
-    async (id:string,{getState,dispatch,rejectWithValue}) => {
-    try {
-        const {stays} = getState() as {stays: StaysState}
+    async (id: string, {getState, dispatch, rejectWithValue}) => {
+        try {
+            const {stays} = getState() as { stays: StaysState }
 
-        const currentStay = stays.stays.find((value) => value.id === id);
-        if (currentStay) {
-            console.log('Current Stay local')
-           return currentStay;
-        } else {
-            const staysRef = collection(firestore, 'stays');
-            const snapshot = await getDoc(doc(staysRef, id));
-            const data = snapshot.data() as Stay
-            console.log('Gotten from firebase: ', data)
-            dispatch(setAllStays([...stays.stays, data]))
-            return data;
+            const currentStay = stays.stays.find((value) => value.id === id);
+            if (currentStay) {
+                console.log('Current Stay local')
+                dispatch(setBookingStay(currentStay))
+                return currentStay;
+            } else {
+                const staysRef = collection(firestore, 'stays');
+                const snapshot = await getDoc(doc(staysRef, id));
+                const data = snapshot.data() as Stay
+                console.log('Gotten from firebase: ', data)
+                dispatch(setAllStays([...stays.stays, data]))
+                dispatch(setBookingStay(data))
+                return data;
+            }
+        } catch (error) {
+            if (error instanceof Error) {
+                return rejectWithValue(error.message);
+            } else {
+                return rejectWithValue('An unknown error occurred');
+            }
         }
-    } catch (error){
-        if (error instanceof Error) {
-            return rejectWithValue(error.message);
-        } else {
-            return rejectWithValue('An unknown error occurred');
+    })
+
+export const fetchAppExchangeRates = createAsyncThunk(
+    'stays/fetchExchangeRates',
+    async (_, {getState}) => {
+        const {stays} = getState() as { stays: StaysState };
+        try {
+
+            const response = await fetch(`https://open.er-api.com/v6/latest/${stays.globalCurrency}`);
+
+            const data = await response.json();
+            console.log(data)
+            return data.rates;
+        } catch (error) {
+            console.error('Error fetching exchange rates:', error);
         }
     }
-    })
+);
+
 
 const staysSlice = createSlice({
     name: "stays",
@@ -102,16 +126,7 @@ const staysSlice = createSlice({
             state.currentId = -1;
         },
 
-        setCurrentStayFromIdAsync: (state, action: PayloadAction<string | number>) => {
-            state.currentId = action.payload;
-            const currentStay = state.stays.find((value) => value.id === action.payload);
-            if (currentStay) {
-                if (state.currentStay.id !== currentStay?.id) {
 
-                }
-            }
-            state.currentStay = currentStay ? currentStay : ({} as Stay);
-        },
         resetError: (state) => {
             state.hasError = false
             state.errorMessage = ''
@@ -137,7 +152,7 @@ const staysSlice = createSlice({
             .addCase(setCurrentStayFromId.pending, (state, action) => {
                 state.isLoading = true;
             })
-            .addCase(setCurrentStayFromId.fulfilled,(state,action) => {
+            .addCase(setCurrentStayFromId.fulfilled, (state, action) => {
                 state.isLoading = false;
                 state.currentStay = action.payload as Stay
             })
@@ -145,6 +160,8 @@ const staysSlice = createSlice({
                 state.isLoading = false;
                 state.hasError = true;
                 state.errorMessage = action.payload as string || 'Failed to set current stay';
+            }).addCase(fetchAppExchangeRates.fulfilled, (state, action) => {
+            state.exchangeRates = action.payload
         });
     }
 });
@@ -157,6 +174,8 @@ export const selectHasError = (state: RootState) => state.stays.hasError;
 export const selectErrorMessage = (state: RootState) => state.stays.errorMessage;
 export const selectHasRun = (state: RootState) => state.stays.hasRun;
 export const selectStayById = (state: RootState, id: string | number) => state.stays.stays.find((stay: Stay) => stay.id === id);
+export const selectExchangeRate = (state: RootState) => state.stays.exchangeRates;
+export const selectGlobalCurrency = (state: RootState) => state.stays.globalCurrency;
 
 export const {
     setAllStays,

@@ -180,4 +180,20 @@ export const getExchangeRate = async (fromCurrency: string, toCurrency: string) 
 
 export function roundToNearest5(x: number) { return x % 5 < 3 ? (x % 5 === 0 ? x : Math.floor(x / 5) * 5) : Math.ceil(x / 5) * 5 }
 
+export function getFeePercentage(num: number) {
+    const minNum = 2500;  // num corresponding to the minimum value
+    const maxNum = 200;     // num corresponding to the maximum value
+    const minValue = 5;   // minimum value
+    const maxValue = 15;  // maximum value
+    if (num > minNum){
+        return minValue;
+    } else if (num < maxNum){
+        return maxValue;
+    }
+    // Linear interpolation formula
+    return minValue + (maxValue - minValue) * ((minNum - num) / (minNum - maxNum));
+}
+
+
+
 

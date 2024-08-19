@@ -2,22 +2,17 @@
 import Link from "next/link";
 import {Button, Carousel, Image, Rate, Tooltip} from "antd";
 import {roundToNearest5, toMoneyFormat} from "@/lib/utils";
-import {Ellipsis} from "react-bootstrap/PageItem";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import {deleteFromWishList, selectCurrentUser, selectWishlist, updateWishList} from "@/slices/authenticationSlice";
 import {HeartFilled, HeartOutlined} from "@ant-design/icons";
+import {selectExchangeRate, selectGlobalCurrency} from "@/slices/staysSlice";
 
 
-export default function HotelItem({hotel}: {
-    hotel: {
-        poster: string, name: string, id: string, location: {
-            city: string,
-            country: string,
-        }, rating?: number, maxGuests: number, description: string, images: string[], rooms: any[]
-    }
-}) {
+
+export default function HotelItem({hotel}: { hotel: any }) {
     const {poster, name, id, location, rating, maxGuests, description, images, rooms} = hotel;
-    const descriptionLimit = 50;
+    const globalCurrency = useAppSelector(selectGlobalCurrency)
+    const exchangeRates = useAppSelector(selectExchangeRate)
     const wishlist = useAppSelector(selectWishlist)
     const dispatch = useAppDispatch()
 
@@ -35,6 +30,17 @@ export default function HotelItem({hotel}: {
                 console.log(value)
             })
         }
+    }
+
+
+    function calculatePrice() {
+        let price = 0
+        if (exchangeRates[ hotel.currency ] && hotel.currency !== globalCurrency) {
+            price = getLowestPrice(rooms) * 1.02 / exchangeRates[ hotel.currency ]
+        } else {
+            price = getLowestPrice(rooms)
+        }
+        return toMoneyFormat(price);
     }
 
     return <div
@@ -72,8 +78,8 @@ export default function HotelItem({hotel}: {
             <div className={'max-md:text-sm flex flex-nowrap'}>
                 <p className={'line-clamp-1 text-nowrap flex-nowrap'}>{description}</p>
             </div>
-            <h4 className={'text-primary leading-none font-medium text-nowrap'}>From
-                $ {toMoneyFormat(getLowestPrice(rooms))} / night</h4>
+            <h4 className={'text-primary leading-none font-medium text-nowrap'}>
+                From {globalCurrency} {calculatePrice()} / night</h4>
         </Link>
     </div>
 }
