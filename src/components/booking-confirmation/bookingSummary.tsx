@@ -28,10 +28,10 @@ const BookingSummary = ({ stay }: any) => {
        const fetchExchangeRate = async () => {
            const country = await getCountry();
 
-            const fromCurrency = stay.currency? stay.currency : 'USD'; // Change as needed
+             // Change as needed
             const toCurrency = 'KES'; // Change as needed
             if (toCurrency){
-                const rate = await getExchangeRate(fromCurrency, toCurrency);
+                const rate = await getExchangeRate(booking.currency, toCurrency);
                 if (rate) {
                     setCurrency(toCurrency)
                     setExchangeRate(rate * 1.02);
@@ -42,12 +42,18 @@ const BookingSummary = ({ stay }: any) => {
         };
        fetchExchangeRate()
     },[stay.currency]);
-
+    function calculatePrice(amount: number) {
+        let price = 0
+        if (booking.exchangeRates[ stay.currency ] && stay.currency !== booking.currency) {
+            price = amount * 1.02 / booking.exchangeRates[ stay.currency ]
+        } else {
+            price = amount
+        }
+        return toMoneyFormat(price);
+    }
     useEffect(()=>{
         dispatch(setBookingStay(stay))
-        dispatch(updateCostData(
-            {price: subTotal, currency: currency, usedRate: exchangeRate}
-        ))
+
     },[currency, exchangeRate, subTotal])
     return (
         <div className="border border-gray-200 rounded-xl p-4 shadow-md shadow-primary">
@@ -56,23 +62,24 @@ const BookingSummary = ({ stay }: any) => {
                 <div
                     className="capitalize text-gray-500">{stay.rooms.find((value: any) => value.id === cartItem.roomId).name}</div>
                 <div
-                    className="capitalize text-end">${toMoneyFormat(cartItem.numRooms * stay.rooms.find((value: any) => value.id === cartItem.roomId).price)}</div>
+                    className="capitalize text-end">{booking.currency} {calculatePrice(cartItem.numRooms * stay.rooms.find((value: any) => value.id === cartItem.roomId).price)}</div>
             </div>)}
             <hr className="col-span-2 my-4"/>
             <div className="grid grid-cols-2">
                 <div className="font-medium text-gray-500">Subtotal</div>
-                <div className="font-medium text-end">${toMoneyFormat(subTotal)}</div>
+                <div className="font-medium text-end">{booking.currency} {toMoneyFormat(booking.totalPrice)}</div>
                 <div className="font-medium text-gray-500">Booking fees</div>
-                <div className="font-medium text-end">${toMoneyFormat(subTotal * 0.035)}</div>
+                <div className="font-medium text-end">{booking.currency} {toMoneyFormat(booking.fees)}</div>
                 <hr className="col-span-2 my-4"/>
                 <div className="font-medium text-xl">Total</div>
                 <div className="font-medium text-xl text-end">
-                    ${toMoneyFormat(subTotal * 1.035)}
+                    {booking.currency} {toMoneyFormat(booking.grandTotal)}
                 </div>
             </div>
-            <div className={'text-primary text-center font-medium h4 my-2'}> 1 {stay.currency? stay.currency : 'USD'} = {toMoneyFormat(exchangeRate)} {currency}</div>
+            <small className={'italic text-gray-400 text-center'}>We currently only accept payments GHS</small>
+            <div className={'text-primary text-center font-medium h4 my-2'}> 1 {booking.currency} = {toMoneyFormat(exchangeRate)} {currency}</div>
             <div className={'text-lg font-medium'}>You will Pay</div>
-            <div className={'text-xl font-bold'}>{currency} {toMoneyFormat(subTotal * 1.035 * exchangeRate)}</div>
+            <div className={'text-xl font-bold'}>{currency} {toMoneyFormat(booking.grandTotal * exchangeRate)}</div>
         </div>
     );
 };

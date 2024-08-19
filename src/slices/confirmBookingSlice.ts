@@ -2,7 +2,7 @@ import { Stay } from "@/lib/types";
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";;
 import { addDays, differenceInDays } from "date-fns";
 import { RootState } from "@/data/types";
-import {getFeePercentage} from "@/lib/utils";
+import {getCountry, getFeePercentage} from "@/lib/utils";
 import createBooking from "@/slices/confirmBookingThunks/createBooking";
 import handlePaymentAsync from '@/slices/confirmBookingThunks/handlePaymentAsync'
 import {state} from "sucrase/dist/types/parser/traverser/base";
@@ -88,7 +88,7 @@ const recalculateCosts = (state: any) => {
     // Convert the total price to the stay's currency if necessary
     if (state.stay.currency && state.stay.currency !== state.currency) {
 
-        const exchangeRate =1.02 / state.exchangeRates[state.stay.currency];
+        const exchangeRate = 1.02 / state.exchangeRates[state.stay.currency];
         state.usedRate = exchangeRate ;
         state.fees = fees * exchangeRate;
         state.totalPrice = subTotal * exchangeRate;
@@ -112,12 +112,13 @@ export const fetchExchangeRates = createAsyncThunk(
     async (_, { getState }) => {
         const { confirmBooking } = getState() as { confirmBooking: ConfirmBookingState };
         try {
-            let fromCurrency = confirmBooking.currency;
+            const country = await getCountry()
+            let fromCurrency = country?.currency || confirmBooking.currency;
 
             const response = await fetch(`https://open.er-api.com/v6/latest/${fromCurrency}`);
             console.log(response)
             const data = await response.json();
-            return data.rates;
+            return {rates: data.rates, currency: data.base_code};
         } catch (error) {
             console.error('Error fetching exchange rates:', error);
         }
@@ -168,7 +169,8 @@ const ConfirmBookingSlice = createSlice({
         },
         setPaymentMethod: (state,action: PayloadAction<string>) => {
             state.paymentMethod = action.payload;
-        }
+        },
+
     },
     extraReducers: (builder) => {
         builder
@@ -197,8 +199,10 @@ const ConfirmBookingSlice = createSlice({
                 state.error = action.payload;
             })
             .addCase(fetchExchangeRates.fulfilled, (state, action) => {
-                state.exchangeRates = action.payload;
-                state.usedRate = action.payload[state.currency] * 1.02;
+                state.exchangeRates = action.payload?.rates;
+                state.currency = action.payload?.currency || 'KES';
+                state.usedRate = action.payload?.rates[state.currency] * 1.02;
+
                 recalculateCosts(state); // Recalculate costs after exchange rates are fetched
             })
             .addCase(fetchExchangeRates.pending, (state, action) => {

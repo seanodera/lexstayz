@@ -77,8 +77,8 @@ export default function ContextProvider({children}: { children: React.ReactNode 
         return <AuthenticationProvider>{children}</AuthenticationProvider>
     } else {
         return <div className={'min-h-screen'}>
-            <Navbar/>
-            <div className={'h-full'}>
+            {pathname === '/'? <Navbar/> : <div><Navbar/> </div>}
+            <div className={'h-full py-20'}>
                 {children}
             </div>
             <Footer/>

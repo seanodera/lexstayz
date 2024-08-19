@@ -39,7 +39,7 @@ export default function Page() {
 
     async function handSubmit() {
         setIsLoading(true)
-        dispatch(handlePaymentAsync({preserve: true})).then((value: any) => {
+        dispatch(handlePaymentAsync({preserve: false})).then((value: any) => {
             if (value.meta.requestStatus === 'fulfilled'){
                 router.push(value.payload)
             } else {
