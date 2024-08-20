@@ -10,9 +10,9 @@ export default function Banner({ stay }: { stay: any }) {
     return (
         <div>
             <h3 className="font-semibold text-3xl mb-4">{stay.name}</h3>
-            <div className="grid grid-cols-3 md:grid-cols-4 grid-rows-3 gap-2 w-full aspect-[20/7]">
-                <div className="col-span-3 row-span-3">
-                    <img src={stay.poster} className="w-full h-full object-cover rounded-xl" />
+            <div className="grid grid-cols-3 md:grid-cols-4 md:grid-rows-3 gap-2 w-full aspect-[20/7]">
+                <div className="col-span-3 md:row-span-3">
+                    <img src={stay.poster} className="w-full md:h-full object-cover rounded-xl max-md:aspect-video"  alt={'poster'}/>
                 </div>
                 {stay.images.slice(0, 2).map((image: string, index: number) => (
                     <div key={index} className="col-span-1 row-span-1">
