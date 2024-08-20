@@ -54,7 +54,7 @@ export default function ChatBox() {
     } else {
         return (
             <div className="h-full overscroll-y-none overflow-y-hidden flex" ref={setContainer}>
-                {!isMobile && pathname.split('/').length >= 3 && <div><RecipientsBox/></div>}
+                {!isMobile && pathname.split('/').length >= 3 && <div className={'w-1/5 h-full'} ><RecipientsBox/></div>}
                 <div className="flex flex-col justify-between overscroll-none overflow-y-hidden h-full w-full items-center transition-all duration-300 ease-in-out">
                     <div className="flex justify-between bg-white py-3 w-full px-4 static">
                         <div className="flex items-center gap-1">
@@ -140,14 +140,14 @@ export default function ChatBox() {
                         <BookingBox/>
                     </Card>
                 </div>
-                <Drawer
+                {isMobile && <Drawer
                     title="Recent Booking"
                     placement="right"
                     onClose={() => setShowReservation(false)}
                     open={showReservation}
                 >
                     <BookingBox/>
-                </Drawer>
+                </Drawer>}
             </div>
         );
     }

@@ -62,8 +62,8 @@ export default function AuthenticationProvider({children}: { children: ReactNode
     const isMessagePage = pathName.startsWith('/messages')
     return <main className={`${isMessagePage ? 'h-screen overflow-hidden' : 'overflow-auto space-y-16'}`}>
         <Navbar/>
-        <div className={'py-8'}>
-            <div className="h-full overflow-auto py-12">{children}</div>
+        <div className={`${isMessagePage ? 'h-[calc(100%_-_4.5rem)]':'py-8'}`}>
+            <div className={isMessagePage ? 'h-full overflow-auto ' :'h-full overflow-auto py-12'}>{children}</div>
         </div>
     </main>
 }
