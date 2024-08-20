@@ -85,7 +85,7 @@ export async function completeBooking({
                         currency: stayData.currency,
                         paymentData: paymentData,
                         date: booking.createdAt,
-                        availableDate: addDays(booking.checkOutDate, 3),
+                        availableDate: addDays(booking.checkOutDate, 3).toISOString(),
                     })
                 }
             }
