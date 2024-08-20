@@ -2,6 +2,7 @@ import {Dates, Stay} from "@/lib/types";
 import {auth, firestore} from "@/lib/firebase";
 import {writeBatch} from "@firebase/firestore";
 import {collection, doc, getDoc, getDocs, runTransaction} from "firebase/firestore";
+import {addDays} from "date-fns";
 
 
 export function getCurrentUser() {
@@ -83,6 +84,8 @@ export async function completeBooking({
                         amount: booking.totalPrice,
                         currency: stayData.currency,
                         paymentData: paymentData,
+                        date: booking.createdAt,
+                        availableDate: addDays(booking.checkOutDate, 3),
                     })
                 }
             }
