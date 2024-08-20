@@ -76,7 +76,7 @@ export default function ReservePanel({stay}: {stay: any}) {
         <hr/>
         <div className={'grid grid-cols-2'}>
             <h4 className={'text-gray-600'}>{booking.length} Nights</h4>
-            <h4 className={'text-end'}>{globalCurrency} {toMoneyFormat(booking.totalPrice)}</h4>
+            <h4 className={'text-end'}>{globalCurrency} {toMoneyFormat(booking.subtotal)}</h4>
             <h4 className={'text-gray-600'}>LexStayz Fees</h4>
             <h4 className={'text-end'}>{globalCurrency} {toMoneyFormat(booking.fees)}</h4>
             <h3 className={'font-bold mt-4'}>Total</h3>

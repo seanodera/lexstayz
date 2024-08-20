@@ -11,7 +11,7 @@ const BookingSummary = ({stay}: any) => {
     const cart = useAppSelector(selectCart);
     const [subTotal, setSubTotal] = useState(0);
     const [exchangeRate, setExchangeRate] = useState(0)
-    const [currency, setCurrency] = useState('USD')
+    const currency = 'KES'
     const booking = useAppSelector(selectConfirmBooking)
     const [messageApi, contextHolder] = message.useMessage();
     const dispatch = useAppDispatch()
@@ -25,27 +25,16 @@ const BookingSummary = ({stay}: any) => {
     }, [cart]);
 
     useEffect(() => {
-        const fetchExchangeRate = async () => {
 
-            // Change as needed
-            const toCurrency = 'KES'; // Change as needed
+        const rate = booking.exchangeRates[ currency ];
 
-            const rate = booking.exchangeRates[ currency ];
-            ;
-            if (rate) {
-                setCurrency(toCurrency)
-                if (rate !== 1){
-                setExchangeRate(rate * 1.02);
-                } else {
-                    setExchangeRate(1)
-                }
-            } else {
-                //messageApi.error(`Failed to get exchange Rate`, )
-            }
+        if (rate !== 1){
+            setExchangeRate(rate * 1.02);
+        } else {
+            setExchangeRate(1)
+        }
 
-        };
-        fetchExchangeRate()
-    }, [stay.currency]);
+    }, [booking.exchangeRates, currency]);
 
     function calculatePrice(amount: number) {
         let price = 0
@@ -60,7 +49,7 @@ const BookingSummary = ({stay}: any) => {
     useEffect(() => {
         dispatch(setBookingStay(stay))
 
-    }, [currency, exchangeRate, subTotal])
+    }, [currency, subTotal])
     return (
         <div className="border border-gray-200 rounded-xl p-4 shadow-md shadow-primary">
             <h3 className="text-xl font-semibold">Price Summary</h3>
@@ -73,7 +62,7 @@ const BookingSummary = ({stay}: any) => {
             <hr className="col-span-2 my-4"/>
             <div className="grid grid-cols-2">
                 <div className="font-medium text-gray-500">Subtotal</div>
-                <div className="font-medium text-end">{booking.currency} {toMoneyFormat(booking.totalPrice)}</div>
+                <div className="font-medium text-end">{booking.currency} {toMoneyFormat(booking.subtotal)}</div>
                 <div className="font-medium text-gray-500">Booking fees</div>
                 <div className="font-medium text-end">{booking.currency} {toMoneyFormat(booking.fees)}</div>
                 <hr className="col-span-2 my-4"/>
@@ -82,7 +71,7 @@ const BookingSummary = ({stay}: any) => {
                     {booking.currency} {toMoneyFormat(booking.grandTotal)}
                 </div>
             </div>
-            {booking.currency === currency? <div className={'w-full'}>
+            {booking.currency !== currency? <div className={'w-full'}>
                 <small className={'italic text-gray-400 text-center block'}>We currently only accept
                     payments in {currency}</small>
                 <div

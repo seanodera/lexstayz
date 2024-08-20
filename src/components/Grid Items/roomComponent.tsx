@@ -11,7 +11,13 @@ import {toMoneyFormat} from "@/lib/utils";
 import {selectExchangeRate, selectGlobalCurrency} from "@/slices/staysSlice";
 
 
-export default function RoomComponent({room, stay, className = '', available = true, lowest = 10}: { room: any, stay: any, className?: string, available?: boolean, lowest?: number }) {
+export default function RoomComponent({room, stay, className = '', available = true, lowest = 10}: {
+    room: any,
+    stay: any,
+    className?: string,
+    available?: boolean,
+    lowest?: number
+}) {
     const dispatch = useAppDispatch();
     const globalCart = useAppSelector(selectCart)
     const [numRooms, setNumRooms] = useState<number>(0);
@@ -23,16 +29,16 @@ export default function RoomComponent({room, stay, className = '', available = t
     useEffect(() => {
         let _roomIndex = globalCart.findIndex((value: any) => value.roomId === room.id);
         setRoomIndex(_roomIndex)
-        if (_roomIndex !== -1){
-            setNumRooms(globalCart[_roomIndex].numRooms)
+        if (_roomIndex !== -1) {
+            setNumRooms(globalCart[ _roomIndex ].numRooms)
         }
 
     }, [globalCart])
 
     useEffect(() => {
-        if (!available){
+        if (!available) {
             setNumRooms(0);
-        } else if (lowest < numRooms){
+        } else if (lowest < numRooms) {
             setNumRooms(lowest)
         }
     }, [lowest, available]);
@@ -46,7 +52,7 @@ export default function RoomComponent({room, stay, className = '', available = t
             // Check if the room is already in the cart by its index
             if (roomIndex !== -1) {
                 // Update the existing room entry in the cart
-                newCart[roomIndex] = {
+                newCart[ roomIndex ] = {
                     name: room.name,
                     price: room.price,
                     numRooms: numRooms,
@@ -71,6 +77,7 @@ export default function RoomComponent({room, stay, className = '', available = t
         // Dispatch the updated cart
         dispatch(updateCart(newCart));
     }
+
     useEffect(() => {
 
         handleCart()
@@ -78,8 +85,8 @@ export default function RoomComponent({room, stay, className = '', available = t
 
     function calculatePrice(amount: number) {
         let price = 0
-        if (exchangeRates[stay.currency] && stay.currency !== globalCurrency){
-            price = amount * 1.02 / exchangeRates[stay.currency]
+        if (exchangeRates[ stay.currency ] && stay.currency !== globalCurrency) {
+            price = amount * 1.02 / exchangeRates[ stay.currency ]
         } else {
             price = amount
         }
@@ -93,18 +100,20 @@ export default function RoomComponent({room, stay, className = '', available = t
             {(lowest > 0 && lowest < 5 && available) && <div
                 className={'absolute top-0 right-0 py-2 px-3 rounded-lg shadow-md mt-2 mx-2 bg-warning font-medium'}>{lowest} Left</div>}
             {!available && <div
-                className={'absolute top-0 right-0 py-2 px-3 rounded-lg shadow-md mt-2 mx-2 bg-danger font-medium text-white'}>Fully Booked</div>}
+                className={'absolute top-0 right-0 py-2 px-3 rounded-lg shadow-md mt-2 mx-2 bg-danger font-medium text-white'}>Fully
+                Booked</div>}
         </div>
         <div className={'flex justify-between items-center my-2'}>
             <h3 className={'text-xl font-medium mb-0'}>{room.name}</h3>
             <div className={'flex justify-between'}> <span
-                className={'font-medium text-primary text-xl'}>{globalCurrency} {calculatePrice(room.price)} <span className={'font-light text-sm'}>/night</span></span></div>
+                className={'font-medium text-primary text-xl'}>{globalCurrency} {calculatePrice(room.price)} <span
+                className={'font-light text-sm'}>/night</span></span></div>
         </div>
         <div>
             <span className="flex gap-1 items-center flex-wrap my-4">
                                     <div className="text-sm mb-0">Up to {room.maxGuests} Guests</div>
                                     <Divider className="bg-primary h-5" type="vertical"/>
-                                    {/*<h4 className={'max-md:text-sm mb-0'}>{bedsText}</h4>*/}
+                {/*<h4 className={'max-md:text-sm mb-0'}>{bedsText}</h4>*/}
                                 </span>
         </div>
 
@@ -112,8 +121,8 @@ export default function RoomComponent({room, stay, className = '', available = t
             <div className={'flex justify-end gap-2 w-max'}><Select disabled={!available} value={numRooms}
                                                                     onChange={(e) => setNumRooms(parseInt(e.target.value))}
                                                                     className={'appearance-none rounded-xl border border-primary text-sm py-2 px-4 text-start bg-transparent'}>
-                {Array.from({length: lowest < 10? lowest + 1 : 11}, (_, i) => <option value={i}
-                                                            key={i}>{i} {(i === 1) ? 'Room' : 'Rooms'}</option>)}
+                {Array.from({length: lowest < 10 ? lowest + 1 : 11}, (_, i) => <option value={i}
+                                                                                       key={i}>{i} {(i === 1) ? 'Room' : 'Rooms'}</option>)}
             </Select>
                 <Button type={'primary'} size={'large'} className={''}
                         onClick={() => setOpen(true)}>View Room
@@ -123,12 +132,19 @@ export default function RoomComponent({room, stay, className = '', available = t
 
 
         <ReservationDialog isOpen={open} setIsOpen={setOpen} room={room} stay={stay} numRoom={numRooms}
-                           setNumRoom={setNumRooms} available={available} lowest={lowest}/>
+                           setNumRoom={setNumRooms} available={available} lowest={lowest}
+                           price={calculatePrice(room.price)} currency={globalCurrency}/>
     </div>
 }
 
 
-export function RoomComponentPortrait({room, stay, className = '', available = true, lowest = 10}: { room: any, stay: any, className?: string, available?: boolean, lowest?: number }) {
+export function RoomComponentPortrait({room, stay, className = '', available = true, lowest = 10}: {
+    room: any,
+    stay: any,
+    className?: string,
+    available?: boolean,
+    lowest?: number
+}) {
     const dispatch = useAppDispatch();
     const globalCart = useAppSelector(selectCart)
     const [numRooms, setNumRooms] = useState<number>(0);
@@ -140,8 +156,8 @@ export function RoomComponentPortrait({room, stay, className = '', available = t
     useEffect(() => {
         let _roomIndex = globalCart.findIndex((value: any) => value.roomId === room.id);
         setRoomIndex(_roomIndex)
-        if (_roomIndex !== -1){
-            setNumRooms(globalCart[_roomIndex].numRooms)
+        if (_roomIndex !== -1) {
+            setNumRooms(globalCart[ _roomIndex ].numRooms)
         }
 
     }, [globalCart])
@@ -156,7 +172,7 @@ export function RoomComponentPortrait({room, stay, className = '', available = t
             // Check if the room is already in the cart by its index
             if (roomIndex !== -1) {
                 // Update the existing room entry in the cart
-                newCart[roomIndex] = {
+                newCart[ roomIndex ] = {
                     name: room.name,
                     price: room.price,
                     numRooms: numRooms,
@@ -184,25 +200,28 @@ export function RoomComponentPortrait({room, stay, className = '', available = t
 
     function calculatePrice(amount: number) {
         let price = 0
-        if (exchangeRates[stay.currency] && stay.currency !== globalCurrency){
-            price = amount * 1.02 / exchangeRates[stay.currency]
+        if (exchangeRates[ stay.currency ] && stay.currency !== globalCurrency) {
+            price = amount * 1.02 / exchangeRates[ stay.currency ]
         } else {
             price = amount
         }
         return toMoneyFormat(price);
     }
 
-    return <div className={`${(roomIndex !== -1) && 'shadow-primary'} ${className ? className : 'rounded-2xl p-4 shadow-md'}`}>
+    return <div
+        className={`${(roomIndex !== -1) && 'shadow-primary'} ${className ? className : 'rounded-2xl p-4 shadow-md'}`}>
         <div className={'relative aspect-video'}>
             <Image className={'aspect-video rounded-xl object-cover'} src={room.poster} alt={room.name}/>
             {(lowest > 0 && lowest < 5 && available) && <div
                 className={'absolute top-0 right-0 py-2 px-3 rounded-lg shadow-md mt-2 mx-2 bg-warning font-medium'}>{lowest} Left</div>}
             {!available && <div
-                className={'absolute top-0 right-0 py-2 px-3 rounded-lg shadow-md mt-2 mx-2 bg-danger font-medium text-white'}>Fully Booked</div>}
+                className={'absolute top-0 right-0 py-2 px-3 rounded-lg shadow-md mt-2 mx-2 bg-danger font-medium text-white'}>Fully
+                Booked</div>}
         </div>
         <div className={'my-4 flex justify-between'}><h3
             className={'text-xl font-medium'}>{room.name}</h3>  <span
-            className={'font-medium text-primary text-xl'}>{globalCurrency} {calculatePrice(room.price)} <span className={'font-light text-sm'}>/night</span></span></div>
+            className={'font-medium text-primary text-xl'}>{globalCurrency} {calculatePrice(room.price)} <span
+            className={'font-light text-sm'}>/night</span></span></div>
         <div className={'flex flex-wrap gap-2 my-4'}>{room.amenities.slice(0, 3).map((amenity: string, index: number) =>
             <div
                 className={'border border-gray-500 shadow-md rounded py-1 px-3 text-balance text-sm'}
@@ -223,14 +242,16 @@ export function RoomComponentPortrait({room, stay, className = '', available = t
             <div className={'rounded-xl'}><Select disabled={!available} value={numRooms}
                                                   onChange={(e) => setNumRooms(parseInt(e.target.value))}
                                                   className={'appearance-none rounded-xl border border-primary py-3 px-3 text-start bg-transparent'}>
-                {Array.from({length:  lowest < 10? lowest + 1 : 11}, (_, i) => <option value={i}
-                                                            key={i}>{i} {(i === 1) ? 'Room' : 'Rooms'}</option>)}
+                {Array.from({length: lowest < 10 ? lowest + 1 : 11}, (_, i) => <option value={i}
+                                                                                       key={i}>{i} {(i === 1) ? 'Room' : 'Rooms'}</option>)}
             </Select></div>
-            <button disabled={!available} className={'rounded-xl text-center py-3 bg-primary text-white font-medium w-full'}
+            <button disabled={!available}
+                    className={'rounded-xl text-center py-3 bg-primary text-white font-medium w-full'}
                     onClick={handleCart}>Reserve
             </button>
         </div>
 
-        <ReservationDialog isOpen={open} setIsOpen={setOpen} room={room} stay={stay} numRoom={numRooms} setNumRoom={setNumRooms}/>
+        <ReservationDialog isOpen={open} setIsOpen={setOpen} room={room} stay={stay} numRoom={numRooms}
+                           setNumRoom={setNumRooms} price={calculatePrice(room.price)} currency={globalCurrency}/>
     </div>
 }

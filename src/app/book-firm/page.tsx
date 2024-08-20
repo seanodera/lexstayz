@@ -175,7 +175,7 @@ export default function BookFirmPage() {
                                     <div
                                         className={'mb-0'}>{booking.currency} {toMoneyFormat(stay.price * booking.usedRate)}</div>
                                     <div
-                                        className={'mb-0 text-primary'}>{booking.currency} {toMoneyFormat(booking.totalPrice)}</div>
+                                        className={'mb-0 text-primary'}>{booking.currency} {toMoneyFormat(booking.subtotal)}</div>
                                 </div>
                                 <div className={'mb-0 text-gray-500'}>Booking Fees</div>
                                 <div
@@ -187,7 +187,7 @@ export default function BookFirmPage() {
 
                             </div>
                         </div>
-                        {booking.currency === currency? <div>
+                        {booking.currency !== currency? <div>
                             <small className={'italic text-gray-400 text-center block'}>We currently only accept
                                 payments in {currency}</small>
                             <div

@@ -7,13 +7,13 @@ import {CloseIcon} from "next/dist/client/components/react-dev-overlay/internal/
 import {CloseOutlined} from "@ant-design/icons";
 import {updateCart} from "@/slices/bookingSlice";
 
-export default function ReservationDialog({isOpen = false, setIsOpen, room, stay, numRoom, setNumRoom, available = true, lowest = 10}: {
+export default function ReservationDialog({isOpen = false, setIsOpen, room, stay, numRoom, setNumRoom, available = true, lowest = 10, price, currency}: {
     isOpen: boolean,
     setIsOpen: any,
     room: any,
     stay: any,
     numRoom: number,
-    setNumRoom: any, available?:boolean, lowest?:number,
+    setNumRoom: any, available?:boolean, lowest?:number,price: string, currency: string
 }) {
     const [bedsText, setBedsText] = useState('');
     const [numRooms, setNumRooms] = useState<number>(numRoom);
@@ -78,7 +78,7 @@ export default function ReservationDialog({isOpen = false, setIsOpen, room, stay
                                 <div className={'flex justify-between items-center'}>
                                     <div className="text-2xl font-bold capitalize mb-0">{room.name}</div>
                                     <div
-                                        className={'text-primary text-lg font-bold'}>{stay.currency} {room.price.toFixed(2)}/night
+                                        className={'text-primary text-lg font-bold'}>{currency} {price}/night
                                     </div>
                                 </div>
                                 <span className="flex gap-1 items-center flex-wrap">

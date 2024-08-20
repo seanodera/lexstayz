@@ -18,6 +18,7 @@ export interface ConfirmBookingState {
     numGuests: number;
     specialRequest: string;
     totalPrice: number;
+    subtotal: number;
     currency: string;
     usedRate: number;
     fees: number;
@@ -44,6 +45,7 @@ const initialState: ConfirmBookingState = {
     numGuests: 2,
     specialRequest: '',
     totalPrice: 0,
+    subtotal: 0,
     currency: 'KES',
     fees: 0,
     usedRate: 1,
@@ -75,7 +77,7 @@ const recalculateCosts = (state: any) => {
 
     // Convert the total price to USD for fee calculation
     let totalPriceInUSD = subTotal;
-
+    state.totalPrice = subTotal;
     if (state.stay.currency !== 'USD') {
 
         totalPriceInUSD = (subTotal * 1.02 / state.exchangeRates[state.stay.currency]) * state.exchangeRates['USD']
@@ -91,14 +93,14 @@ const recalculateCosts = (state: any) => {
         const exchangeRate = 1.02 / state.exchangeRates[state.stay.currency];
         state.usedRate = exchangeRate ;
         state.fees = fees * exchangeRate;
-        state.totalPrice = subTotal * exchangeRate;
+        state.subtotal = subTotal * exchangeRate;
 
-        state.grandTotal = state.fees + state.totalPrice;
+        state.grandTotal = state.fees + state.subtotal;
     } else {
-        state.totalPrice = subTotal;
+        state.subtotal = subTotal;
         state.fees = fees;
         state.usedRate = 1;
-        state.grandTotal = state.totalPrice + state.fees;
+        state.grandTotal = state.subtotal + state.fees;
     }
 };
 
@@ -136,7 +138,7 @@ const ConfirmBookingSlice = createSlice({
             state.specialRequest = action.payload;
         },
         updateCostData: (state, action: PayloadAction<{ price: number; currency: string; usedRate: number }>) => {
-            state.totalPrice = action.payload.price;
+            state.subtotal = action.payload.price;
             state.currency = action.payload.currency;
             state.usedRate = action.payload.usedRate;
             state.exchanged = state.stay.currency !== action.payload.currency;
@@ -153,9 +155,6 @@ const ConfirmBookingSlice = createSlice({
             state.checkInDate = action.payload.checkInDate;
             state.checkOutDate = action.payload.checkOutDate;
 
-            if (state.stay.type && state.stay.type !== 'Hotel') {
-                state.totalPrice = state.length * state.stay.price;
-            }
 
             recalculateCosts(state); // Recalculate costs when booking dates or number of guests change
         },
@@ -233,7 +232,7 @@ export const selectPaymentData = (state: RootState) => state.confirmBooking.paym
 export const selectContact = (state: RootState) => state.confirmBooking.contact;
 export const selectNumGuests = (state: RootState) => state.confirmBooking.numGuests;
 export const selectSpecialRequest = (state: RootState) => state.confirmBooking.specialRequest;
-export const selectTotalPrice = (state: RootState) => state.confirmBooking.totalPrice;
+export const selectSubtotal = (state: RootState) => state.confirmBooking.subtotal;
 export const selectCurrency = (state: RootState) => state.confirmBooking.currency;
 export const selectUsedRate = (state: RootState) => state.confirmBooking.usedRate;
 export const selectFees = (state: RootState) => state.confirmBooking.fees;
