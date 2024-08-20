@@ -46,12 +46,16 @@ export async function completeBooking({
 
         const booking = bookingSnap.data();
 
-        if (booking.status === status && booking.isConfirmed === isConfirmed)  {
-            throw new Error("Booking status or confirmation status is already set!");
-        }
-        const hostDoc = doc(firestore, 'hosts', booking.hostId, 'bookings', id);
+        // if (booking.status === status && booking.isConfirmed === isConfirmed)  {
+        //     throw new Error("Booking status or confirmation status is already set!");
+        // }
+        const hostBookingsDoc = doc(firestore, 'hosts', booking.hostId, 'bookings', id);
+        const hostTransactions = doc(firestore, 'hosts', booking.hostId, 'pendingTransactions', id);
+
         batch.update(userDoc, {status, isConfirmed, paymentData});
-        batch.set(hostDoc, {...booking, status, isConfirmed, paymentData});
+        batch.set(hostBookingsDoc, {...booking, status, isConfirmed, paymentData});
+
+        const transactionDoc = await getDoc(hostTransactions)
 
         const stayRef = doc(firestore, 'stays', booking.accommodationId);
 
@@ -65,6 +69,24 @@ export async function completeBooking({
             const stayData = staySnap.data();
             const checkIn = new Date(booking.checkInDate);
             const checkOut = new Date(booking.checkOutDate);
+
+            if (transactionDoc.exists()) {
+                if (status === 'Cancelled' || status === 'Reject') {
+                    batch.delete(hostTransactions)
+                } else {
+
+                }
+            } else {
+                if (status === 'Confirmed') {
+                    batch.set(hostTransactions, {
+                        id: booking.id,
+                        amount: booking.totalPrice,
+                        currency: stayData.currency,
+                        paymentData: paymentData,
+                    })
+                }
+            }
+
 
             if (stayData.type === 'Hotel') {
 
