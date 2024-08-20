@@ -17,6 +17,8 @@ export default function RoomComponent({room, stay, className = '', available = t
     const [numRooms, setNumRooms] = useState<number>(0);
     const [open, setOpen] = useState(false);
     const [roomIndex, setRoomIndex] = useState<number>(-1);
+    const exchangeRates = useAppSelector(selectExchangeRate)
+    const globalCurrency = useAppSelector(selectGlobalCurrency)
 
     useEffect(() => {
         let _roomIndex = globalCart.findIndex((value: any) => value.roomId === room.id);
@@ -74,6 +76,16 @@ export default function RoomComponent({room, stay, className = '', available = t
         handleCart()
     }, [numRooms])
 
+    function calculatePrice(amount: number) {
+        let price = 0
+        if (exchangeRates[stay.currency] && stay.currency !== globalCurrency){
+            price = amount * 1.02 / exchangeRates[stay.currency]
+        } else {
+            price = amount
+        }
+        return toMoneyFormat(price);
+    }
+
     return <div
         className={`${(roomIndex !== -1) && 'shadow-primary'} ${className ? className : 'rounded-2xl p-4 shadow-md'}`}>
         <div className={'relative aspect-video'}>
@@ -86,9 +98,7 @@ export default function RoomComponent({room, stay, className = '', available = t
         <div className={'flex justify-between items-center my-2'}>
             <h3 className={'text-xl font-medium mb-0'}>{room.name}</h3>
             <div className={'flex justify-between'}> <span
-                className={'font-medium text-primary text-xl'}>{'$'} {room.price.toLocaleString(undefined, {
-                minimumFractionDigits: 2, maximumFractionDigits: 2
-            })} <span className={'font-light text-sm'}>/night</span></span></div>
+                className={'font-medium text-primary text-xl'}>{globalCurrency} {calculatePrice(room.price)} <span className={'font-light text-sm'}>/night</span></span></div>
         </div>
         <div>
             <span className="flex gap-1 items-center flex-wrap my-4">

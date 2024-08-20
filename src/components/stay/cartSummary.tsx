@@ -4,12 +4,16 @@ import {selectCart, updateCart} from "@/slices/bookingSlice";
 import {useEffect, useState} from "react";
 import {Select} from "@headlessui/react";
 import {selectConfirmBooking} from "@/slices/confirmBookingSlice";
+import {toMoneyFormat} from "@/lib/utils";
+import {selectExchangeRate, selectGlobalCurrency} from "@/slices/staysSlice";
 
 export default function CartSummary({stay}: any) {
     const cart = useAppSelector(selectCart);
     const dispatch = useAppDispatch();
     const [subTotal, setSubTotal] = useState(0);
     const  booking = useAppSelector(selectConfirmBooking)
+    const exchangeRates = useAppSelector(selectExchangeRate)
+    const globalCurrency = useAppSelector(selectGlobalCurrency)
     useEffect(() => {
         let _subTotal = 0;
 
@@ -18,12 +22,21 @@ export default function CartSummary({stay}: any) {
         });
         setSubTotal(_subTotal);
     }, [cart, booking.length]);
+    function calculatePrice(amount: number) {
+        let price = 0
+        if (exchangeRates[stay.currency] && stay.currency !== globalCurrency){
+            price = amount * 1.02 / exchangeRates[stay.currency]
+        } else {
+            price = amount
+        }
+        return toMoneyFormat(price);
+    }
 
     return (
         <div>
             <div className={'flex justify-between items-center'}>
                 <h3 className="text-2xl font-semibold mb-2">Cart</h3>
-                <h4 className={'text-gray-500 mb-0'}>Subtotal: {stay.currency? stay.currency : 'USD'} {subTotal.toFixed(2)}</h4>
+                <h4 className={'text-gray-500 mb-0'}>Subtotal: {globalCurrency} {calculatePrice(subTotal)}</h4>
             </div>
             {cart.map((cartItem: any, index: number) => {
                 let numRooms = cartItem.numRooms
@@ -49,11 +62,19 @@ export default function CartSummary({stay}: any) {
                     // Dispatch the updated cart
                     dispatch(updateCart(newCart));
                 }
-
+                function calculatePrice(amount: number) {
+                    let price = 0
+                    if (exchangeRates[stay.currency] && stay.currency !== globalCurrency){
+                        price = amount * 1.02 / exchangeRates[stay.currency]
+                    } else {
+                        price = amount
+                    }
+                    return toMoneyFormat(price);
+                }
                 return <div key={index} className={'flex justify-between border-solid px-4 py-2 border-gray-200 shadow-md rounded-lg'}>
                     <div>
                         <div className={'text-lg font-bold capitalize'}>{cartItem.name}</div>
-                        <div className={'text-primary font-semibold'}>$ {cartItem.price.toFixed(2)} /night</div>
+                        <div className={'text-primary font-semibold'}>{globalCurrency} {calculatePrice(cartItem.price)} /night</div>
                     </div>
                     <div>
                         <Select value={numRooms}
