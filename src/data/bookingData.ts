@@ -72,7 +72,7 @@ export async function completeBooking({
             const checkOut = new Date(booking.checkOutDate);
 
             if (transactionDoc.exists()) {
-                if (status === 'Cancelled' || status === 'Reject') {
+                if (status === 'Canceled' || status === 'Rejected') {
                     batch.delete(hostTransactions)
                 } else {
 
