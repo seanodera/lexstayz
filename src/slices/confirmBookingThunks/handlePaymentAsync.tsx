@@ -26,7 +26,7 @@ const handlePaymentAsync = createAsyncThunk(
                     email: booking.contact.email,
                     amount: amount,
                     currency: paymentCurrency,
-                    callback_url: `${process.env.NEXT_PUBLIC_HOST}/${booking.stay.type === 'Hotel'? 'checkout': 'confirm-booking'}?userID=${user.uid}&booking=${id}${preserve ? `&preserve=${preserve}` : ''}`,
+                    callback_url: `${process.env.NEXT_PUBLIC_HOST}/confirm-booking?userID=${user.uid}&booking=${id}${preserve ? `&preserve=${preserve}` : ''}`,
                     reference: id
                 });
 
@@ -41,7 +41,7 @@ const handlePaymentAsync = createAsyncThunk(
                     amount: amount,
                     currency: paymentCurrency,
                     authorization_code: state.confirmBooking.paymentMethod,
-                    callback_url: `${process.env.NEXT_PUBLIC_HOST}/${booking.stay.type === 'Hotel'? 'checkout': 'confirm-booking'}?userID=${user.uid}&booking=${id}${preserve ? `&preserve=${preserve}` : ''}`,
+                    callback_url: `${process.env.NEXT_PUBLIC_HOST}/confirm-booking?userID=${user.uid}&booking=${id}${preserve ? `&preserve=${preserve}` : ''}`,
                     reference: id
                 });
 

@@ -48,9 +48,9 @@ export async function completeBooking({
 
         const booking = bookingSnap.data();
 
-        // if (booking.status === status && booking.isConfirmed === isConfirmed)  {
-        //     throw new Error("Booking status or confirmation status is already set!");
-        // }
+        if (booking.status === status && booking.isConfirmed === isConfirmed)  {
+            throw new Error("Booking status or confirmation status is already set!");
+        }
         const hostBookingsDoc = doc(firestore, 'hosts', booking.hostId, 'bookings', id);
         const hostTransactions = doc(firestore, 'hosts', booking.hostId, 'pendingTransactions', id);
 
