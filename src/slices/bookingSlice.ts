@@ -8,6 +8,7 @@ import {arrayUnion, collection, doc, getDoc, setDoc} from "firebase/firestore";
 import {firestore} from "@/lib/firebase";
 import {writeBatch} from "@firebase/firestore";
 import {state} from "sucrase/dist/types/parser/traverser/base";
+import {updateBookingStatusAsync} from "@/slices/bookingThunks/updateBookingStatusAsync";
 
 
 interface BookingState {
@@ -271,6 +272,25 @@ const bookingsSlice = createSlice({
                 state.isLoading = false;
                 state.hasError = true;
                 state.errorMessage = 'Failed to write review';
+            }) .addCase(updateBookingStatusAsync.pending, (state) => {
+            state.isLoading = true;
+            state.hasError = false;
+            state.errorMessage = '';
+        })
+            .addCase(updateBookingStatusAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                const index = state.bookings.findIndex((value) => value.id === action.payload.booking.id);
+                if (index !== -1) {
+                    state.bookings[ index ] = {
+                        ...action.payload.booking,
+                        status: action.payload.status,
+                    };
+                }
+            })
+            .addCase(updateBookingStatusAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.hasError = true;
+                state.errorMessage = action.error.message || 'Failed to update booking';
             });
     }
 });
@@ -282,7 +302,7 @@ export const selectCurrentBooking = (state: RootState) => state.bookings.current
 export const selectHasError = (state: RootState) => state.bookings.hasError;
 export const selectErrorMessage = (state: RootState) => state.bookings.errorMessage;
 export const selectHasBookingRun = (state: RootState) => state.bookings.hasBookingRun;
-
+export {updateBookingStatusAsync}
 export const {
     resetBooking,
     updateCart

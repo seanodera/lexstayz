@@ -2,7 +2,13 @@
 import {useParams, useRouter} from "next/navigation";
 import {useEffect, useState} from "react";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
-import {checkUnpaidBookingAsync, fetchBookingAsync, selectBookings, selectCurrentBooking} from "@/slices/bookingSlice";
+import {
+    checkUnpaidBookingAsync,
+    fetchBookingAsync,
+    selectBookings,
+    selectCurrentBooking,
+    updateBookingStatusAsync
+} from "@/slices/bookingSlice";
 import {selectAllStays, selectCurrentStay, setCurrentStayFromId} from "@/slices/staysSlice";
 import StayWidget from "@/components/bookings/StayWidget";
 import {Button, Col, Row, Skeleton} from "antd";
@@ -30,7 +36,9 @@ export default function Page() {
             dispatch(fetchBookingAsync(bookingId.toString())).then((value) => {
                 console.log(value)
                 if (value.meta.requestStatus === 'fulfilled') {
-                    dispatch(checkUnpaidBookingAsync(booking.id))
+                    if (value.payload.status !== 'Canceled'){
+                        dispatch(checkUnpaidBookingAsync(booking.id))
+                    }
                     dispatch(setCurrentStayFromId(value.payload.accommodationId))
                 }
             },)
@@ -46,6 +54,10 @@ export default function Page() {
         })
     }
 
+    function handleCancel(){
+        dispatch(updateBookingStatusAsync({status:'Canceled', booking}))
+    }
+
     console.log(booking, stay, bookings)
     return <div className={'grid grid-cols-1 md:grid-cols-3 gap-4 py-4 lg:px-24 px-7'}>
         <div className={'md:col-span-3 flex justify-between'}>
@@ -54,7 +66,7 @@ export default function Page() {
                 {!booking.review && <Button className={'animate-bounce'} type={'primary'}
                          onClick={() => setOpenDialog(true)}>Review</Button>}
                 <Button type={'primary'} onClick={() => handleContactHost()}>Message Host</Button>
-                {booking.status === 'Confirmed' ? <Button type={'primary'} danger>Cancel</Button> : ''}
+                {booking.status === 'Confirmed' ? <Button type={'primary'}  danger>Cancel</Button> : ''}
             </div> : <div></div>}
         </div>
         <div className={'space-y-4'}>

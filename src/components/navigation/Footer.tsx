@@ -15,7 +15,7 @@ export default function Footer() {
                     <div className={'space-y-2'}>
                         <div className={'font-bold'}>Partners</div>
                         <Link className={'block text-sm text-gray-300'} href={'/list-your-property'}>List your Property</Link>
-                        <Link className={'block text-sm text-gray-300'} href={'/affiliates'}>Affiliates</Link>
+                        {/*<Link className={'block text-sm text-gray-300'} href={'/affiliates'}>Affiliates</Link>*/}
                         <Link className={'block text-sm text-gray-300'} href={'/advertise'}>advertise with Us</Link>
                     </div>
                     <div className={'space-y-2'}>
@@ -23,7 +23,7 @@ export default function Footer() {
                         <Link className={'block text-sm text-gray-300'} href={'/about-us'}>About Us</Link>
                         <Link className={'block text-sm text-gray-300'} href={'/contact'}>Contact Us</Link>
                         <Link className={'block text-sm text-gray-300'} href={'/faq'}>FAQ</Link>
-                        <Link className={'block text-sm text-gray-300'} href={'/careers'}>Careers</Link>
+                        {/*<Link className={'block text-sm text-gray-300'} href={'/careers'}>Careers</Link>*/}
                     </div>
                     <div className={'space-y-2'}>
                         <div className={'font-bold mb-2'}>Terms And Privacy</div>
