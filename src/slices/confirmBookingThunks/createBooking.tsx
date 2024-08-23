@@ -3,6 +3,7 @@ import {getCurrentUser} from "@/data/bookingData";
 import {doc, writeBatch} from "firebase/firestore";
 import {firestore} from "@/lib/firebase";
 import {ConfirmBookingState} from "@/slices/confirmBookingSlice";
+import dayjs from "dayjs";
 
 
 const createBooking = createAsyncThunk(
@@ -44,8 +45,8 @@ const createBooking = createAsyncThunk(
                     phone: contact.phone,
                     country: contact.country,
                 },
-                checkInDate,
-                checkOutDate,
+                checkInDate: dayjs(checkInDate).toISOString(),
+                checkOutDate: dayjs(checkOutDate).toISOString(),
                 createdAt: new Date().toISOString(),
                 numGuests: numGuests,
                 isConfirmed: false,
