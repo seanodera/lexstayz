@@ -144,7 +144,7 @@ export default function SearchComponent() {
                 <div
                     className={'flex justify-between gap-2 sticky-top z-50 bg-white py-3 px-7 border-solid border-gray-100 border-0 border-t border-b'}>
                     <div></div>
-                    <div className={'flex gap-2'}>
+                    <div className={'flex max-md:flex-col gap-2'}>
                         <Combobox value={selectedLocation} onChange={(value) => handleSelect(value || '')}>
                             <ComboboxInput className={'bg-gray-200 rounded-lg border-0'} placeholder={'Anywhere'}
                                            displayValue={(item: any) => item}

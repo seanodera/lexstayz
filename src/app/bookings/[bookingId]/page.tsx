@@ -60,7 +60,7 @@ export default function Page() {
 
     console.log(booking, stay, bookings)
     return <div className={'grid grid-cols-1 md:grid-cols-3 gap-4 py-4 lg:px-24 px-7'}>
-        <div className={'md:col-span-3 flex justify-between'}>
+        <div className={'md:col-span-3 flex max-md:flex-col justify-between'}>
             <div className={'text-2xl font-bold'}>Booking</div>
             {booking.id && booking.status !== 'Rejected' ? <div className={'flex gap-2'}>
                 {!booking.review && <Button className={'animate-bounce'} type={'primary'}
