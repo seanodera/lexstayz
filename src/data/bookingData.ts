@@ -176,6 +176,7 @@ function iterateDaysBetween(startDate: Date, endDate: Date, task: (date: Date) =
         currentDate.setDate(currentDate.getDate() + 1);
     }
 }
+
 export async function getBookings() {
     try {
         let bookings: any = []

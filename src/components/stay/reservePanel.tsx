@@ -9,6 +9,7 @@ import {useMediaQuery} from "react-responsive";
 import {useEffect, useState} from "react";
 import {MinusOutlined, PlusOutlined} from "@ant-design/icons";
 import Link from "next/link";
+import {RangePickerProps} from "antd/es/date-picker";
 
 const { RangePicker } = DatePicker;
 
@@ -23,7 +24,7 @@ export default function ReservePanel({stay}: {stay: any}) {
     const dispatch = useAppDispatch()
 
     function calculatePrice (){
-        let price = 0
+        let price;
         if (exchangeRates[stay.currency] && stay.currency !== globalCurrency){
             price = stay.price * 1.02 / exchangeRates[stay.currency]
         } else {
@@ -38,8 +39,19 @@ export default function ReservePanel({stay}: {stay: any}) {
             checkInDate: startDate,
             checkOutDate: endDate,
         }));
-    }, [numGuests, startDate, endDate]);
+    }, [numGuests, startDate, endDate, dispatch]);
+    const disabledDate: RangePickerProps['disabledDate'] = (current) => {
+        const curr = current.toISOString().split('T')[ 0 ]
 
+        let booked;
+        if (stay.type === 'Home'){
+            booked = stay.bookedDates?.includes(curr);
+
+        } else {
+            booked = stay.fullyBookedDates?.includes(curr)
+        }
+        return booked || current.isBefore(dayjs().subtract(1,'day'));
+    };
     return <div className={'space-y-4'}>
         <h2 className={'font-bold text-xl'}>{globalCurrency} {calculatePrice()} <span className={'text-sm font-normal'}>/ night</span>
         </h2>
@@ -50,7 +62,7 @@ export default function ReservePanel({stay}: {stay: any}) {
                 </div>
             )}
             value={[dayjs(booking.checkInDate), dayjs(booking.checkOutDate)]}
-
+            disabledDate={disabledDate}
             onChange={(value) => {
                 if (value) {
                     setStartDate(dayjs(value[ 0 ]).toString());

@@ -34,8 +34,8 @@ export interface ConfirmBookingState {
 
 const initialState: ConfirmBookingState = {
     stay: {} as Stay,
-    checkInDate: new Date().toISOString(),
-    checkOutDate: addDays(new Date().toString(), 1).toISOString(),
+    checkInDate: new Date().toString(),
+    checkOutDate: addDays(new Date().toString(), 1).toString(),
     rooms: [],
     paymentData: {
         method: 'Pryzapay',

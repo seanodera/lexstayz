@@ -10,19 +10,20 @@ import Description from "@/components/stay/description";
 import StayDate from "@/components/stay/stayDate";
 import MobileCartSummary from "@/components/stay/MobileCartSummary";
 import CartSummary from "@/components/stay/cartSummary";
-import FeaturedRoom from "@/components/stay/featuredRoom";
 import AvailableRooms from "@/components/stay/availableRooms";
 import {selectCurrentStay, setCurrentStayFromId} from "@/slices/staysSlice";
-import {selectCart, updateCart} from "@/slices/bookingSlice";
+import {selectCart} from "@/slices/bookingSlice";
 import HouseRules from "@/components/stay/houseRules";
 import {Calendar, Card} from "antd";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
-import {selectConfirmBooking, setBookingStay} from "@/slices/confirmBookingSlice";
-import {UnknownAction} from "redux";
-import {AppDispatch} from "@/data/types";
-import ReservePanel from "@/components/stay/reservePanel";
+import {selectConfirmBooking} from "@/slices/confirmBookingSlice";
 
+
+import ReservePanel from "@/components/stay/reservePanel";
+import dynamic from "next/dynamic";
+
+const MapWithMarker = dynamic(() => import("@/components/stay/mapWithMarker"), {ssr: false});
 // Extend dayjs with the required plugins
 dayjs.extend(isBetween);
 
@@ -32,13 +33,12 @@ export default function StayPage() {
     const dispatch = useAppDispatch();
 
     const stay = useAppSelector(selectCurrentStay);
-    const cart = useAppSelector(selectCart);
     const booking = useAppSelector(selectConfirmBooking);
     const stayId = params.id as string;
 
 
     useEffect(() => {
-        if (stayId && stayId !== stay.id){
+        if (stayId && stayId !== stay.id) {
             dispatch(setCurrentStayFromId(stayId))
         }
 
@@ -63,39 +63,38 @@ export default function StayPage() {
                 </div>
                 {stay.type === 'Hotel' ?
                     <div className="max-lg:hidden lg:ps-12 col-span-1 md:col-span-2 lg:col-span-1">
-                            <Calendar
-                                fullscreen={false}
-                                disabledDate={(date) =>
-                                {
-                                    const curr = date.toISOString().split('T')[ 0 ]
-                                    let booked = false;
-                                    if (stay.type === 'Home'){
-                                        booked = stay.bookedDates?.includes(curr);
-                                        console.log(booked)
-                                    } else {
-                                        booked = stay.fullyBookedDates?.includes(curr)
-                                    }
-                                    return date.isBefore(dayjs()) || booked || (stay.fullDates && stay.fullDates.includes(date.toISOString().split("T")[0]));
-                                }}
-                                fullCellRender={(date) => {
-                                    const isCheckIn = date.isSame(checkInDate, 'date');
-                                    const isCheckOut = date.isSame(checkOutDate, 'date');
-                                    const inRange = date.isBetween(checkInDate, checkOutDate);
+                        <Calendar
+                            fullscreen={false}
+                            disabledDate={(date) => {
+                                const curr = date.toISOString().split('T')[ 0 ]
+                                let booked: boolean;
+                                if (stay.type === 'Home') {
+                                    booked = stay.bookedDates?.includes(curr);
+                                    console.log(booked)
+                                } else {
+                                    booked = stay.fullyBookedDates?.includes(curr)
+                                }
+                                return date.isBefore(dayjs()) || booked || (stay.fullDates && stay.fullDates.includes(date.toISOString().split("T")[ 0 ]));
+                            }}
+                            fullCellRender={(date) => {
+                                const isCheckIn = date.isSame(checkInDate, 'date');
+                                const isCheckOut = date.isSame(checkOutDate, 'date');
+                                const inRange = date.isBetween(checkInDate, checkOutDate);
 
-                                    let className = 'ant-picker-cell-inner  hover:text-primary';
-                                    if (isCheckIn || isCheckOut || inRange) {
-                                        className += ' ant-picker-cell-selected bg-primary text-white hover:text-white';
-                                    }
-                                    if (date.toDate().getDate() === 17) {
+                                let className = 'ant-picker-cell-inner  hover:text-primary';
+                                if (isCheckIn || isCheckOut || inRange) {
+                                    className += ' ant-picker-cell-selected bg-primary text-white hover:text-white';
+                                }
+                                if (date.toDate().getDate() === 17) {
 
-                                    }
-                                    return (
-                                        <div className={className + ''}>
-                                            {date.date()}
-                                        </div>
-                                    );
-                                }}
-                            />
+                                }
+                                return (
+                                    <div className={className + ''}>
+                                        {date.date()}
+                                    </div>
+                                );
+                            }}
+                        />
                         <CartSummary stay={stay}/>
                     </div> : <div className="max-lg:hidden lg:ps-12 col-span-1 md:col-span-2 lg:col-span-1">
                         <Card className="rounded-xl shadow-lg shadow-primary-50">
@@ -130,8 +129,10 @@ export default function StayPage() {
 
                         </Card>
                         <h3 className={'mt-4 font-bold'}>Where You&apos;ll be</h3>
-                        <Card className={'rounded-xl aspect-square'}>
-
+                        <Card className={'rounded-xl aspect-square p-0'} classNames={{body: 'p-0'}}>
+                            <div className={'h-full w-full'}>
+                                <MapWithMarker/>
+                            </div>
                         </Card>
                     </div>}
             </div>
