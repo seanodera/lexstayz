@@ -24,7 +24,7 @@ export default function AvailableRooms({ stay}: { stay: any }) {
                         if (room.bookedDates){
                             if (room.bookedDates[current]){
                                 if (room.bookedDates[current] <= lowest) {
-                                    lowest = room.bookedDates[current];
+                                    lowest = room.available - room.bookedDates[current];
                                 }
                             }
                         }
