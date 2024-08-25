@@ -60,7 +60,7 @@ const createBooking = createAsyncThunk(
                 status: 'Unpaid',
                 grandTotal,
                 paymentCurrency,
-                paymentRate: exchangeRates[paymentCurrency] * 1.02
+                paymentRate: exchangeRates[paymentCurrency] * 1.035
             };
 
             const unique = (stay.type === 'Hotel') ? { rooms: rooms } : {};
