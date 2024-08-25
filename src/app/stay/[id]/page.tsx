@@ -51,7 +51,7 @@ export default function StayPage() {
     const checkOutDate = dayjs(booking.checkOutDate);
     console.log(booking)
     return (
-        <div className="lg:px-24 px-7 py-4 bg-white text-dark">
+        <div className="lg:px-24 px-7 py-4 pt-[4.5rem] bg-white text-dark">
             <Banner stay={stay}/>
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 pt-8">
                 <div className="col-span-2">
