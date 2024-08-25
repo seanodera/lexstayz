@@ -20,6 +20,7 @@ import ReviewDialog from "@/components/bookings/reviewDialog";
 import {verifyPayment} from "@/data/payment";
 import {completeBooking} from "@/data/bookingData";
 import {selectCurrentUser} from "@/slices/authenticationSlice";
+import dayjs from "dayjs";
 
 
 export default function Page() {
@@ -66,7 +67,7 @@ export default function Page() {
                 {!booking.review && <Button className={'animate-bounce'} type={'primary'}
                          onClick={() => setOpenDialog(true)}>Review</Button>}
                 <Button type={'primary'} onClick={() => handleContactHost()}>Message Host</Button>
-                {booking.status === 'Confirmed' ? <Button type={'primary'}  danger onClick={() => handleCancel()}>Cancel</Button> : ''}
+                {booking.status === 'Confirmed' ? <Button type={'primary'} disabled={dayjs(booking.checkOutDate).isAfter(dayjs())}  danger onClick={() => handleCancel()}>Cancel</Button> : ''}
             </div> : <div></div>}
         </div>
         <div className={'space-y-4'}>
