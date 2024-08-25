@@ -66,7 +66,7 @@ export default function Page() {
                 {!booking.review && <Button className={'animate-bounce'} type={'primary'}
                          onClick={() => setOpenDialog(true)}>Review</Button>}
                 <Button type={'primary'} onClick={() => handleContactHost()}>Message Host</Button>
-                {booking.status === 'Confirmed' ? <Button type={'primary'}  danger>Cancel</Button> : ''}
+                {booking.status === 'Confirmed' ? <Button type={'primary'}  danger onClick={() => handleCancel()}>Cancel</Button> : ''}
             </div> : <div></div>}
         </div>
         <div className={'space-y-4'}>

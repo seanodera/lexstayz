@@ -1,7 +1,5 @@
 'use client'
 import {useEffect, useState} from "react";
-import {useAppSelector} from "@/hooks/hooks";
-import {selectAllStays} from "@/slices/staysSlice";
 import {Button, Card, Checkbox, Collapse, Segmented, Select, Slider} from "antd";
 import {IoMdGlobe} from "react-icons/io";
 import {MdOutlineHotel, MdOutlineVilla} from "react-icons/md";
@@ -9,6 +7,7 @@ import {toMoneyFormat} from "@/lib/utils";
 import {hotelFacilities} from "@/data/hotelsDataLocal";
 
 
+// @ts-ignore
 export default function SearchFilter({stays, onFilter}: { stays: any[ ], onFilter: (filteredList: any[]) => void }) {
 
     const [displayStays, setDisplayStays] = useState<any[]>([]);

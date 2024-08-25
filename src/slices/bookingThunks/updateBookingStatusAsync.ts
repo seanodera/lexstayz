@@ -26,20 +26,33 @@ export const updateBookingStatusAsync = createAsyncThunk(
             const userDoc = doc(firestore, 'users', booking.accountId, 'bookings', booking.id)
             const hostTransaction = doc(firestore, 'hosts', booking.hostId, 'pendingTransactions', booking.id);
             const transactionDoc = await getDoc(hostTransaction)
-            const availableRef = collection(firestore, 'hosts', booking.hostId, 'availableTransactions')
+            const availableRef = collection(firestore, 'hosts', booking.hostId, 'availableTransactions');
+            const stayRef = doc(firestore, 'stays', booking.accommodationId);
             let paymentData = booking.paymentData;
             if (status === 'Rejected' || status === 'Canceled') {
                 if (booking.isConfirmed) {
-                    const stay = stayState.stays.find((stay) => stay.id === booking.accommodationId);
+                    const staySnap = await getDoc(stayRef);
+
+                    if (!staySnap.exists()) {
+                        throw new Error("Accommodation document does not exist!");
+                    }
+                    const stay = staySnap.data()
+                    const checkIn = new Date(booking.checkInDate);
+                    const checkOut = new Date(booking.checkOutDate);
                     console.log(stay)
                     if (stay) {
-                        const stayDoc = doc(firestore, 'stays', booking.accommodationId);
-                        batch.update(stayDoc, {status: status});
-                        if (status === 'Rejected' || status === 'Canceled') {
-                            const newStay = {...stay};
-                            newStay.availableRooms += booking.rooms;
-                            batch.update(stayDoc, newStay);
+
+                        if (stay.type === 'Hotel') {
+                            const {updatedRooms, fullyBookedDates} = reverseProcessHotelBooking(stay, booking, checkIn, checkOut);
+                            console.log('Unavailable: ',updatedRooms, fullyBookedDates);
+                            batch.update(stayRef, {rooms: updatedRooms, fullyBookedDates});
+                        } else if (stay.type === 'Home') {
+                            const unavailableDates = reverseProcessHomeBooking(stay, checkIn, checkOut);
+                            console.log('Unavailable: ', unavailableDates)
+                            batch.update(stayRef, {bookedDates: unavailableDates});
                         }
+
+
 
                         if (stay.cancellation.cancellation === 'Free') {
                             paymentData = await refundBooking(booking)
@@ -129,3 +142,72 @@ export const updateBookingStatusAsync = createAsyncThunk(
 
     }
 );
+
+
+
+function reverseProcessHotelBooking(stayData: any, booking: any, checkIn: Date, checkOut: Date): {
+    updatedRooms: any[],
+    fullyBookedDates: string[]
+} {
+    const rooms = stayData.rooms;
+    const bookedRooms = booking.rooms;
+    const bookingIds = bookedRooms.map((room: any) => room.roomId);
+
+    let updatedRooms: any[] = [];
+    let fullyBookedDates: string[] = [...stayData.fullyBookedDates];
+
+    rooms.forEach((room: any) => {
+        if (bookingIds.includes(room.id)) {
+            const bookedRoomData = bookedRooms.find((r: any) => r.roomId === room.id);
+            let {bookedDates, fullDates} = room;
+
+            // Initialize if undefined
+            bookedDates = bookedDates ? {...bookedDates} : {};
+            fullDates = fullDates ? [...fullDates] : [];
+
+            iterateDaysBetween(checkIn, checkOut, (date) => {
+                const currentDateStr = date.toISOString().split('T')[0];
+
+                if (bookedDates[currentDateStr]) {
+                    // Decrease the booked count due to cancellation
+                    bookedDates[currentDateStr] -= bookedRoomData.numRooms;
+
+                    if (bookedDates[currentDateStr] <= 0) {
+                        delete bookedDates[currentDateStr];
+                    }
+
+                    // If room is now available on this date, remove from fullDates
+                    if (fullDates.includes(currentDateStr) && bookedDates[currentDateStr] < room.available) {
+                        fullDates = fullDates.filter((value: string) => value !== currentDateStr);
+                        fullyBookedDates = fullyBookedDates.filter((value: string) => value !== currentDateStr);
+                    }
+                }
+            });
+
+            updatedRooms.push({...room, bookedDates, fullDates});
+        } else {
+            updatedRooms.push(room);
+        }
+    });
+
+    return {updatedRooms, fullyBookedDates};
+}
+
+function reverseProcessHomeBooking(stayData: any, checkIn: Date, checkOut: Date): string[] {
+    const unavailableDates = new Set<string>(stayData.bookedDates || []);
+
+    iterateDaysBetween(checkIn, checkOut, (date) => {
+        unavailableDates.delete(date.toISOString().split('T')[0]);
+    });
+
+    return Array.from(unavailableDates);
+}
+
+function iterateDaysBetween(startDate: Date, endDate: Date, task: (date: Date) => void): void {
+    let currentDate = new Date(startDate);
+
+    while (currentDate <= endDate) {
+        task(currentDate);
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+}
