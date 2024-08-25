@@ -64,10 +64,10 @@ export default function Page() {
         <div className={'md:col-span-3 flex max-md:flex-col justify-between'}>
             <div className={'text-2xl font-bold'}>Booking</div>
             {booking.id && booking.status !== 'Rejected' ? <div className={'flex gap-2'}>
-                {!booking.review && <Button className={'animate-bounce'} type={'primary'}
+                {!booking.review && dayjs(booking.checkOutDate).isBefore(dayjs()) && <Button className={'animate-bounce'} type={'primary'}
                          onClick={() => setOpenDialog(true)}>Review</Button>}
                 <Button type={'primary'} onClick={() => handleContactHost()}>Message Host</Button>
-                {booking.status === 'Confirmed' ? <Button type={'primary'} disabled={dayjs(booking.checkOutDate).isAfter(dayjs())}  danger onClick={() => handleCancel()}>Cancel</Button> : ''}
+                {booking.status === 'Confirmed' && dayjs(booking.checkOutDate).isAfter(dayjs()) ? <Button type={'primary'} danger onClick={() => handleCancel()}>Cancel</Button> : ''}
             </div> : <div></div>}
         </div>
         <div className={'space-y-4'}>
