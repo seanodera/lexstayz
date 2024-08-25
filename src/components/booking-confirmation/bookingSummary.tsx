@@ -29,7 +29,7 @@ const BookingSummary = ({stay}: any) => {
         const rate = booking.exchangeRates[ currency ];
 
         if (rate !== 1){
-            setExchangeRate(rate * 1.025);
+            setExchangeRate(rate * 1.035);
         } else {
             setExchangeRate(1)
         }

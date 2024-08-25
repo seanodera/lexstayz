@@ -18,7 +18,7 @@ const handlePaymentAsync = createAsyncThunk(
             const user = getCurrentUser();
             let amount = parseInt((booking.grandTotal).toFixed(2));
             if (booking.currency !== paymentCurrency) {
-                amount = parseInt((booking.exchangeRates[paymentCurrency] * 1.025 * booking.grandTotal).toFixed(2));
+                amount = parseInt((booking.exchangeRates[paymentCurrency] * 1.035 * booking.grandTotal).toFixed(2));
             }
 
             if (state.confirmBooking.paymentMethod === 'new') {

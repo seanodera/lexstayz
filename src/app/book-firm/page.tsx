@@ -54,7 +54,7 @@ export default function BookFirmPage() {
         const rate = booking.exchangeRates[ currency ];
 
             if (rate !== 1){
-                setExchangeRate(rate * 1.02);
+                setExchangeRate(rate * 1.035);
             } else {
                 setExchangeRate(1)
             }
