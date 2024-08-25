@@ -285,6 +285,9 @@ const bookingsSlice = createSlice({
                         ...action.payload.booking,
                         status: action.payload.status,
                     };
+                    if (state.currentBooking && state.currentBooking.id === action.payload.booking.id){
+                        state.currentBooking = action.payload.booking
+                    }
                 }
             })
             .addCase(updateBookingStatusAsync.rejected, (state, action) => {
