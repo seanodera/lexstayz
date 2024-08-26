@@ -7,7 +7,7 @@ import {doc, runTransaction, updateDoc} from "firebase/firestore";
 import {RootState} from "@/data/types";
 import {getCurrentUser} from "@/data/bookingData";
 
-export const getUserDetailsAsync:any = createAsyncThunk('authentication/user',
+export const getUserDetailsAsync = createAsyncThunk('authentication/user',
     async (id: string) => {
         try {
             const userDetails = await getUserDetails(id)
@@ -40,9 +40,10 @@ export const updateUserAsync = createAsyncThunk('authentication/updateUser',
     async ({details}:{details: any}, {rejectWithValue}) => {
         try {
             const user = getCurrentUser()
-            await updateDoc(doc(firestore, 'hosts', user.uid), details);
+            await updateDoc(doc(firestore, 'users', user.uid), details);
             return details;
         } catch (error){
+            console.log(error)
             if (error instanceof Error){
                 return rejectWithValue(error.message);
             } else {
