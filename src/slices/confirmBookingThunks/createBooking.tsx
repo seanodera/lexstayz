@@ -3,7 +3,6 @@ import {getCurrentUser} from "@/data/bookingData";
 import {doc, writeBatch} from "firebase/firestore";
 import {firestore} from "@/lib/firebase";
 import {ConfirmBookingState} from "@/slices/confirmBookingSlice";
-import dayjs from "dayjs";
 
 
 const createBooking = createAsyncThunk(
@@ -32,7 +31,15 @@ const createBooking = createAsyncThunk(
             const batch = writeBatch(firestore);
             const userDoc = doc(firestore, 'users', user.uid, 'bookings', id);
             const hostDoc = doc(firestore, 'hosts', stay.hostId, 'bookings', id);
+            const checkIn = new Date(checkInDate);
 
+            const [hours, minutes] = stay.checkInTime.split(':').map(Number);
+            checkIn.setHours(hours);
+            checkIn.setMinutes(minutes);
+            const [hoursOut, minutesOut] = stay.checkOutTime.split(':').map(Number);
+            const checkOut = new Date(checkOutDate);
+            checkOut.setHours(hoursOut)
+            checkOut.setMinutes(minutesOut)
             const commonProperties = {
                 id: id,
                 accommodationId: stay.id,
@@ -45,8 +52,8 @@ const createBooking = createAsyncThunk(
                     phone: contact.phone,
                     country: contact.country,
                 },
-                checkInDate: dayjs(checkInDate).toISOString(),
-                checkOutDate: dayjs(checkOutDate).toISOString(),
+                checkInDate: checkIn.toISOString(),
+                checkOutDate: checkOut.toISOString(),
                 createdAt: new Date().toISOString(),
                 numGuests: numGuests,
                 isConfirmed: false,
