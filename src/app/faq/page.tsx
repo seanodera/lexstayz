@@ -141,7 +141,7 @@ const FAQPage = () => {
     ];
 
     return (
-        <div className="md:px-24 px-7 py-4 text-center lg:w-2/3 mx-auto">
+        <div className="md:px-24 px-7 py-4 text-center lg:w-2/3 mx-auto h-full">
             <h1 className="text-3xl font-bold mb-8">Frequently Asked Questions</h1>
             <p>This are the most commonly asked questions about lexstayz. If you have any further questions please contact support</p>
             <Collapse accordion>
