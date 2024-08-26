@@ -14,7 +14,9 @@ export default function BookingItem({booking}: {booking: any}){
     return <Link href={`/bookings/${booking.id}`} className={'block md:space-y-4 gap-2 bg-white rounded-xl p-4'}>
         <Image src={stay?.poster} alt={''} className={'rounded-xl h-full object-cover aspect-video'}/>
         <div className={'mt-2'}>
+            <h4 className={'text-gray-500 font-medium'}>{booking.id}</h4>
             <div className={'flex flex-col md:flex-row justify-between items-center gap-2'}>
+
                 <h3 className={'mb-0'}>{stay?.name}</h3>
                 <div>{getTag(booking.status)}</div>
             </div>

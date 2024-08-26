@@ -87,7 +87,7 @@ export default function CartSummary({stay}: any) {
                 </div>
             })}
             <div className="rounded-2xl p-4 mt-4">
-                <Link href="/booking-confirmation"
+                <Link href="/book-firm"
                       className="block rounded-xl text-center py-3 bg-primary text-white font-medium w-full">
                     Confirm Reservation
                 </Link>

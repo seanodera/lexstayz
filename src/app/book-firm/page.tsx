@@ -7,6 +7,7 @@ import {LeftOutlined} from "@ant-design/icons";
 import Link from "next/link";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import {
+    convertCart,
     createBooking,
     fetchExchangeRates,
     handlePaymentAsync,
@@ -23,6 +24,8 @@ import {differenceInDays} from "date-fns";
 import {generateID} from "@/data/bookingData";
 import axios from "axios";
 import PaymentMethods from "@/components/confirm-booking/paymentMethods";
+import CancellationPolicy from "@/components/booking-confirmation/cancellationPolicy";
+import {selectCart} from "@/slices/bookingSlice";
 
 
 export default function BookFirmPage() {
@@ -33,6 +36,7 @@ export default function BookFirmPage() {
     const dispatch = useAppDispatch();
     const [loading, setLoading] = useState(false);
     const [exchangeRate, setExchangeRate] = useState(1);
+    const cart = useAppSelector(selectCart);
     const currency = 'KES'
     useEffect(() => {
         if (!stay) {
@@ -62,10 +66,24 @@ export default function BookFirmPage() {
     }, [booking.exchangeRates, currency]);
 
 
+
+    useEffect(() => {
+        dispatch(convertCart(cart));
+    }, [cart]);
+
     if (!booking || !stay) {
         return <div></div>;
     }
 
+    function calculatePrice(amount: number) {
+        let price = 0
+        if (booking.exchangeRates[ stay.currency ] && stay.currency !== booking.currency) {
+            price = amount * 1.02 / booking.exchangeRates[ stay.currency ]
+        } else {
+            price = amount
+        }
+        return toMoneyFormat(price);
+    }
 
     async function handleConfirm() {
         setLoading(true)
@@ -108,21 +126,7 @@ export default function BookFirmPage() {
                         <div className={'py-8'}>
                             <ContactForm/>
                         </div>
-                        <div className={'border-solid border-gray-200 p-4 rounded-xl my-8'}>
-                            <h3 className={'font-semibold'}>Cancellation Policy</h3>
-                            <p className={''}>Free Cancellation Before nov 30</p>
-                            <p>After that,the reservation is non-refundable</p>
-
-                            <hr className={'my-8'}/>
-
-                            <h3 className={'font-semibold'}>Ground Rules</h3>
-                            <p>We request guests to remember a few simple things about what makes a good guests</p>
-                            <ul>
-                                <li>Follow the house rules</li>
-                                <li>Treat the home as your own</li>
-                            </ul>
-
-                        </div>
+                        <CancellationPolicy stay={stay}/>
                         <SpecialRequests/>
                     </Card>
                 </div>
@@ -169,14 +173,20 @@ export default function BookFirmPage() {
                             <h3>Pricing Breakdown</h3>
                             <hr/>
                             <div className={'grid grid-cols-2 gap-2 '}>
-                                <div className={'mb-0 text-gray-500'}>Price X <span
-                                    className={'text-dark'}>{booking.length} night</span></div>
-                                <div className={'text-end'}>
+                                {stay.type !== 'hotel' && <div className={'mb-0 text-gray-500'}>Price X <span
+                                    className={'text-dark'}>{booking.length} night</span></div>}
+                                {stay.type !== 'hotel' &&<div className={'text-end'}>
                                     <div
                                         className={'mb-0'}>{booking.currency} {toMoneyFormat(stay.price * booking.usedRate)}</div>
                                     <div
                                         className={'mb-0 text-primary'}>{booking.currency} {toMoneyFormat(booking.subtotal)}</div>
-                                </div>
+                                </div>}
+                                {booking.rooms.map((cartItem: any, index: number) => <div key={index} className={'col-span-2 grid grid-cols-2'}>
+                                    <div
+                                        className="capitalize text-gray-500">{stay.rooms.find((value: any) => value.id === cartItem.roomId).name}</div>
+                                    <div
+                                        className="capitalize text-end">{booking.currency} {calculatePrice(cartItem.numRooms * stay.rooms.find((value: any) => value.id === cartItem.roomId).price)}</div>
+                                </div>)}
                                 <div className={'mb-0 text-gray-500'}>Booking Fees</div>
                                 <div
                                     className={'mb-0 text-end'}>{booking.currency} {toMoneyFormat(booking.fees)}</div>

@@ -37,7 +37,7 @@ export default function MobileCartSummary() {
                 </div>
             </div>
             <div>
-                <Link href={stay.type === 'Hotel' ? "/booking-confirmation" : "/book-firm"}
+                <Link href={stay.type === 'Hotel' ? "/book-firm" : "/book-firm"}
                       className="block rounded-xl text-center px-4 py-3 bg-primary text-white font-medium">
                     Confirm
                 </Link>

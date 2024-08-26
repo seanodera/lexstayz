@@ -30,6 +30,8 @@ export interface ConfirmBookingState {
     bookingStatus: 'Pending' | 'Confirmed' | 'Canceled' | 'Rejected';
     paymentMethod: any;
     exchangeRates: any;
+    paymentCurrency: 'KES',
+    paymentRate: number,
 }
 
 const initialState: ConfirmBookingState = {
@@ -56,6 +58,8 @@ const initialState: ConfirmBookingState = {
     error: null,
     paymentMethod: 'new',
     bookingStatus: 'Pending', // Default status
+    paymentCurrency: 'KES',
+    paymentRate: 1,
     exchangeRates: {}
 };
 
@@ -201,7 +205,7 @@ const ConfirmBookingSlice = createSlice({
                 state.exchangeRates = action.payload?.rates;
                 state.currency = action.payload?.currency || 'KES';
                 state.usedRate = action.payload?.rates[state.currency] * 1.02;
-
+                state.paymentRate = action.payload?.rates[state.paymentCurrency] * 1.035
                 recalculateCosts(state); // Recalculate costs after exchange rates are fetched
             })
             .addCase(fetchExchangeRates.pending, (state, action) => {

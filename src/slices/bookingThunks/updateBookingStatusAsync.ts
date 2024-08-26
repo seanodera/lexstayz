@@ -73,6 +73,7 @@ export const updateBookingStatusAsync = createAsyncThunk(
                                     date = dayjs(booking.checkInDate).add(cancellation.time, 'hours')
                                 }
                             }
+
                             if (transactionDoc.exists()) {
                                 batch.delete(hostTransaction)
                             }
