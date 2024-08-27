@@ -24,8 +24,10 @@ const createBooking = createAsyncThunk(
             fees,
             grandTotal,
             exchangeRates,
+            paymentRate,
+            paymentCurrency,
         } = state.confirmBooking;
-        const paymentCurrency = 'KES'
+
         try {
             const user = getCurrentUser();
             const batch = writeBatch(firestore);
@@ -67,7 +69,7 @@ const createBooking = createAsyncThunk(
                 status: 'Unpaid',
                 grandTotal,
                 paymentCurrency,
-                paymentRate: exchangeRates[paymentCurrency] * 1.035
+                paymentRate: paymentRate,
             };
 
             const unique = (stay.type === 'Hotel') ? { rooms: rooms } : {};

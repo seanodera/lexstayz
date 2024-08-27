@@ -37,7 +37,7 @@ export default function BookFirmPage() {
     const [loading, setLoading] = useState(false);
     const [exchangeRate, setExchangeRate] = useState(1);
     const cart = useAppSelector(selectCart);
-    const currency = 'KES'
+    const currency = 'GHS'
     useEffect(() => {
         if (!stay) {
             router.push('/');

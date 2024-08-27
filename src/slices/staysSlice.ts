@@ -43,7 +43,7 @@ const initialState: StaysState = {
     errorMessage: '',
     hasRun: false,
     exchangeRates: {},
-    globalCurrency: 'KES'
+    globalCurrency: 'GHS'
 };
 
 export const fetchStaysAsync = createAsyncThunk(

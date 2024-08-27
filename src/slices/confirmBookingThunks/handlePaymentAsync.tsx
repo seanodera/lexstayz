@@ -11,7 +11,7 @@ const handlePaymentAsync = createAsyncThunk(
         const booking = state.confirmBooking;
 
         const id = generateID();
-        const paymentCurrency = 'KES'
+        const paymentCurrency = booking.paymentCurrency
 
 
         try {

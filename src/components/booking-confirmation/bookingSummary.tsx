@@ -11,7 +11,7 @@ const BookingSummary = ({stay}: any) => {
     const cart = useAppSelector(selectCart);
     const [subTotal, setSubTotal] = useState(0);
     const [exchangeRate, setExchangeRate] = useState(0)
-    const currency = 'KES'
+    const currency = 'GHS'
     const booking = useAppSelector(selectConfirmBooking)
     const [messageApi, contextHolder] = message.useMessage();
     const dispatch = useAppDispatch()
