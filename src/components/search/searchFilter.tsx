@@ -7,8 +7,8 @@ import {toMoneyFormat} from "@/lib/utils";
 import {hotelFacilities} from "@/data/hotelsDataLocal";
 
 
-// @ts-ignore
-export default function SearchFilter({stays, onFilter}: { stays: any[ ], onFilter: (filteredList: any[]) => void }) {
+// (filteredList: any[]) => void
+export default function SearchFilter({stays, onFilter}: { stays: any[ ], onFilter: any }) {
 
     const [displayStays, setDisplayStays] = useState<any[]>([]);
     const [typeFilter, setTypeFilter] = useState('All');

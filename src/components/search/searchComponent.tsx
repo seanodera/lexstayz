@@ -213,7 +213,7 @@ export default function SearchComponent() {
             <Drawer title="Filter Stays" onClose={onClose} open={open} classNames={{
                 body: 'p-0'
             }}>
-                <SearchFilter stays={preFilter} onFilter={(filteredList) => {
+                <SearchFilter stays={preFilter} onFilter={(filteredList: any) => {
                     console.log('Prefilter: ',preFilter,' Filtered list: ', filteredList);
                     setDisplayStays(filteredList)
                 }}/>

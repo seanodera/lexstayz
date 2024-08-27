@@ -24,7 +24,7 @@ export default function BookingItem({booking}: {booking: any}){
             <div className={'flex flex-col md:flex-row gap-2 items-center mt-4'}>
                 <h4 className={'mb-0'}>{booking.numGuests} Guests</h4>
                 <Divider className={'hidden md:block bg-dark'} type={'vertical'}/>
-                <h4 className={'mb-0'}>{calculateStayLength(booking.checkOutDate, booking.checkInDate)} Day</h4>
+                <h4 className={'mb-0'}>{calculateStayLength(booking.checkOutDate, booking.checkInDate)} Nights</h4>
             </div>
             <div className={'grid grid-cols-1 md:grid-cols-2 gap-2 mt-4'}>
                 <div>
