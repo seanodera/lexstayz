@@ -173,9 +173,9 @@ export default function BookFirmPage() {
                             <h3>Pricing Breakdown</h3>
                             <hr/>
                             <div className={'grid grid-cols-2 gap-2 '}>
-                                {stay.type !== 'hotel' && <div className={'mb-0 text-gray-500'}>Price X <span
+                                {stay.type !== 'Hotel' && <div className={'mb-0 text-gray-500'}>Price X <span
                                     className={'text-dark'}>{booking.length} night</span></div>}
-                                {stay.type !== 'hotel' &&<div className={'text-end'}>
+                                {stay.type !== 'Hotel' && <div className={'text-end'}>
                                     <div
                                         className={'mb-0'}>{booking.currency} {toMoneyFormat(stay.price * booking.usedRate)}</div>
                                     <div
