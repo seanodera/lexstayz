@@ -27,7 +27,7 @@ const firestore = initializeFirestore(app, {localCache:
         persistentLocalCache(/*settings*/{tabManager: persistentMultipleTabManager()})
 });
 const storage = getStorage(app);
-const analytics = getAnalytics(app);
+// const analytics = getAnalytics(app);
 const searchClient = algoliasearch("S192CBDSDM", "07dbe0e186e0f74a4ce9915a7fb74233");
 
-export { app, auth, firestore, storage, searchClient,analytics };
+export { app, auth, firestore, storage, searchClient };

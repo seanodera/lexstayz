@@ -1,6 +1,5 @@
 import {countries} from "country-data";
-import {analytics} from "@/lib/firebase";
-import { setUserProperties } from "firebase/analytics";
+import {differenceInMilliseconds} from "date-fns";
 
 
 export function getRandomInt({max, min = 0}: { max: number, min?: number }) {
@@ -100,7 +99,7 @@ export async function getCountry() {
 
         // Get country information from country-data package
         const country = countries[ countryCode ];
-        setUserProperties(analytics, {country: country})
+        // setUserProperties(analytics, {country: country})
         return {
             name: country.name,
             emoji: country.emoji,
@@ -204,6 +203,15 @@ export function getFeePercentage(num: number) {
     return minValue + (maxValue - minValue) * ((minNum - num) / (minNum - maxNum));
 }
 
+export function calculateStayLength(date1:string, date2:string){
+    // Calculate the difference in milliseconds
+    const diffInMilliseconds = differenceInMilliseconds(date1, date2);
 
+// Convert milliseconds to days
+    const diffInDays = diffInMilliseconds / (1000 * 60 * 60 * 24);
+
+// Round up to the nearest whole day
+    return Math.ceil(diffInDays)
+}
 
 
