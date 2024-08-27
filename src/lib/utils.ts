@@ -1,4 +1,6 @@
 import {countries} from "country-data";
+import {analytics} from "@/lib/firebase";
+import { setUserProperties } from "firebase/analytics";
 
 
 export function getRandomInt({max, min = 0}: { max: number, min?: number }) {
@@ -98,7 +100,7 @@ export async function getCountry() {
 
         // Get country information from country-data package
         const country = countries[ countryCode ];
-
+        setUserProperties(analytics, {country: country})
         return {
             name: country.name,
             emoji: country.emoji,
