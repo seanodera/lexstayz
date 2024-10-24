@@ -35,9 +35,8 @@ export default function BookFirmPage() {
     const [length, setLength] = useState(0);
     const dispatch = useAppDispatch();
     const [loading, setLoading] = useState(false);
-    const [exchangeRate, setExchangeRate] = useState(1);
     const cart = useAppSelector(selectCart);
-    const currency = 'GHS'
+
     useEffect(() => {
         if (!stay) {
             router.push('/');
@@ -53,17 +52,7 @@ export default function BookFirmPage() {
         setLength(differenceInDays(booking.checkOutDate, booking.checkInDate));
     }, [booking.checkInDate, booking.checkOutDate]);
 
-    useEffect(() => {
 
-        const rate = booking.exchangeRates[ currency ];
-
-            if (rate !== 1){
-                setExchangeRate(rate * 1.035);
-            } else {
-                setExchangeRate(1)
-            }
-
-    }, [booking.exchangeRates, currency]);
 
 
 
@@ -197,14 +186,14 @@ export default function BookFirmPage() {
 
                             </div>
                         </div>
-                        {booking.currency !== currency? <div>
+                        {booking.currency !== booking.paymentCurrency? <div>
                             <small className={'italic text-gray-400 text-center block'}>We currently only accept
-                                payments in {currency}</small>
+                                payments in {booking.paymentCurrency}</small>
                             <div
-                                className={'text-primary text-center font-medium h4 my-2 '}> 1 {booking.currency} = {toMoneyFormat(exchangeRate)} {currency}</div>
+                                className={'text-primary text-center font-medium h4 my-2 '}> 1 {booking.currency} = {toMoneyFormat(booking.paymentRate)} {booking.paymentCurrency}</div>
                             <div className={'text-lg font-medium'}>You will Pay</div>
                             <div
-                                className={'text-xl font-bold'}>{currency} {toMoneyFormat(booking.grandTotal * exchangeRate)}</div>
+                                className={'text-xl font-bold'}>{booking.paymentCurrency} {toMoneyFormat(booking.grandTotal * booking.paymentRate)}</div>
                         </div> : <div>
                             <div className={'text-lg font-medium'}>You will Pay</div>
                             <div

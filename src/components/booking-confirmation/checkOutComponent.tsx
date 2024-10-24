@@ -81,16 +81,3 @@ export default function CheckOutComponent() {
     </div>
 }
 
-// async function completeBooking(booking:any, bookingID: string){
-//     try {
-//         const user = getCurrentUser();
-//         const hostDoc = doc(firestore, 'hosts', booking.accommodationId, 'bookings', bookingID)
-//         const userDoc = doc(firestore, 'user', user.uid, 'bookings', bookingID)
-//         const batch = writeBatch(firestore)
-//         batch.update(hostDoc,{status: 'Confirmed'})
-//         batch.update(userDoc,{status: 'Confirmed'})
-//         await batch.commit()
-//     } catch (error){
-//         console.log(error)
-//     }
-// }

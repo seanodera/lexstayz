@@ -89,7 +89,7 @@ export default function ListYourPropertyPage() {
                     <div className={'text-gray-700 max-w-md text-sm sm:text-md md:text-lg'}>
                         Start your journey with LexStayz and experience the benefits of partnering with a leading platform in the accommodation industry. Click the link below to get started.
                     </div>
-                    <Button href={'https://lexstayz-dashboard.vercel.app/login'} className={'w-max mt-3'} type={'primary'} size={'large'}>Get Started</Button>
+                    <Button href={'https://dashboard.lexstayz.com/login'} className={'w-max mt-3'} type={'primary'} size={'large'}>Get Started</Button>
                 </div>
                 <div className={'flex justify-center lg:justify-end'}>
                     <img src={'/assets/banner-list-your-property.jpg'} alt={''}
@@ -203,7 +203,7 @@ export default function ListYourPropertyPage() {
                     <div className={'w-full lg:w-1/2 px-8 flex flex-col justify-center h-full'}>
                         <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4">Ready to Grow Your Business?</h2>
                         <p className="text-sm sm:text-md md:text-lg text-gray-300 mb-8">Join the LexStayz community today and unlock the full potential of your property.</p>
-                        <Button href={'https://lexstayz-dashboard.vercel.app/login'} type="primary" size="large" className={'w-max'}>List Your Property Now</Button>
+                        <Button href={'https://dashboard.lexstayz.com/login'} type="primary" size="large" className={'w-max'}>List Your Property Now</Button>
                     </div>
                 </div>
             </div>

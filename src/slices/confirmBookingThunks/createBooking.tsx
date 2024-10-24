@@ -31,8 +31,7 @@ const createBooking = createAsyncThunk(
         try {
             const user = getCurrentUser();
             const batch = writeBatch(firestore);
-            const userDoc = doc(firestore, 'users', user.uid, 'bookings', id);
-            const hostDoc = doc(firestore, 'hosts', stay.hostId, 'bookings', id);
+            const bookingsDoc = doc(firestore, 'bookings', id);
             const checkIn = new Date(checkInDate);
 
             const [hours, minutes] = stay.checkInTime.split(':').map(Number);
@@ -79,7 +78,7 @@ const createBooking = createAsyncThunk(
                 ...unique
             };
 
-            batch.set(userDoc, booking);
+            batch.set(bookingsDoc, booking);
             await batch.commit();
             return booking;
         } catch (error) {

@@ -106,7 +106,7 @@ export const fetchBookingAsync = createAsyncThunk('bookings/fetchBooking', async
                 return _booking;
             } else {
                 const user = getCurrentUser()
-                const bookingRef = doc(collection(firestore, 'users', user.uid, 'bookings'), id)
+                const bookingRef = doc(firestore, 'bookings', id)
                 const bookingSnapshot = await getDoc(bookingRef);
                 if (bookingSnapshot.exists()) {
                     return bookingSnapshot.data();
@@ -154,8 +154,8 @@ export const writeReview = createAsyncThunk('bookings/writeReview', async (revie
         }
 
 
-        const bookingRef = doc(collection(firestore, 'users', user.uid, 'bookings'), review.bookingId);
-        const stayRef = doc(collection(firestore, 'stays'), review.stayId);
+        const bookingRef = doc(firestore, 'bookings', review.bookingId);
+        const stayRef = doc(firestore, 'stays', review.stayId);
 
 
         const snapshot = await getDoc(stayRef);
@@ -193,6 +193,7 @@ export const writeReview = createAsyncThunk('bookings/writeReview', async (revie
         const booking = bookings.bookings.find((value) => value.id === review.bookingId);
         return { ...booking, review: true, reviewData: review };
     } catch (error) {
+        console.error(error);
         if (error instanceof Error) {
             return rejectWithValue(error.message);
         }
