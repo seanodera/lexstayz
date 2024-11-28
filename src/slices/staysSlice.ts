@@ -5,7 +5,7 @@ import {RootState} from "@/data/types";
 import {collection, doc, getDoc, getDocs} from "firebase/firestore";
 import {firestore} from "@/lib/firebase";
 import {query, where} from "@firebase/firestore";
-import {ConfirmBookingState, setBookingStay} from "@/slices/confirmBookingSlice";
+import {setBookingStay} from "@/slices/confirmBookingSlice";
 import {getCountry} from "@/lib/utils";
 
 
@@ -16,11 +16,6 @@ export interface Stay {
     [ key: string ]: any;
 }
 
-interface Dates {
-    startDate: string;
-    endDate: string;
-    length: number;
-}
 
 interface StaysState {
     stays: Stay[];
@@ -51,7 +46,7 @@ export const fetchStaysAsync = createAsyncThunk(
     async (_, {rejectWithValue}) => {
         try {
 
-            const staysRef = query(collection(firestore, 'stays'));
+            const staysRef = query(collection(firestore, 'stays'), where('published', '==', true));
             const stays: Array<any> = [];
             const snapshot = await getDocs(staysRef);
             for (const doc1 of snapshot.docs) {
@@ -99,8 +94,7 @@ export const setCurrentStayFromId = createAsyncThunk('stays/setCurrentStayFromId
 
 export const fetchAppExchangeRates = createAsyncThunk(
     'stays/fetchExchangeRates',
-    async (_, {getState}) => {
-        const {stays} = getState() as { stays: StaysState };
+    async (_) => {
         try {
             const country = await getCountry()
 
@@ -151,7 +145,7 @@ const staysSlice = createSlice({
                 state.hasError = true;
                 state.errorMessage = action.payload as string || 'Failed to fetch stays';
             })
-            .addCase(setCurrentStayFromId.pending, (state, action) => {
+            .addCase(setCurrentStayFromId.pending, (state) => {
                 state.isLoading = true;
             })
             .addCase(setCurrentStayFromId.fulfilled, (state, action) => {
