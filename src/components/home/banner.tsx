@@ -6,7 +6,8 @@ import {Stay} from "@/lib/types";
 import Link from "next/link";
 import {selectAllStays} from "@/slices/staysSlice";
 import SearchComponent from "@/components/home/searchComponent";
-import {getRandomSubarray} from "@/lib/utils";
+import {formatRating, getRandomSubarray} from "@/lib/utils";
+import {StarFilled} from "@ant-design/icons";
 
 
 export default function Banner() {
@@ -23,7 +24,7 @@ export default function Banner() {
                             }}>
                             <div
                                 className={'h-full w-full flex flex-col justify-end text-white bg-primary-950 bg-opacity-30 pt-24 pb-16 md:px-12 px-7 '}>
-                                <div className={'md:w-1/2 lg:w-1/3'}>
+                                <div className={'md:w-1/2 lg:w-2/5'}>
                                     <h1 className={'md:text-2xl lg:text-5xl mb-0'}>{stay.name}</h1>
                                     <h2 className={'font-light text-gray-200 line-clamp-1 mb-0'}>
                                         {stay.location.city}, {stay.location.country}
@@ -31,9 +32,10 @@ export default function Banner() {
                                     <div className={'flex gap-2 items-center'}>
                                         <h3 className={'mb-0 text-gray-300'}>{stay.type}</h3>
                                         <Divider className={'bg-white'} type={'vertical'}/>
-                                        <Rate disabled defaultValue={3} className={'h3 mb-0'}/>
+                                         <h3 className={'font-medium my-0'}><StarFilled
+                                            className={'text-primary'}/> {(stay.rating || stay.rating !== 0)? formatRating(stay.rating || 0.0) : 'New'}</h3>
                                     </div>
-                                    <p className={'line-clamp-5'}>{stay.description}</p>
+                                    <p className={'line-clamp-2'}>{stay.description}</p>
                                     <div>
                                         <Link href={`/stay/${stay.id}`}
                                               className={'block bg-primary rounded px-4 py-2 w-max text-white'}>See

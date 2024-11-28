@@ -8,7 +8,6 @@ import {Avatar, Card} from "antd";
 import {Field, Fieldset, Input, Label} from "@headlessui/react";
 import Link from "next/link";
 import {loginUser} from "@/slices/authenticationSlice";
-import {fetchAppExchangeRates} from "@/slices/staysSlice";
 
 
 export default function UserInformation(){
@@ -49,7 +48,7 @@ export default function UserInformation(){
         }
         await createUser(details, user.uid);
         await dispatch(loginUser(details));
-            dispatch(fetchAppExchangeRates());
+            // dispatch(fetchAppExchangeRates());
         router.push('/');
         }
     }

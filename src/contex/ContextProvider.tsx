@@ -9,7 +9,7 @@ import {usePathname, useRouter} from "next/navigation";
 import {getAuth} from "firebase/auth";
 import {getUserDetails} from "@/data/usersData";
 import {loginUser, selectCurrentUser} from "@/slices/authenticationSlice";
-import {fetchAppExchangeRates, fetchStaysAsync, selectHasRun, selectIsStayLoading} from "@/slices/staysSlice";
+import {fetchStaysAsync, selectHasRun, selectIsStayLoading} from "@/slices/staysSlice";
 import ErrorDialog from "@/components/dialogs/ErrorDialog";
 import Footer from "@/components/navigation/Footer";
 import {fetchExchangeRates} from "@/slices/confirmBookingSlice";
@@ -35,7 +35,7 @@ export default function ContextProvider({children}: { children: React.ReactNode 
                    setHasRunLocal(true)
                    dispatch(fetchStaysAsync());
                    dispatch(fetchExchangeRates())
-                   dispatch(fetchAppExchangeRates())
+                   // dispatch(fetchAppExchangeRates())
                    if (user){
                        dispatch(fetchBookingsAsync())
                    }
@@ -47,7 +47,7 @@ export default function ContextProvider({children}: { children: React.ReactNode 
                     const userDetails = await getUserDetails(user.uid);
                     if (userDetails){
                         await dispatch(loginUser(userDetails));
-                        dispatch(fetchAppExchangeRates());
+                        // dispatch(fetchAppExchangeRates());
                         dispatch(fetchExchangeRates())
                     } else {
                         router.push('/user-information')
@@ -75,7 +75,7 @@ export default function ContextProvider({children}: { children: React.ReactNode 
     } else if (authRoutes.includes(pathname)) {
         return <div>{children}</div>
     } else if (pathname.split('/').length > 1 &&  authNeededRoutes.includes(pathname.split('/')[1])) {
-        console.log('authRoute', pathname.split('/')[1]);
+
         return <AuthenticationProvider>{children}</AuthenticationProvider>
     } else {
         return <div className={'min-h-screen'}>

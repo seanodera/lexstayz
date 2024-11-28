@@ -5,6 +5,7 @@ import {RootState} from "@/data/types";
 import {getCountry, getFeePercentage} from "@/lib/utils";
 import createBooking from "@/slices/confirmBookingThunks/createBooking";
 import handlePaymentAsync from '@/slices/confirmBookingThunks/handlePaymentAsync';
+import {setExchangeRates} from "@/slices/staysSlice";
 
 export interface ConfirmBookingState {
     stay: Stay;
@@ -65,7 +66,6 @@ const recalculateCosts = (state: any) => {
     if (!state.stay.id){
         return ;
     }
-    console.log(state, state.stay.id)
     //calculate totals
     let subTotal = 0;
 
@@ -113,15 +113,16 @@ const recalculateCosts = (state: any) => {
 
 export const fetchExchangeRates = createAsyncThunk(
     'confirmBooking/fetchExchangeRates',
-    async (_, { getState }) => {
+    async (_, { getState,dispatch }) => {
         const { confirmBooking} = getState() as RootState;
         try {
             const country = await getCountry()
             let fromCurrency = country?.currency || confirmBooking.currency;
 
             const response = await fetch(`https://open.er-api.com/v6/latest/${fromCurrency}`);
-            console.log(response)
+
             const data = await response.json();
+            dispatch(setExchangeRates({rates: data.rates, currency: data.base_code}))
             return {rates: data.rates, currency: data.base_code};
         } catch (error) {
             console.error('Error fetching exchange rates:', error);

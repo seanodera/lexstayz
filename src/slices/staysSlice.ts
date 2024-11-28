@@ -121,11 +121,13 @@ const staysSlice = createSlice({
             state.currentStay = action.payload;
             state.currentId = -1;
         },
-
-
         resetError: (state) => {
             state.hasError = false
             state.errorMessage = ''
+        },
+        setExchangeRates: (state, action) => {
+            state.exchangeRates = action.payload?.rates || {};
+            state.globalCurrency = action.payload?.currency || 'USD';
         }
     },
     extraReducers: (builder) => {
@@ -158,10 +160,9 @@ const staysSlice = createSlice({
                 state.errorMessage = action.payload as string || 'Failed to set current stay';
             }).addCase(fetchAppExchangeRates.fulfilled, (state, action) => {
             state.exchangeRates = action.payload?.rates || {};
-            state.globalCurrency = action.payload?.currency || 'KES';
+            state.globalCurrency = action.payload?.currency || 'USD';
         });
-    }
-});
+    }});
 
 export const selectCurrentStay = (state: RootState) => state.stays.currentStay;
 export const selectAllStays = (state: RootState) => state.stays.stays;
@@ -178,6 +179,7 @@ export const {
     setAllStays,
     setCurrentStay,
     resetError,
+    setExchangeRates,
 } = staysSlice.actions;
 
 export default staysSlice.reducer;
