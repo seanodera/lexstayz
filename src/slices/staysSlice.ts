@@ -54,7 +54,7 @@ export const fetchStaysAsync = createAsyncThunk(
             }
             return stays
         } catch (error) {
-            console.log(error)
+
             if (error instanceof Error) {
                 return rejectWithValue(error.message);
             }
@@ -71,7 +71,7 @@ export const setCurrentStayFromId = createAsyncThunk('stays/setCurrentStayFromId
 
             const currentStay = stays.stays.find((value) => value.id === id);
             if (currentStay) {
-                console.log('Current Stay local')
+
                 dispatch(setBookingStay(currentStay))
                 return currentStay;
             } else {
