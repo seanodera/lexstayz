@@ -16,7 +16,7 @@ export default function Footer() {
                         <div className={'font-bold'}>Partners</div>
                         <Link className={'block text-sm text-gray-300'} href={'/list-your-property'}>List your Property</Link>
                         {/*<Link className={'block text-sm text-gray-300'} href={'/affiliates'}>Affiliates</Link>*/}
-                        <Link className={'block text-sm text-gray-300'} href={'/advertise'}>advertise with Us</Link>
+                        <Link className={'block text-sm text-gray-300'} href={'/advertise'}>Advertise with Us</Link>
                     </div>
                     <div className={'space-y-2'}>
                         <div className={'font-bold'}>About</div>
