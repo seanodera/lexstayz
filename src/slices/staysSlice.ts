@@ -51,7 +51,7 @@ export const fetchStaysAsync = createAsyncThunk(
     async (_, {rejectWithValue}) => {
         try {
 
-            const staysRef = query(collection(firestore, 'stays'));
+            const staysRef = query(collection(firestore, 'stays'), where('published', '==', true));
             const stays: Array<any> = [];
             const snapshot = await getDocs(staysRef);
             for (const doc1 of snapshot.docs) {
