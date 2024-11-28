@@ -14,6 +14,7 @@ export default function ConfirmBooking() {
     const userID = params.get('userID')
     const bookingID = params.get('booking')
     const preserve = params.get('preserve')
+    const depositId = params.get('depositId')
     const [messageApi, contextHolder] = message.useMessage();
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(false);
@@ -23,7 +24,7 @@ export default function ConfirmBooking() {
 
     async function runBooking(){
         if (userID && bookingID){
-            const response = await verifyPayment(bookingID);
+            const response = await verifyPayment( depositId? depositId : bookingID, (bookingID === depositId)? 'Paystack' : 'Pawapay');
             if (response.status === 'success') {
                 completeBooking({
                     userId: userID,

@@ -53,9 +53,6 @@ export default function BookFirmPage() {
     }, [booking.checkInDate, booking.checkOutDate]);
 
 
-
-
-
     useEffect(() => {
         dispatch(convertCart(cart));
     }, [cart]);
@@ -80,6 +77,7 @@ export default function BookFirmPage() {
 
         dispatch(handlePaymentAsync({preserve: true})).then((value: any) => {
             setLoading(false)
+            console.log(value)
             if (value.meta.requestStatus === 'fulfilled') {
 
                 router.push(value.payload)
@@ -92,7 +90,6 @@ export default function BookFirmPage() {
 
     }
 
-    console.log(booking, stay)
 
     if (loading || !stay.id) {
         return <div className={'flex flex-col items-center justify-center h-full w-full min-h-96 bg-white'}>
@@ -170,7 +167,8 @@ export default function BookFirmPage() {
                                     <div
                                         className={'mb-0 text-primary'}>{booking.currency} {toMoneyFormat(booking.subtotal)}</div>
                                 </div>}
-                                {booking.rooms.map((cartItem: any, index: number) => <div key={index} className={'col-span-2 grid grid-cols-2'}>
+                                {booking.rooms.map((cartItem: any, index: number) => <div key={index}
+                                                                                          className={'col-span-2 grid grid-cols-2'}>
                                     <div
                                         className="capitalize text-gray-500">{stay.rooms.find((value: any) => value.id === cartItem.roomId).name}</div>
                                     <div
@@ -186,7 +184,7 @@ export default function BookFirmPage() {
 
                             </div>
                         </div>
-                        {booking.currency !== booking.paymentCurrency? <div>
+                        {booking.currency !== booking.paymentCurrency ? <div>
                             <small className={'italic text-gray-400 text-center block'}>We currently only accept
                                 payments in {booking.paymentCurrency}</small>
                             <div

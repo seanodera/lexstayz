@@ -2,10 +2,10 @@ import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import {getUserDetails} from "@/data/usersData";
 import {signInWithEmailAndPassword} from "firebase/auth";
 import {auth, firestore} from "@/lib/firebase";
-import {redirect} from "next/navigation";
 import {doc, runTransaction, updateDoc} from "firebase/firestore";
 import {RootState} from "@/data/types";
 import {getCurrentUser} from "@/data/bookingData";
+import {getCountry} from "@/lib/utils";
 
 export const getUserDetailsAsync = createAsyncThunk('authentication/user',
     async (id: string) => {
@@ -37,14 +37,14 @@ export const signInUserAsync = createAsyncThunk('authentication/signIn',
 );
 
 export const updateUserAsync = createAsyncThunk('authentication/updateUser',
-    async ({details}:{details: any}, {rejectWithValue}) => {
+    async ({details}: { details: any }, {rejectWithValue}) => {
         try {
             const user = getCurrentUser()
             await updateDoc(doc(firestore, 'users', user.uid), details);
             return details;
-        } catch (error){
+        } catch (error) {
             console.log(error)
-            if (error instanceof Error){
+            if (error instanceof Error) {
                 return rejectWithValue(error.message);
             } else {
                 return rejectWithValue('An unknown error occurred');
@@ -112,6 +112,35 @@ export const deleteFromWishList = createAsyncThunk('authentication/deleteFromWis
     }
 );
 
+export const loginUser = createAsyncThunk('auth/auto', async (data: {
+    phone: string;
+    email: string;
+    lastName: string;
+    firstName: string;
+    avatar?: any;
+    uid: string;
+    dob?: string;
+    gender?: string;
+    address?: any;
+    paymentMethods?: any[];
+    wishlist: string[]
+} | any, {rejectWithValue}) => {
+    try {
+        const country = await getCountry()
+        console.log({
+            data: data,
+            country: country ? country : {currency: "GHS", emoji: "GH", name: "Ghana"},
+        })
+        return {
+            data: data,
+            country: country ? country : {currency: "GHS", emoji: "GH", name: "Ghana"},
+        };
+    } catch (e) {
+        console.error("Error fetching user data", e);
+        return rejectWithValue('An unknown error occurred');
+    }
+})
+
 interface AuthenticationState {
     isAuthenticated: boolean,
     user?: {
@@ -121,8 +150,8 @@ interface AuthenticationState {
         firstName: string;
         avatar?: any;
         uid: string;
-        dob?:string;
-        gender?:string;
+        dob?: string;
+        gender?: string;
         address?: any;
         paymentMethods?: any[];
     },
@@ -131,26 +160,28 @@ interface AuthenticationState {
     hasError: boolean,
     errorMessage: string,
     hasRun: boolean,
+    country: {
+        name: string,
+        emoji: string,
+        currency: string,
+    }
 }
 
 const initialState: AuthenticationState = {
+    country: {currency: "", emoji: "", name: ""},
     isAuthenticated: false,
     user: undefined,
     wishlist: [],
     isLoading: false,
     hasError: false,
     errorMessage: '',
-    hasRun: false,
+    hasRun: false
 }
 const AuthenticationSlice = createSlice({
     name: "authentication",
     initialState: initialState,
     reducers: {
-        loginUser: (state, action) => {
-            state.isAuthenticated = true;
-            state.user = action.payload;
-            state.wishlist = action.payload.wishlist;
-        },
+
         logoutUser: (state) => {
             state.isAuthenticated = false;
             state.user = undefined;
@@ -170,6 +201,20 @@ const AuthenticationSlice = createSlice({
             })
             .addCase(getUserDetailsAsync.pending, (state) => {
                 state.isLoading = true;
+            })
+            .addCase(loginUser.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(loginUser.fulfilled, (state, action) => {
+                state.isAuthenticated = true;
+                state.user = action.payload.data;
+                state.wishlist = action.payload.data.wishlist;
+                state.country = action.payload.country;
+            })
+            .addCase(loginUser.rejected, (state, action) => {
+                state.hasError = true;
+                state.errorMessage = action.payload as string;
+                state.isLoading = false;
             })
             .addCase(signInUserAsync.pending, (state) => {
                 state.isLoading = true;
@@ -223,5 +268,5 @@ export const selectCurrentUser = (state: RootState) => state.authentication.user
 export const selectIsAuthenticated = (state: RootState) => state.authentication.isAuthenticated;
 export const selectWishlist = (state: RootState) => state.authentication.wishlist;
 
-export const {loginUser, logoutUser} = AuthenticationSlice.actions;
+export const {logoutUser} = AuthenticationSlice.actions;
 export default AuthenticationSlice.reducer

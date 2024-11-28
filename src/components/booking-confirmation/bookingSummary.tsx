@@ -1,27 +1,18 @@
 // components/BookingSummary.tsx
-import {getCountry, getExchangeRate, toMoneyFormat} from "@/lib/utils";
+import {toMoneyFormat} from "@/lib/utils";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import {selectCart} from "@/slices/bookingSlice";
-import {useEffect, useState} from "react";
-import {message} from "antd";
-import {selectConfirmBooking, setBookingStay, updateCostData} from "@/slices/confirmBookingSlice";
+import {useEffect} from "react";
+import {selectConfirmBooking, setBookingStay} from "@/slices/confirmBookingSlice";
 
 
 const BookingSummary = ({stay}: any) => {
     const cart = useAppSelector(selectCart);
-    const [subTotal, setSubTotal] = useState(0);
+
 
     const booking = useAppSelector(selectConfirmBooking)
-    const [messageApi, contextHolder] = message.useMessage();
     const dispatch = useAppDispatch()
-    useEffect(() => {
-        let _subTotal = 0;
 
-        cart.forEach((value: any) => {
-            _subTotal += value.numRooms * stay.rooms.find((stay: any) => stay.id === value.roomId).price * booking.length;
-        });
-        setSubTotal(_subTotal);
-    }, [cart]);
 
 
     function calculatePrice(amount: number) {

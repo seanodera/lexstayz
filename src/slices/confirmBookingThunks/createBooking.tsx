@@ -7,7 +7,7 @@ import {ConfirmBookingState} from "@/slices/confirmBookingSlice";
 
 const createBooking = createAsyncThunk(
     'confirmBooking/createBooking',
-    async ({ paymentData, id }: { paymentData: any, id: string }, { getState, rejectWithValue }) => {
+    async ({ paymentData, id, method }: { paymentData: any, id: string,method: string }, { getState, rejectWithValue }) => {
         const state = getState() as { confirmBooking: ConfirmBookingState };
         const {
             stay,
@@ -64,6 +64,7 @@ const createBooking = createAsyncThunk(
                 currency: currency,
                 usedRate: usedRate,
                 paymentData: paymentData,
+                paymentMethod: method,
                 specialRequest: specialRequest,
                 status: 'Unpaid',
                 grandTotal,

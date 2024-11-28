@@ -9,6 +9,8 @@ import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import Navbar from "@/components/navigation/Navbar";
 import {fetchBookingsAsync, selectHasBookingRun} from "@/slices/bookingSlice";
 import {fetchUserChatsAsync} from "@/slices/messagingSlice";
+import {fetchAppExchangeRates} from "@/slices/staysSlice";
+import {fetchExchangeRates} from "@/slices/confirmBookingSlice";
 
 export const authRoutes = ['/login', '/register', '/forgot-password', '/reset-password', '/user-information']
 
@@ -31,7 +33,9 @@ export default function AuthenticationProvider({children}: { children: ReactNode
                     if (!currentUser || currentUser.uid !== user.uid) {
                         const userDetails = await getUserDetails(user.uid);
                         if (userDetails) {
-                            dispatch(loginUser(userDetails));
+                            await dispatch(loginUser(userDetails));
+                            dispatch(fetchAppExchangeRates());
+                            dispatch(fetchExchangeRates())
                             setUserLoaded(true)
                         } else {
                             router.push('/user-information')

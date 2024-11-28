@@ -48,7 +48,8 @@ export const checkUnpaidBookingAsync = createAsyncThunk('bookings/checkUnpaidBoo
         const {bookings} = getState() as RootState
         const _booking = bookings.bookings.find((value) => value.id === id)
         const user = getCurrentUser()
-        const res = await verifyPayment(id)
+        //TODO: implement method below
+        const res = await verifyPayment(id,'')
         if (res.status === 'success' && !_booking.isConfirmed) {
             await completeBooking({
                 userId: user.uid,

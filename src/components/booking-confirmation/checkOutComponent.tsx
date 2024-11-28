@@ -16,17 +16,17 @@ export default function CheckOutComponent() {
     const params = useSearchParams()
     const userID = params.get('userID')
     const bookingID = params.get('booking')
-    const bookings = useAppSelector(selectBookings)
+    const depositId = params.get('depositId')
     const [messageApi, contextHolder] = message.useMessage();
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('')
     const [hasRun,setHasRun] = useState(false)
     useEffect(() => {
-
+        console.log(userID,bookingID,depositId);
        if (!hasRun){
            if (userID && bookingID) {
-               verifyPayment(bookingID).then((res) => {
+               verifyPayment( depositId? depositId : bookingID, (bookingID === depositId)? 'Paystack' : 'Pawapay').then((res) => {
                    console.log(res)
                    if (res.status === 'success') {
                        completeBooking({

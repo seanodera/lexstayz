@@ -46,7 +46,9 @@ export default function ContextProvider({children}: { children: React.ReactNode 
                 if (!currentUser || currentUser.uid !== user.uid){
                     const userDetails = await getUserDetails(user.uid);
                     if (userDetails){
-                        dispatch(loginUser(userDetails));
+                        await dispatch(loginUser(userDetails));
+                        dispatch(fetchAppExchangeRates());
+                        dispatch(fetchExchangeRates())
                     } else {
                         router.push('/user-information')
                     }

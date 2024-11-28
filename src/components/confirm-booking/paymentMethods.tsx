@@ -1,18 +1,17 @@
 'use client'
 
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
-import { selectCurrentUser } from "@/slices/authenticationSlice";
-import { Radio, RadioGroup } from "@headlessui/react";
-import { useState } from "react";
-import {SiMastercard, SiVisa} from "react-icons/si";
+import {Radio, RadioGroup} from "@headlessui/react";
 import {CiCreditCard2} from "react-icons/ci";
-import {selectPaymentMethod, setPaymentMethod} from "@/slices/confirmBookingSlice";
-import {PaymentMethod} from "@/data/types";
+import {selectConfirmBooking, selectPaymentMethod, setPaymentMethod} from "@/slices/confirmBookingSlice";
+import {toMoneyFormat} from "@/lib/utils";
+import {AiOutlineMobile} from "react-icons/ai";
 
 // Define the types for the user's payment methods
 
 export default function PaymentMethods() {
-    const userDetails = useAppSelector(selectCurrentUser);
+    const booking = useAppSelector(selectConfirmBooking)
+
     const paymentMethod = useAppSelector(selectPaymentMethod);
     const dispatch = useAppDispatch();
 
@@ -25,33 +24,35 @@ export default function PaymentMethods() {
                     onChange={(value) => dispatch(setPaymentMethod(value))}
                     className="grid grid-cols-2 gap-4"
                 >
-                    {userDetails?.paymentMethods?.map((paymentMethod: PaymentMethod, index: number) => {
-                        console.log(paymentMethod.card_type.trim() === 'visa')
-                        return (
-                            <Radio key={index} value={paymentMethod.authorization_code} className="">
-                                {({checked}) => (
-                                    <div
-                                        className={`w-full ${checked ? 'border-primary ' : 'border-gray-400'} flex gap-2 border-solid py-3 px-2 rounded-xl `}>
-                                        <div className={'text-3xl'}>
-                                            {paymentMethod.card_type.trim() === 'visa' ?
-                                                <SiVisa/> : paymentMethod.card_type.trim() === 'mastercard' ? <SiMastercard/> :
-                                                    <CiCreditCard2/>}
-                                        </div>
-                                        <div>
-                                            <div className="font-semibold">
-                                                {paymentMethod.card_type} ending in {paymentMethod.last4}
-                                            </div>
-                                            <div>Expiry {paymentMethod.exp_month}/{paymentMethod.exp_year}</div>
-                                        </div>
+                    <Radio value={'card-payment'} className="">
+                        {({checked}) => (
+                            <div
+                                className={`w-full ${checked ? 'border-primary ' : 'border-gray-400'} flex gap-2 border-solid py-3 px-2 rounded-xl `}>
+                                <div className={'text-3xl'}>
+                                     <CiCreditCard2/>
+                                </div>
+                                <div>
+                                    <div className="font-semibold">
+                                        Card Payment
                                     </div>
-                                )}
-                            </Radio>
-                        );
-                    })}
-                    <Radio value={'new'}>
-                        {({ checked }) => (
-                            <div className={`w-full ${checked ? 'border-primary ' : 'border-gray-400'} flex gap-2 border-solid py-3 px-2 rounded-lg font-semibold`}>
-                                New Payment Method
+                                    <div className={'font-bold text-lg'}>{booking.paymentCurrency} {toMoneyFormat(booking.grandTotal * booking.paymentRate)}</div>
+                                </div>
+                            </div>
+                        )}
+                    </Radio>
+                    <Radio value={'mobile-money'} className="">
+                        {({checked}) => (
+                            <div
+                                className={`w-full ${checked ? 'border-primary ' : 'border-gray-400'} flex gap-2 border-solid py-3 px-2 rounded-xl `}>
+                                <div className={'text-3xl'}>
+                                    <AiOutlineMobile/>
+                                </div>
+                                <div>
+                                    <div className="font-semibold">
+                                        Mobile Money
+                                    </div>
+                                    <div className={'font-bold text-lg'}>{booking.currency} {toMoneyFormat(booking.grandTotal)}</div>
+                                </div>
                             </div>
                         )}
                     </Radio>

@@ -1,6 +1,7 @@
 import {countries} from "country-data";
 import {differenceInMilliseconds, startOfDay} from "date-fns";
 
+export const handler_url = process.env.NEXT_PUBLIC_HANDLER || 'http://localhost:4500';
 
 export function getRandomInt({max, min = 0}: { max: number, min?: number }) {
     return Math.floor(Math.random() * (max - min + 1) + min);
@@ -92,25 +93,54 @@ export async function getCountry() {
         const ipData = await ipResponse.json();
         const ip = ipData.ip;
 
-        // Fetch the country using the IP address
-        const countryResponse = await fetch(`https://ipapi.co/${ip}/json/`);
-        const countryData = await countryResponse.json();
-        const countryCode = countryData.country;
+        // Try the primary API route first
+        try {
 
-        // Get country information from country-data package
-        const country = countries[ countryCode ];
-        // setUserProperties(analytics, {country: country})
-        return {
-            name: country.name,
-            emoji: country.emoji,
-            currency: country.currencies[ 0 ]
-        };
+            const countryResponse = await fetch(`https://ipapi.co/${ip}/json/`);
+            if (!countryResponse.ok) {
+                throw new Error('Primary API request failed');
+            }
+            const countryData = await countryResponse.json();
+            const countryCode = countryData.country;
+
+
+            const country = countries[ countryCode ];
+            return {
+                name: country.name,
+                emoji: country.emoji,
+                currency: country.currencies[ 0 ]
+            };
+
+        } catch (primaryError) {
+            console.warn('Primary API failed, attempting secondary API', primaryError);
+
+
+
+
+            const backupCountryResponse = await fetch("https://freegeoip.app/json/", {
+                method: "GET",
+                redirect: "follow"
+            });
+            if (!backupCountryResponse.ok) {
+                throw new Error('Backup API request failed');
+            }
+            const backupCountryData = await backupCountryResponse.json();
+            const backupCountryCode = backupCountryData.country_code;
+
+
+            const backupCountry = countries[ backupCountryCode ];
+            console.log(backupCountry, backupCountryData)
+            return {
+                name: backupCountry.name,
+                emoji: backupCountry.emoji,
+                currency: backupCountry.currencies[ 0 ]
+            };
+        }
     } catch (error) {
         console.error("Error fetching country data: ", error);
         return undefined;
     }
 }
-
 export function serviceCountries() {
     let list = ['KE', 'GH', 'UK', 'CY']
     return list.map((e) => countries[ e ])

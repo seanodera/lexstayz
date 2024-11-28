@@ -1,13 +1,14 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
 import {generateID, getCurrentUser} from "@/data/bookingData";
 import axios from "axios";
-import {ConfirmBookingState} from "@/slices/confirmBookingSlice";
 import createBooking from "@/slices/confirmBookingThunks/createBooking";
+import {handler_url} from "@/lib/utils";
+import {RootState} from "@/data/types";
 
 const handlePaymentAsync = createAsyncThunk(
     'confirmBooking/handlePaymentAsync',
     async ({ preserve = false }: { preserve?: boolean }, { dispatch, getState, rejectWithValue }) => {
-        const state = getState() as { confirmBooking: ConfirmBookingState };
+        const state = getState() as RootState;
         const booking = state.confirmBooking;
 
         const id = generateID();
@@ -15,38 +16,45 @@ const handlePaymentAsync = createAsyncThunk(
 
 
         try {
+            const country = state.authentication.country
             const user = getCurrentUser();
             let amount = parseInt((booking.grandTotal).toFixed(2));
             if (booking.currency !== paymentCurrency) {
-                amount = parseInt((booking.exchangeRates[paymentCurrency] * 1.035 * booking.grandTotal).toFixed(2));
+                amount = parseInt((booking.paymentRate * booking.grandTotal).toFixed(2));
             }
 
-            if (state.confirmBooking.paymentMethod === 'new') {
-                const res = await axios.post('/api/createTransaction', {
+            if (state.confirmBooking.paymentMethod === 'mobile-money') {
+                const res = await axios.post(`${handler_url}/api/payments/createTransaction`, {
                     email: booking.contact.email,
-                    amount: amount,
-                    currency: paymentCurrency,
-                    callback_url: `${process.env.NEXT_PUBLIC_HOST}/confirm-booking?userID=${user.uid}&booking=${id}${preserve ? `&preserve=${preserve}` : ''}`,
+                    amount: booking.grandTotal.toFixed(2),
+                    currency: booking.currency,
+                    callback_url: `${process.env.NEXT_PUBLIC_HOST}/confirm-booking?userID=${user.uid}&booking=${id}`,
+                    country: country?.name,
+                    booking: booking,
                     reference: id
                 });
 
-                const { access_code: accessCode, reference, authorization_url } = res.data.data.data;
+                const { access_code: accessCode, reference, authorization_url, method } = res.data.data;
 
-                const paymentData = { accessCode, reference, authorization_url };
-                await dispatch(createBooking({ paymentData, id }));
+                const paymentData = { accessCode, reference, authorization_url, method };
+                await dispatch(createBooking({ paymentData, id, method }));
                 return authorization_url;
             } else {
-                const res = await axios.post('/api/createCharge', {
+                const res = await axios.post(`${handler_url}/api/payments/createTransaction`, {
                     email: booking.contact.email,
                     amount: amount,
-                    currency: paymentCurrency,
-                    authorization_code: state.confirmBooking.paymentMethod,
-                    callback_url: `${process.env.NEXT_PUBLIC_HOST}/confirm-booking?userID=${user.uid}&booking=${id}${preserve ? `&preserve=${preserve}` : ''}`,
+                    currency: booking.paymentCurrency,
+                    callback_url: `${process.env.NEXT_PUBLIC_HOST}/confirm-booking?userID=${user.uid}&booking=${id}`,
+                    country: country?.name,
+                    booking: booking,
                     reference: id
                 });
 
-                await dispatch(createBooking({ paymentData: res.data.data, id }));
-                return `/confirm-booking?userID=${user.uid}&booking=${id}`;
+                const { access_code: accessCode, reference, authorization_url, method } = res.data.data;
+
+                const paymentData = { accessCode, reference, authorization_url, method };
+                await dispatch(createBooking({ paymentData, id, method }));
+                return authorization_url;
             }
         } catch (error) {
             return rejectWithValue(`An error occurred. Please try again. ${error}`);

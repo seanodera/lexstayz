@@ -1,12 +1,10 @@
-import { Stay } from "@/lib/types";
-import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";;
-import { addDays, differenceInDays } from "date-fns";
-import { RootState } from "@/data/types";
+import {Stay} from "@/lib/types";
+import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
+import {addDays, differenceInDays} from "date-fns";
+import {RootState} from "@/data/types";
 import {getCountry, getFeePercentage} from "@/lib/utils";
 import createBooking from "@/slices/confirmBookingThunks/createBooking";
-import handlePaymentAsync from '@/slices/confirmBookingThunks/handlePaymentAsync'
-import {state} from "sucrase/dist/types/parser/traverser/base";
-import {WritableDraft} from "immer";
+import handlePaymentAsync from '@/slices/confirmBookingThunks/handlePaymentAsync';
 
 export interface ConfirmBookingState {
     stay: Stay;
@@ -116,7 +114,7 @@ const recalculateCosts = (state: any) => {
 export const fetchExchangeRates = createAsyncThunk(
     'confirmBooking/fetchExchangeRates',
     async (_, { getState }) => {
-        const { confirmBooking } = getState() as { confirmBooking: ConfirmBookingState };
+        const { confirmBooking} = getState() as RootState;
         try {
             const country = await getCountry()
             let fromCurrency = country?.currency || confirmBooking.currency;
