@@ -16,7 +16,7 @@ const handlePaymentAsync = createAsyncThunk(
 
 
         try {
-            const country = state.authentication.country
+            const country = booking.country;
             const user = getCurrentUser();
             let amount = parseInt((booking.grandTotal).toFixed(2));
             if (booking.currency !== paymentCurrency) {
