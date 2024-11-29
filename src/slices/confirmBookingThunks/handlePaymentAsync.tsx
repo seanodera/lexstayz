@@ -16,7 +16,7 @@ const handlePaymentAsync = createAsyncThunk(
 
 
         try {
-            const country = booking.country;
+            const country = state.authentication.country;
             const user = getCurrentUser();
             let amount = parseInt((booking.grandTotal).toFixed(2));
             if (booking.currency !== paymentCurrency) {
@@ -29,7 +29,7 @@ const handlePaymentAsync = createAsyncThunk(
                     amount: booking.grandTotal.toFixed(2),
                     currency: booking.currency,
                     callback_url: `${process.env.NEXT_PUBLIC_HOST}/confirm-booking?userID=${user.uid}&booking=${id}`,
-                    country: country?.name,
+                    country: booking.country,
                     booking: booking,
                     reference: id
                 });
