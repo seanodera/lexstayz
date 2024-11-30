@@ -29,8 +29,9 @@ export interface ConfirmBookingState {
     bookingStatus: 'Pending' | 'Confirmed' | 'Canceled' | 'Rejected';
     paymentMethod: any;
     exchangeRates: any;
-    paymentCurrency: 'GHS',
-    paymentRate: number,
+    paymentCurrency: 'GHS';
+    paymentRate: number;
+    country: string;
 }
 
 const initialState: ConfirmBookingState = {
@@ -59,7 +60,8 @@ const initialState: ConfirmBookingState = {
     bookingStatus: 'Pending', // Default status
     paymentCurrency: 'GHS',
     paymentRate: 1,
-    exchangeRates: {}
+    exchangeRates: {},
+    country: 'Kenya',
 };
 
 const recalculateCosts = (state: any) => {
@@ -123,7 +125,7 @@ export const fetchExchangeRates = createAsyncThunk(
 
             const data = await response.json();
             dispatch(setExchangeRates({rates: data.rates, currency: data.base_code}))
-            return {rates: data.rates, currency: data.base_code};
+            return {rates: data.rates, currency: data.base_code, country: country?.name};
         } catch (error) {
             console.error('Error fetching exchange rates:', error);
         }
@@ -203,6 +205,7 @@ const ConfirmBookingSlice = createSlice({
             .addCase(fetchExchangeRates.fulfilled, (state, action) => {
                 state.exchangeRates = action.payload?.rates;
                 state.currency = action.payload?.currency || 'GHS';
+                state.country = action.payload?.country || 'Kenya';
                 state.usedRate = action.payload?.rates[state.currency] * 1.02;
                 state.paymentRate = action.payload?.rates[state.paymentCurrency] * 1.035
                 recalculateCosts(state); // Recalculate costs after exchange rates are fetched
