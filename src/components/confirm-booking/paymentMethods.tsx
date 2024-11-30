@@ -29,13 +29,23 @@ export default function PaymentMethods() {
                             <div
                                 className={`w-full ${checked ? 'border-primary ' : 'border-gray-400'} flex gap-2 border-solid py-3 px-2 rounded-xl `}>
                                 <div className={'text-3xl'}>
-                                     <CiCreditCard2/>
+                                    <CiCreditCard2/>
                                 </div>
-                                <div>
+                                <div className={'w-full'}>
                                     <div className="font-semibold">
                                         Card Payment
                                     </div>
-                                    <div className={'font-bold text-lg'}>{booking.paymentCurrency} {toMoneyFormat(booking.grandTotal * booking.paymentRate)}</div>
+                                    <div
+                                        className={'font-bold text-lg'}>{booking.paymentCurrency} {toMoneyFormat(booking.grandTotal * booking.paymentRate)}</div>
+
+                                </div>
+                                <div
+                                    className={'text-primary text-center font-medium text-sm space-y-0'}>
+                                <div className={'text-nowrap'}>1 {booking.currency}</div>
+                                    <div>=</div>
+                                    <div className={'text-nowrap'}>
+                                        {toMoneyFormat(booking.paymentRate)} {booking.paymentCurrency}
+                                    </div>
                                 </div>
                             </div>
                         )}

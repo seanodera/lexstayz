@@ -26,7 +26,7 @@ export default function CheckOutComponent() {
         console.log(userID,bookingID,depositId);
        if (!hasRun){
            if (userID && bookingID) {
-               verifyPayment( depositId? depositId : bookingID, depositId? 'Paystack' : 'Pawapay').then((res) => {
+               verifyPayment( depositId? depositId : bookingID, depositId ? 'Pawapay' : 'Paystack').then((res) => {
                    console.log(res)
                    if (res.status === 'success') {
                        completeBooking({

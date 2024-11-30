@@ -24,7 +24,7 @@ export default function ConfirmBooking() {
 
     async function runBooking(){
         if (userID && bookingID){
-            const response = await verifyPayment( depositId? depositId : bookingID, (bookingID === depositId)? 'Paystack' : 'Pawapay');
+            const response = await  verifyPayment( depositId? depositId : bookingID, depositId ? 'Pawapay' : 'Paystack');
             if (response.status === 'success') {
                 completeBooking({
                     userId: userID,
