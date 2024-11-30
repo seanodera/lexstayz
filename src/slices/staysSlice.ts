@@ -6,7 +6,6 @@ import {collection, doc, getDoc, getDocs} from "firebase/firestore";
 import {firestore} from "@/lib/firebase";
 import {query, where} from "@firebase/firestore";
 import {setBookingStay} from "@/slices/confirmBookingSlice";
-import {getCountry} from "@/lib/utils";
 
 
 export interface Stay {
@@ -92,22 +91,6 @@ export const setCurrentStayFromId = createAsyncThunk('stays/setCurrentStayFromId
         }
     })
 
-export const fetchAppExchangeRates = createAsyncThunk(
-    'stays/fetchExchangeRates',
-    async (_) => {
-        try {
-            const country = await getCountry()
-
-            const response = await fetch(`https://open.er-api.com/v6/latest/${country?.currency}`);
-
-            const data = await response.json();
-            console.log(data)
-            return {rates: data.rates, currency: data.base_code};
-        } catch (error) {
-            console.error('Error fetching exchange rates:', error);
-        }
-    }
-);
 
 
 const staysSlice = createSlice({
@@ -158,10 +141,7 @@ const staysSlice = createSlice({
                 state.isLoading = false;
                 state.hasError = true;
                 state.errorMessage = action.payload as string || 'Failed to set current stay';
-            }).addCase(fetchAppExchangeRates.fulfilled, (state, action) => {
-            state.exchangeRates = action.payload?.rates || {};
-            state.globalCurrency = action.payload?.currency || 'USD';
-        });
+            });
     }});
 
 export const selectCurrentStay = (state: RootState) => state.stays.currentStay;

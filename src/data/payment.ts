@@ -13,7 +13,6 @@ export async function verifyPayment(id: string, method: string) {
             alert('Payment verification failed');
         }
 
-
     } catch (err) {
         console.log(err)
     }
