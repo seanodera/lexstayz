@@ -184,19 +184,19 @@ export default function BookFirmPage() {
 
                             </div>
                         </div>
-                        {booking.currency !== booking.paymentCurrency ? <div>
-                            <small className={'italic text-gray-400 text-center block'}>We currently only accept
-                                payments in {booking.paymentCurrency}</small>
-                            <div
-                                className={'text-primary text-center font-medium h4 my-2 '}> 1 {booking.currency} = {toMoneyFormat(booking.paymentRate)} {booking.paymentCurrency}</div>
-                            <div className={'text-lg font-medium'}>You will Pay</div>
-                            <div
-                                className={'text-xl font-bold'}>{booking.paymentCurrency} {toMoneyFormat(booking.grandTotal * booking.paymentRate)}</div>
-                        </div> : <div>
-                            <div className={'text-lg font-medium'}>You will Pay</div>
-                            <div
-                                className={'text-xl font-bold'}>{booking.currency} {toMoneyFormat(booking.grandTotal)}</div>
-                        </div>}
+                        {/*{booking.currency !== booking.paymentCurrency ? <div>*/}
+                        {/*    <small className={'italic text-gray-400 text-center block'}>We currently only accept*/}
+                        {/*        payments in {booking.paymentCurrency}</small>*/}
+                        {/*    <div*/}
+                        {/*        className={'text-primary text-center font-medium h4 my-2 '}> 1 {booking.currency} = {toMoneyFormat(booking.paymentRate)} {booking.paymentCurrency}</div>*/}
+                        {/*    <div className={'text-lg font-medium'}>You will Pay</div>*/}
+                        {/*    <div*/}
+                        {/*        className={'text-xl font-bold'}>{booking.paymentCurrency} {toMoneyFormat(booking.grandTotal * booking.paymentRate)}</div>*/}
+                        {/*</div> : <div>*/}
+                        {/*    <div className={'text-lg font-medium'}>You will Pay</div>*/}
+                        {/*    <div*/}
+                        {/*        className={'text-xl font-bold'}>{booking.currency} {toMoneyFormat(booking.grandTotal)}</div>*/}
+                        {/*</div>}*/}
                         <Button block type={'primary'} size={'large'} onClick={handleConfirm}>Confirm</Button>
                     </Card>
                 </div>
