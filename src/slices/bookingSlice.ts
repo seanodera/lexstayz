@@ -309,8 +309,6 @@ export const selectCart = (state: RootState) => state.bookings.cart;
 export const selectBookings = (state: RootState) => state.bookings.bookings;
 export const selectIsLoading = (state: RootState) => state.bookings.isLoading;
 export const selectCurrentBooking = (state: RootState) => state.bookings.currentBooking;
-export const selectHasError = (state: RootState) => state.bookings.hasError;
-export const selectErrorMessage = (state: RootState) => state.bookings.errorMessage;
 export const selectHasBookingRun = (state: RootState) => state.bookings.hasBookingRun;
 export {updateBookingStatusAsync}
 export const {

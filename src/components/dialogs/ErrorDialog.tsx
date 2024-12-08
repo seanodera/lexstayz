@@ -19,16 +19,16 @@ export default function ErrorDialog() {
     const {show, hasError, errorMessage, setError,setShow } = errorContext;
 
 
-    const {
-        isLoading: isMessagingLoading, hasError: messagingError, errorMessage: messagingErrorMessage
+    const {hasError: messagingError, errorMessage: messagingErrorMessage
     } = useAppSelector(state => state.messaging)
     const {status, error} = useAppSelector(state => state.confirmBooking)
     const {
-        isLoading: isAuthLoading,
         hasError: authError,
         errorMessage: authErrorMessage
     } = useAppSelector(state => state.authentication)
     const {hasError: staysHasError, errorMessage: staysErrorMessage} = useAppSelector(state => state.stays)
+
+    const {hasError: bookingError,errorMessage: bookingErrorMessage} = useAppSelector(state => state.bookings)
     useEffect(() => {
         if (authError) {
             setError(authError, authErrorMessage)
@@ -38,8 +38,10 @@ export default function ErrorDialog() {
             setError(true, error)
         } else if (staysHasError) {
             setError(staysHasError, staysErrorMessage)
+        } else if (bookingError){
+            setError(bookingError, bookingErrorMessage)
         }
-    }, [authError, authErrorMessage, error, messagingError, messagingErrorMessage, setError, status, staysErrorMessage, staysHasError]);
+    }, [authError, authErrorMessage, bookingError, bookingErrorMessage, error, messagingError, messagingErrorMessage, setError, status, staysErrorMessage, staysHasError]);
 
     const handleClose = () => {
         setError(false, '');

@@ -6,6 +6,7 @@ import {collection, doc, getDoc, getDocs} from "firebase/firestore";
 import {firestore} from "@/lib/firebase";
 import {query, where} from "@firebase/firestore";
 import {setBookingStay} from "@/slices/confirmBookingSlice";
+import {Host} from "@/lib/types";
 
 
 export interface Stay {
@@ -19,6 +20,8 @@ export interface Stay {
 interface StaysState {
     stays: Stay[];
     currentStay: Stay;
+    fetchedHosts: Host[];
+    currentHost?: Host;
     currentId: number | string;
     isLoading: boolean;
     hasError: boolean;
@@ -29,6 +32,8 @@ interface StaysState {
 }
 
 const initialState: StaysState = {
+    currentHost: undefined,
+    fetchedHosts: [],
     stays: [],
     currentStay: {} as Stay,
     currentId: -1,
@@ -92,6 +97,25 @@ export const setCurrentStayFromId = createAsyncThunk('stays/setCurrentStayFromId
     })
 
 
+export const setCurrentHostById = createAsyncThunk('stays/setCurrentHostById', async (id: string, {getState,dispatch, rejectWithValue}) => {
+    const {stays} = getState() as {stays: StaysState}
+    try {
+        const host = stays.fetchedHosts.find((value) => value.uid === id);
+        if (host){
+            return host
+        } else {
+            const hostsRef = collection(firestore, 'hosts');
+            const hostSnapshot = await getDoc(doc(hostsRef, id));
+            const host = hostSnapshot.data() as Host;
+            dispatch(updateFetchedHosts(host))
+            return host
+        }
+    } catch (error) {
+        console.log(error);
+        rejectWithValue('Error Getting the stays Host');
+    }
+
+})
 
 const staysSlice = createSlice({
     name: "stays",
@@ -111,6 +135,9 @@ const staysSlice = createSlice({
         setExchangeRates: (state, action) => {
             state.exchangeRates = action.payload?.rates || {};
             state.globalCurrency = action.payload?.currency || 'USD';
+        },
+        updateFetchedHosts: (state, action) => {
+            state.fetchedHosts = [...state.fetchedHosts, action.payload];
         }
     },
     extraReducers: (builder) => {
@@ -141,15 +168,25 @@ const staysSlice = createSlice({
                 state.isLoading = false;
                 state.hasError = true;
                 state.errorMessage = action.payload as string || 'Failed to set current stay';
-            });
+            })
+            .addCase(setCurrentHostById.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(setCurrentHostById.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.currentHost = action.payload as Host;
+            })
+            .addCase(setCurrentHostById.rejected, (state, action) => {
+                state.isLoading = false;
+                state.hasError = true;
+                state.errorMessage = action.payload as string || 'Failed to set current host';
+            })
+        ;
     }});
 
 export const selectCurrentStay = (state: RootState) => state.stays.currentStay;
 export const selectAllStays = (state: RootState) => state.stays.stays;
-export const selectCurrentId = (state: RootState) => state.stays.currentId;
 export const selectIsStayLoading = (state: RootState) => state.stays.isLoading;
-export const selectHasError = (state: RootState) => state.stays.hasError;
-export const selectErrorMessage = (state: RootState) => state.stays.errorMessage;
 export const selectHasRun = (state: RootState) => state.stays.hasRun;
 export const selectStayById = (state: RootState, id: string | number) => state.stays.stays.find((stay: Stay) => stay.id === id);
 export const selectExchangeRate = (state: RootState) => state.stays.exchangeRates;
@@ -160,6 +197,7 @@ export const {
     setCurrentStay,
     resetStayError,
     setExchangeRates,
+    updateFetchedHosts
 } = staysSlice.actions;
 
 export default staysSlice.reducer;
