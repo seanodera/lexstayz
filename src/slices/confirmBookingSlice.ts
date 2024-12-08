@@ -1,12 +1,11 @@
-import { Stay } from "@/lib/types";
-import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";;
-import { addDays, differenceInDays } from "date-fns";
-import { RootState } from "@/data/types";
+import {Stay} from "@/lib/types";
+import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
+import {addDays, differenceInDays} from "date-fns";
+import {RootState} from "@/data/types";
 import {getCountry, getFeePercentage} from "@/lib/utils";
 import createBooking from "@/slices/confirmBookingThunks/createBooking";
-import handlePaymentAsync from '@/slices/confirmBookingThunks/handlePaymentAsync'
-import {state} from "sucrase/dist/types/parser/traverser/base";
-import {WritableDraft} from "immer";
+import handlePaymentAsync from '@/slices/confirmBookingThunks/handlePaymentAsync';
+import {setExchangeRates} from "@/slices/staysSlice";
 
 export interface ConfirmBookingState {
     stay: Stay;
@@ -30,8 +29,9 @@ export interface ConfirmBookingState {
     bookingStatus: 'Pending' | 'Confirmed' | 'Canceled' | 'Rejected';
     paymentMethod: any;
     exchangeRates: any;
-    paymentCurrency: 'GHS',
-    paymentRate: number,
+    paymentCurrency: 'GHS';
+    paymentRate: number;
+    country: string;
 }
 
 const initialState: ConfirmBookingState = {
@@ -60,14 +60,14 @@ const initialState: ConfirmBookingState = {
     bookingStatus: 'Pending', // Default status
     paymentCurrency: 'GHS',
     paymentRate: 1,
-    exchangeRates: {}
+    exchangeRates: {},
+    country: 'Kenya',
 };
 
 const recalculateCosts = (state: any) => {
     if (!state.stay.id){
         return ;
     }
-    console.log(state, state.stay.id)
     //calculate totals
     let subTotal = 0;
 
@@ -115,16 +115,17 @@ const recalculateCosts = (state: any) => {
 
 export const fetchExchangeRates = createAsyncThunk(
     'confirmBooking/fetchExchangeRates',
-    async (_, { getState }) => {
-        const { confirmBooking } = getState() as { confirmBooking: ConfirmBookingState };
+    async (_, { getState,dispatch }) => {
+        const { confirmBooking} = getState() as RootState;
         try {
             const country = await getCountry()
             let fromCurrency = country?.currency || confirmBooking.currency;
 
             const response = await fetch(`https://open.er-api.com/v6/latest/${fromCurrency}`);
-            console.log(response)
+
             const data = await response.json();
-            return {rates: data.rates, currency: data.base_code};
+            dispatch(setExchangeRates({rates: data.rates, currency: data.base_code}))
+            return {rates: data.rates, currency: data.base_code, country: country?.name};
         } catch (error) {
             console.error('Error fetching exchange rates:', error);
         }
@@ -173,7 +174,10 @@ const ConfirmBookingSlice = createSlice({
         setPaymentMethod: (state,action: PayloadAction<string>) => {
             state.paymentMethod = action.payload;
         },
-
+        resetConfirmBookingError: (state) => {
+            state.status = 'idle';
+            state.error = '';
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -204,9 +208,11 @@ const ConfirmBookingSlice = createSlice({
             .addCase(fetchExchangeRates.fulfilled, (state, action) => {
                 state.exchangeRates = action.payload?.rates;
                 state.currency = action.payload?.currency || 'GHS';
+                state.country = action.payload?.country || 'Kenya';
                 state.usedRate = action.payload?.rates[state.currency] * 1.02;
                 state.paymentRate = action.payload?.rates[state.paymentCurrency] * 1.035
                 recalculateCosts(state); // Recalculate costs after exchange rates are fetched
+                state.status = 'idle';
             })
             .addCase(fetchExchangeRates.pending, (state, action) => {
                 state.status = 'loading'
@@ -223,7 +229,8 @@ export const {
     updateBookingData,
     setBookingStay,
     convertCart,
-    setPaymentMethod
+    setPaymentMethod,
+    resetConfirmBookingError
 } = ConfirmBookingSlice.actions;
 
 export {createBooking, handlePaymentAsync}

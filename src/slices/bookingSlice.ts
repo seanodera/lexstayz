@@ -48,7 +48,9 @@ export const checkUnpaidBookingAsync = createAsyncThunk('bookings/checkUnpaidBoo
         const {bookings} = getState() as RootState
         const _booking = bookings.bookings.find((value) => value.id === id)
         const user = getCurrentUser()
-        const res = await verifyPayment(id)
+        console.log(_booking)
+        //TODO: implement method below
+        const res = await verifyPayment(_booking.paymentData.reference,_booking.paymentData.method)
         if (res.status === 'success' && !_booking.isConfirmed) {
             await completeBooking({
                 userId: user.uid,
@@ -106,7 +108,7 @@ export const fetchBookingAsync = createAsyncThunk('bookings/fetchBooking', async
                 return _booking;
             } else {
                 const user = getCurrentUser()
-                const bookingRef = doc(collection(firestore, 'users', user.uid, 'bookings'), id)
+                const bookingRef = doc(firestore, 'bookings', id)
                 const bookingSnapshot = await getDoc(bookingRef);
                 if (bookingSnapshot.exists()) {
                     return bookingSnapshot.data();
@@ -154,8 +156,8 @@ export const writeReview = createAsyncThunk('bookings/writeReview', async (revie
         }
 
 
-        const bookingRef = doc(collection(firestore, 'users', user.uid, 'bookings'), review.bookingId);
-        const stayRef = doc(collection(firestore, 'stays'), review.stayId);
+        const bookingRef = doc(firestore, 'bookings', review.bookingId);
+        const stayRef = doc(firestore, 'stays', review.stayId);
 
 
         const snapshot = await getDoc(stayRef);
@@ -193,6 +195,7 @@ export const writeReview = createAsyncThunk('bookings/writeReview', async (revie
         const booking = bookings.bookings.find((value) => value.id === review.bookingId);
         return { ...booking, review: true, reviewData: review };
     } catch (error) {
+        console.error(error);
         if (error instanceof Error) {
             return rejectWithValue(error.message);
         }
@@ -210,6 +213,10 @@ const bookingsSlice = createSlice({
         updateCart: (state, action: PayloadAction<any[]>) => {
             state.cart = action.payload;
         },
+        resetBookingError: (state) => {
+            state.hasError = false
+            state.errorMessage = ''
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -302,13 +309,11 @@ export const selectCart = (state: RootState) => state.bookings.cart;
 export const selectBookings = (state: RootState) => state.bookings.bookings;
 export const selectIsLoading = (state: RootState) => state.bookings.isLoading;
 export const selectCurrentBooking = (state: RootState) => state.bookings.currentBooking;
-export const selectHasError = (state: RootState) => state.bookings.hasError;
-export const selectErrorMessage = (state: RootState) => state.bookings.errorMessage;
 export const selectHasBookingRun = (state: RootState) => state.bookings.hasBookingRun;
 export {updateBookingStatusAsync}
 export const {
     resetBooking,
-    updateCart
+    updateCart, resetBookingError
 } = bookingsSlice.actions;
 
 export default bookingsSlice.reducer;

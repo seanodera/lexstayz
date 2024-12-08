@@ -1,6 +1,7 @@
 import {countries} from "country-data";
 import {differenceInMilliseconds, startOfDay} from "date-fns";
 
+export const handler_url = process.env.NEXT_PUBLIC_HANDLER || 'http://localhost:4500';
 
 export function getRandomInt({max, min = 0}: { max: number, min?: number }) {
     return Math.floor(Math.random() * (max - min + 1) + min);
@@ -85,62 +86,43 @@ export const dateReader = ({date = Date.now(), day = true, month = true, years =
     return dateString;
 }
 
+import axios from 'axios';
+
 export async function getCountry() {
     try {
-        // Fetch the client's IP address
-        const ipResponse = await fetch('https://api.ipify.org?format=json');
-        const ipData = await ipResponse.json();
-        const ip = ipData.ip;
+        // Fetch the client's IP address using Axios
+        const ipResponse = await axios.get('https://api.ipify.org?format=json');
+        const ip = ipResponse.data.ip;
 
         // Try the primary API route first
         try {
+            const countryResponse = await axios.get(`https://ipapi.co/${ip}/json/`);
+            const countryCode = countryResponse.data.country;
 
-            const countryResponse = await fetch(`https://ipapi.co/${ip}/json/`);
-            if (!countryResponse.ok) {
-                throw new Error('Primary API request failed');
-            }
-            const countryData = await countryResponse.json();
-            const countryCode = countryData.country;
-
-
-            const country = countries[ countryCode ];
+            const country = countries[countryCode];
             return {
                 name: country.name,
                 emoji: country.emoji,
-                currency: country.currencies[ 0 ]
+                currency: country.currencies[0]
             };
 
         } catch (primaryError) {
             console.warn('Primary API failed, attempting secondary API', primaryError);
 
-            const backupCountryResponse = await fetch("https://freegeoip.app/json/", {
-                method: "GET",
-                redirect: "follow"
-            });
-            if (!backupCountryResponse.ok) {
-                throw new Error('Backup API request failed');
-            }
-            const backupCountryData = await backupCountryResponse.json();
-            const backupCountryCode = backupCountryData.country_code;
+            const backupCountryResponse = await axios.get("https://freegeoip.app/json/");
+            const backupCountryCode = backupCountryResponse.data.country_code;
 
-
-            const backupCountry = countries[ backupCountryCode ];
-            console.log(backupCountry, backupCountryData)
+            const backupCountry = countries[backupCountryCode];
             return {
                 name: backupCountry.name,
                 emoji: backupCountry.emoji,
-                currency: backupCountry.currencies[ 0 ]
+                currency: backupCountry.currencies[0]
             };
         }
     } catch (error) {
         console.error("Error fetching country data: ", error);
         return undefined;
     }
-}
-
-export function serviceCountries() {
-    let list = ['KE', 'GH', 'UK', 'CY']
-    return list.map((e) => countries[ e ])
 }
 
 export async function createFile({url, name = 'image'}: { url: string, name?: string }) {

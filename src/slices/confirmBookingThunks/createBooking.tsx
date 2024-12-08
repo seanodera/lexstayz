@@ -7,7 +7,7 @@ import {ConfirmBookingState} from "@/slices/confirmBookingSlice";
 
 const createBooking = createAsyncThunk(
     'confirmBooking/createBooking',
-    async ({ paymentData, id }: { paymentData: any, id: string }, { getState, rejectWithValue }) => {
+    async ({ paymentData, id, method }: { paymentData: any, id: string,method: string }, { getState, rejectWithValue }) => {
         const state = getState() as { confirmBooking: ConfirmBookingState };
         const {
             stay,
@@ -31,8 +31,7 @@ const createBooking = createAsyncThunk(
         try {
             const user = getCurrentUser();
             const batch = writeBatch(firestore);
-            const userDoc = doc(firestore, 'users', user.uid, 'bookings', id);
-            const hostDoc = doc(firestore, 'hosts', stay.hostId, 'bookings', id);
+            const bookingsDoc = doc(firestore, 'bookings', id);
             const checkIn = new Date(checkInDate);
 
             const [hours, minutes] = stay.checkInTime.split(':').map(Number);
@@ -65,6 +64,7 @@ const createBooking = createAsyncThunk(
                 currency: currency,
                 usedRate: usedRate,
                 paymentData: paymentData,
+                paymentMethod: method,
                 specialRequest: specialRequest,
                 status: 'Unpaid',
                 grandTotal,
@@ -79,7 +79,7 @@ const createBooking = createAsyncThunk(
                 ...unique
             };
 
-            batch.set(userDoc, booking);
+            batch.set(bookingsDoc, booking);
             await batch.commit();
             return booking;
         } catch (error) {

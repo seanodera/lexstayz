@@ -167,6 +167,10 @@ const MessagingSlice = createSlice({
         },
         setUserChats: (state, action: PayloadAction<any[]>) => {
             state.userChats = action.payload;
+        },
+        resetMessagingError: (state) => {
+            state.hasError = false;
+            state.errorMessage = '';
         }
     },
     extraReducers: (builder) => {
@@ -229,6 +233,6 @@ const MessagingSlice = createSlice({
 });
 export const selectUserChats = (state: RootState) => state.messaging.userChats;
 export const selectFocusChat = (state: RootState) => state.messaging.chat;
-export const {setFocusChat,addMessage,setUserChats} = MessagingSlice.actions;
+export const {setFocusChat,addMessage,setUserChats,resetMessagingError} = MessagingSlice.actions;
 
 export default MessagingSlice.reducer;

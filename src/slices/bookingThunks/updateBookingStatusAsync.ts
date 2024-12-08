@@ -22,8 +22,7 @@ export const updateBookingStatusAsync = createAsyncThunk(
             console.log(booking, 'At status')
             const user = getCurrentUser()
             const batch = writeBatch(firestore);
-            const hostDoc = doc(firestore, 'hosts', booking.hostId, 'bookings', booking.id)
-            const userDoc = doc(firestore, 'users', booking.accountId, 'bookings', booking.id)
+            const bookingsDoc = doc(firestore,  'bookings', booking.id)
             const hostTransaction = doc(firestore, 'hosts', booking.hostId, 'pendingTransactions', booking.id);
             const transactionDoc = await getDoc(hostTransaction)
             const availableRef = collection(firestore, 'hosts', booking.hostId, 'availableTransactions');
@@ -126,8 +125,8 @@ export const updateBookingStatusAsync = createAsyncThunk(
                     })
                 }
             }
-            batch.update(hostDoc, {status: status, acceptedAt: new Date().toString(), paymentData: paymentData,})
-            batch.update(userDoc, {status: status, acceptedAt: new Date().toString(), paymentData: paymentData,})
+            batch.update(bookingsDoc, {status: status, acceptedAt: new Date().toString(), paymentData: paymentData,})
+            batch.update(bookingsDoc, {status: status, acceptedAt: new Date().toString(), paymentData: paymentData,})
 
             await batch.commit();
             let newBooking = {...booking};

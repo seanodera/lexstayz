@@ -1,6 +1,6 @@
 'use client'
 import Navbar from "@/components/navigation/Navbar";
-import {useEffect, useState} from "react";
+import {useContext, useEffect, useState} from "react";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import {fetchBookingsAsync, selectIsLoading} from "@/slices/bookingSlice";
 import LoadingScreen from "@/components/LoadingScreen";
@@ -9,10 +9,10 @@ import {usePathname, useRouter} from "next/navigation";
 import {getAuth} from "firebase/auth";
 import {getUserDetails} from "@/data/usersData";
 import {loginUser, selectCurrentUser} from "@/slices/authenticationSlice";
-import {fetchAppExchangeRates, fetchStaysAsync, selectHasRun, selectIsStayLoading} from "@/slices/staysSlice";
-import ErrorDialog from "@/components/dialogs/ErrorDialog";
+import {fetchStaysAsync, selectHasRun, selectIsStayLoading} from "@/slices/staysSlice";
 import Footer from "@/components/navigation/Footer";
 import {fetchExchangeRates} from "@/slices/confirmBookingSlice";
+import ErrorContext from "@/contex/errorContext";
 
 
 const authNeededRoutes = ['bookings', 'booking-confirmation', 'checkout', 'wishlist', 'profile', 'messages', 'book-firm']
@@ -26,27 +26,29 @@ export default function ContextProvider({children}: { children: React.ReactNode 
     const currentUser = useAppSelector(selectCurrentUser)
 
     const router = useRouter();
-    const [hasRunLocal,setHasRunLocal] =   useState(false)
+    const [hasRunLocal, setHasRunLocal] = useState(false)
     useEffect(() => {
         const fetchData = async () => {
             const user = getAuth().currentUser;
 
-               if (!hasRun) {
-                   setHasRunLocal(true)
-                   dispatch(fetchStaysAsync());
-                   dispatch(fetchExchangeRates())
-                   dispatch(fetchAppExchangeRates())
-                   if (user){
-                       dispatch(fetchBookingsAsync())
-                   }
+            if (!hasRun) {
+                setHasRunLocal(true)
+                dispatch(fetchStaysAsync());
+                dispatch(fetchExchangeRates())
+                // dispatch(fetchAppExchangeRates())
+                if (user) {
+                    dispatch(fetchBookingsAsync())
+                }
 
-               }
+            }
 
             if (user) {
-                if (!currentUser || currentUser.uid !== user.uid){
+                if (!currentUser || currentUser.uid !== user.uid) {
                     const userDetails = await getUserDetails(user.uid);
-                    if (userDetails){
-                        dispatch(loginUser(userDetails));
+                    if (userDetails) {
+                        await dispatch(loginUser(userDetails));
+                        // dispatch(fetchAppExchangeRates());
+                        dispatch(fetchExchangeRates())
                     } else {
                         router.push('/user-information')
                     }
@@ -57,30 +59,40 @@ export default function ContextProvider({children}: { children: React.ReactNode 
         };
         fetchData()
     })
-    useEffect(()=> {
+    useEffect(() => {
         const user = getAuth().currentUser;
-        if (user){
-            if (!currentUser){
+        if (user) {
+            if (!currentUser) {
 
             }
         }
     })
 
-    if (isLoading || isStayLoading) {
+
+    const {
+        isLoading: isMessagingLoading,
+    } = useAppSelector(state => state.messaging)
+    const {status} = useAppSelector(state => state.confirmBooking)
+    const {
+        isLoading: isAuthLoading,
+
+    } = useAppSelector(state => state.authentication)
+
+    if (isLoading || isStayLoading || status === 'loading' || isAuthLoading || isMessagingLoading) {
+        console.log(isLoading, isStayLoading, status === 'loading' , isAuthLoading , isMessagingLoading)
         return <div className={'h-screen w-screen'}>
             <LoadingScreen/>
         </div>;
     } else if (authRoutes.includes(pathname)) {
         return <div>{children}</div>
-    } else if (pathname.split('/').length > 1 &&  authNeededRoutes.includes(pathname.split('/')[1])) {
-        console.log('authRoute', pathname.split('/')[1]);
+    } else if (pathname.split('/').length > 1 && authNeededRoutes.includes(pathname.split('/')[ 1 ])) {
+
         return <AuthenticationProvider>{children}</AuthenticationProvider>
     } else {
         return <div className={'min-h-screen'}>
             {pathname === '/' ? <Navbar/> : <div><Navbar/></div>}
             <div className={pathname === '/' ? '' : 'h-full overflow-auto pt-auto'}>{children}</div>
             <Footer/>
-            <ErrorDialog/>
 
         </div>
     }

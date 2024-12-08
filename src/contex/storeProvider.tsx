@@ -1,10 +1,12 @@
 'use client'
-import { Provider } from 'react-redux'
+import {Provider} from 'react-redux'
 import store from "@/data/store";
 import {ReactNode} from "react";
 import {AntdRegistry} from "@ant-design/nextjs-registry";
 import ContextProvider from "@/contex/ContextProvider";
 import {ConfigProvider} from "antd";
+import {ErrorProvider} from "@/contex/errorContext";
+import ErrorDialog from "@/components/dialogs/ErrorDialog";
 
 
 const theme = {
@@ -24,9 +26,17 @@ const darkTheme = {
     algorithm: "dark"
 }
 
-export default function StoreProvider({ children } : {children: ReactNode}) {
+export default function StoreProvider({children}: { children: ReactNode }) {
 
 
-
-    return <Provider store={store}> <ConfigProvider theme={theme}><ContextProvider>{children}</ContextProvider></ConfigProvider></Provider>
+    return <Provider store={store}>
+        <ErrorProvider>
+            <ConfigProvider theme={theme}>
+                <ContextProvider>
+                {children}
+                </ContextProvider>
+            </ConfigProvider>
+            <ErrorDialog/>
+        </ErrorProvider>
+    </Provider>
 }

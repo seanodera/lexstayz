@@ -16,17 +16,17 @@ export default function CheckOutComponent() {
     const params = useSearchParams()
     const userID = params.get('userID')
     const bookingID = params.get('booking')
-    const bookings = useAppSelector(selectBookings)
+    const depositId = params.get('depositId')
     const [messageApi, contextHolder] = message.useMessage();
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('')
     const [hasRun,setHasRun] = useState(false)
     useEffect(() => {
-
+        console.log(userID,bookingID,depositId);
        if (!hasRun){
            if (userID && bookingID) {
-               verifyPayment(bookingID).then((res) => {
+               verifyPayment( depositId? depositId : bookingID, depositId ? 'Pawapay' : 'Paystack').then((res) => {
                    console.log(res)
                    if (res.status === 'success') {
                        completeBooking({
@@ -81,16 +81,3 @@ export default function CheckOutComponent() {
     </div>
 }
 
-// async function completeBooking(booking:any, bookingID: string){
-//     try {
-//         const user = getCurrentUser();
-//         const hostDoc = doc(firestore, 'hosts', booking.accommodationId, 'bookings', bookingID)
-//         const userDoc = doc(firestore, 'user', user.uid, 'bookings', bookingID)
-//         const batch = writeBatch(firestore)
-//         batch.update(hostDoc,{status: 'Confirmed'})
-//         batch.update(userDoc,{status: 'Confirmed'})
-//         await batch.commit()
-//     } catch (error){
-//         console.log(error)
-//     }
-// }
