@@ -174,7 +174,10 @@ const ConfirmBookingSlice = createSlice({
         setPaymentMethod: (state,action: PayloadAction<string>) => {
             state.paymentMethod = action.payload;
         },
-
+        resetConfirmBookingError: (state) => {
+            state.status = 'idle';
+            state.error = '';
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -209,6 +212,7 @@ const ConfirmBookingSlice = createSlice({
                 state.usedRate = action.payload?.rates[state.currency] * 1.02;
                 state.paymentRate = action.payload?.rates[state.paymentCurrency] * 1.035
                 recalculateCosts(state); // Recalculate costs after exchange rates are fetched
+                state.status = 'idle';
             })
             .addCase(fetchExchangeRates.pending, (state, action) => {
                 state.status = 'loading'
@@ -225,7 +229,8 @@ export const {
     updateBookingData,
     setBookingStay,
     convertCart,
-    setPaymentMethod
+    setPaymentMethod,
+    resetConfirmBookingError
 } = ConfirmBookingSlice.actions;
 
 export {createBooking, handlePaymentAsync}

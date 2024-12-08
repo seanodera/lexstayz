@@ -104,7 +104,7 @@ const staysSlice = createSlice({
             state.currentStay = action.payload;
             state.currentId = -1;
         },
-        resetError: (state) => {
+        resetStayError: (state) => {
             state.hasError = false
             state.errorMessage = ''
         },
@@ -158,7 +158,7 @@ export const selectGlobalCurrency = (state: RootState) => state.stays.globalCurr
 export const {
     setAllStays,
     setCurrentStay,
-    resetError,
+    resetStayError,
     setExchangeRates,
 } = staysSlice.actions;
 

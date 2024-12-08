@@ -6,6 +6,7 @@ import {doc, runTransaction, updateDoc} from "firebase/firestore";
 import {RootState} from "@/data/types";
 import {getCurrentUser} from "@/data/bookingData";
 import {getCountry} from "@/lib/utils";
+import {state} from "sucrase/dist/types/parser/traverser/base";
 
 export const getUserDetailsAsync = createAsyncThunk('authentication/user',
     async (id: string) => {
@@ -186,6 +187,10 @@ const AuthenticationSlice = createSlice({
             state.isAuthenticated = false;
             state.user = undefined;
             state.wishlist = [];
+        },
+        resetAuthError: (state) => {
+            state.hasError = false;
+            state.errorMessage = '';
         }
     },
     extraReducers: (builder) => {
@@ -207,6 +212,7 @@ const AuthenticationSlice = createSlice({
             })
             .addCase(loginUser.fulfilled, (state, action) => {
                 state.isAuthenticated = true;
+                state.isLoading = false;
                 state.user = action.payload.data;
                 state.wishlist = action.payload.data.wishlist;
                 state.country = action.payload.country;
@@ -268,5 +274,5 @@ export const selectCurrentUser = (state: RootState) => state.authentication.user
 export const selectIsAuthenticated = (state: RootState) => state.authentication.isAuthenticated;
 export const selectWishlist = (state: RootState) => state.authentication.wishlist;
 
-export const {logoutUser} = AuthenticationSlice.actions;
+export const {logoutUser,resetAuthError} = AuthenticationSlice.actions;
 export default AuthenticationSlice.reducer

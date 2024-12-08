@@ -213,6 +213,10 @@ const bookingsSlice = createSlice({
         updateCart: (state, action: PayloadAction<any[]>) => {
             state.cart = action.payload;
         },
+        resetBookingError: (state) => {
+            state.hasError = false
+            state.errorMessage = ''
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -311,7 +315,7 @@ export const selectHasBookingRun = (state: RootState) => state.bookings.hasBooki
 export {updateBookingStatusAsync}
 export const {
     resetBooking,
-    updateCart
+    updateCart, resetBookingError
 } = bookingsSlice.actions;
 
 export default bookingsSlice.reducer;

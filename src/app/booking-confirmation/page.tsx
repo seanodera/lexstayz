@@ -1,20 +1,20 @@
 'use client';
-import { dateReader } from "@/lib/utils";
+import {dateReader} from "@/lib/utils";
 import ContactForm from "@/components/booking-confirmation/contactForm";
 import SpecialRequests from "@/components/booking-confirmation/specialRequests";
-import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import StayDetails from "@/components/booking-confirmation/stayDetails";
 import BookingDetails from "@/components/booking-confirmation/bookingDetails";
 import BookingSummary from "@/components/booking-confirmation/bookingSummary";
-import { Select } from "@headlessui/react";
-import { AiOutlineCheckCircle } from "react-icons/ai";
-import { selectCurrentUser } from "@/slices/authenticationSlice";
+import {Select} from "@headlessui/react";
+import {AiOutlineCheckCircle} from "react-icons/ai";
+import {selectCurrentUser} from "@/slices/authenticationSlice";
 import {useEffect, useState} from "react";
-import { getAuth } from "firebase/auth";
-import { message } from "antd";
-import { useRouter } from "next/navigation";
+import {getAuth} from "firebase/auth";
+import {message} from "antd";
+import {useRouter} from "next/navigation";
 import {handlePaymentAsync, selectConfirmBooking} from "@/slices/confirmBookingSlice";
-import { selectCurrentStay } from "@/slices/staysSlice";
+import {selectCurrentStay} from "@/slices/staysSlice";
 import LoadingScreen from "@/components/LoadingScreen";
 
 export default function Page() {
@@ -24,7 +24,7 @@ export default function Page() {
     const dispatch = useAppDispatch();
     const router = useRouter();
     const booking = useAppSelector(selectConfirmBooking);
-    const [isLoading,setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (!stay) {
@@ -40,39 +40,19 @@ export default function Page() {
     async function handSubmit() {
         setIsLoading(true)
         dispatch(handlePaymentAsync({preserve: false})).then((value: any) => {
-            if (value.meta.requestStatus === 'fulfilled'){
+            if (value.meta.requestStatus === 'fulfilled') {
                 router.push(value.payload)
             } else {
                 messageApi.error(value.payload)
             }
-            const errObj = {
-                "type": "confirmBooking/handlePaymentAsync/rejected",
-                "payload": "An error occurred. Please try again. AxiosError: Request failed with status code 400",
-                "meta": {
-                    "requestId": "oCMUSpkxfyB6kukDNDz5e",
-                    "rejectedWithValue": true,
-                    "requestStatus": "rejected",
-                    "aborted": false,
-                    "condition": false
-                },
-                "error": {
-                    "message": "Rejected"
-                }
-            }
-            const successObj = {
-                "type": "confirmBooking/handlePaymentAsync/fulfilled",
-                "payload": "https://checkout.paystack.com/pm2dcx9va7dbdqe",
-                "meta": {
-                    "requestId": "OUpeWvkm0ndDGy2sxzw93",
-                    "requestStatus": "fulfilled"
-                }
-            }
+
             setIsLoading(false)
-            })
+        })
 
     }
+
     console.log('Book Confirm')
-    if (isLoading || !stay || !stay.id){
+    if (isLoading || !stay || !stay.id) {
         return <div className={'h-screen w-screen'}><LoadingScreen/></div>
     } else {
         return (
@@ -94,14 +74,17 @@ export default function Page() {
                                     Ready for check-in at 2:00 PM
                                 </span>
                                 <div className={'font-medium my-2'}>Add your estimated arrival time</div>
-                                <Select className={'appearance-none border border-gray-500 rounded-lg py-2 px-3 w-full'}>
+                                <Select
+                                    className={'appearance-none border border-gray-500 rounded-lg py-2 px-3 w-full'}>
                                     <option>I don&apos;t know</option>
                                     <option>00:00 - 01:00</option>
                                 </Select>
                             </div>
                             <div className={'border shadow-md p-4 rounded-xl'}>
                                 <h3 className={'text-xl font-semibold mb-2'}>Cancellation</h3>
-                                <div className={'text-primary-600 my-4 font-medium'}>Free Cancellation until {dateReader({})} 00:00</div>
+                                <div className={'text-primary-600 my-4 font-medium'}>Free Cancellation
+                                    until {dateReader({})} 00:00
+                                </div>
                                 <div className={'flex justify-between'}>
                                     <span className={'font-medium'}>If you cancel, you&apos;ll pay</span>
                                     <span className={'text-primary'}>$30.00</span>
@@ -111,7 +94,8 @@ export default function Page() {
                                 <h3 className={'text-xl font-semibold mb-2'}>Terms & Conditions</h3>
                             </div>
                         </div>
-                        <button onClick={() => handSubmit()} className="hidden max-lg:block py-3 text-center bg-primary rounded-xl font-medium text-white">
+                        <button onClick={() => handSubmit()}
+                                className="hidden max-lg:block py-3 text-center bg-primary rounded-xl font-medium text-white">
                             Checkout
                         </button>
                     </div>
@@ -120,7 +104,8 @@ export default function Page() {
                             <StayDetails stay={stay}/>
                             <BookingDetails stay={stay}/>
                             <BookingSummary stay={stay}/>
-                            <button onClick={() => handSubmit()} className="block max-lg:hidden py-3 text-center bg-primary rounded-xl font-medium text-white">
+                            <button onClick={() => handSubmit()}
+                                    className="block max-lg:hidden py-3 text-center bg-primary rounded-xl font-medium text-white">
                                 Checkout
                             </button>
                         </div>
