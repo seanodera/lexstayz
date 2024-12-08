@@ -16,7 +16,7 @@ const dispatch = useAppDispatch();
     }, [currentHost, currentStay, dispatch]);
     return <Card className={'rounded-xl aspect-20/7'}>
         <div className={'flex px-4 py-2 items-center gap-4'}>
-            <div className={'aspect-square max-w-32 bg-primary rounded-full p-4 text-2xl text-white shadow'}>
+            <div className={'aspect-square w-32 bg-primary rounded-full p-4 text-2xl text-white shadow'}>
                 <div>
                     {currentHost?.accountType === 'Individual'? `${currentHost?.firstName.charAt(0).toUpperCase()}${currentHost?.lastName.charAt(0).toUpperCase()}` : currentHost?.companyName.charAt(0)}
                 </div>

@@ -66,7 +66,7 @@ const [savedData, setSavedData] = useState<any>()
 
 
 
-    return <div className={'h-full w-full flex flex-col justify-center'}>
+    return <div className={'h-screen w-full flex flex-col justify-center'}>
         {contextHolder}
         {isLoading ? <Skeleton active/> : <Result
             title={`Booking Request ${error ? 'Failed' : 'Sent'}`}
