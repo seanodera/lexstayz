@@ -6,13 +6,14 @@ import {fetchBookingsAsync, selectIsLoading} from "@/slices/bookingSlice";
 import LoadingScreen from "@/components/LoadingScreen";
 import AuthenticationProvider, {authRoutes} from "@/contex/authenticationProvider";
 import {usePathname, useRouter} from "next/navigation";
-import {getAuth} from "firebase/auth";
+import {browserLocalPersistence, getAuth, onAuthStateChanged, setPersistence} from "firebase/auth";
 import {getUserDetails} from "@/data/usersData";
-import {loginUser, selectCurrentUser} from "@/slices/authenticationSlice";
+import {loginUser, logoutUser, selectCurrentUser} from "@/slices/authenticationSlice";
 import {fetchStaysAsync, selectHasRun, selectIsStayLoading} from "@/slices/staysSlice";
 import Footer from "@/components/navigation/Footer";
 import {fetchExchangeRates} from "@/slices/confirmBookingSlice";
 import ErrorContext from "@/contex/errorContext";
+import {auth} from "@/lib/firebase";
 
 
 const authNeededRoutes = ['bookings', 'booking-confirmation', 'checkout', 'wishlist', 'profile', 'messages', 'book-firm']
@@ -27,48 +28,75 @@ export default function ContextProvider({children}: { children: React.ReactNode 
 
     const router = useRouter();
     const [hasRunLocal, setHasRunLocal] = useState(false)
+
+    const [userLoaded, setUserLoaded] = useState(false);
+
+
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchInitialData = async () => {
             const user = getAuth().currentUser;
 
             if (!hasRun) {
-                setHasRunLocal(true)
+                setHasRunLocal(true);
                 dispatch(fetchStaysAsync());
-                dispatch(fetchExchangeRates())
-                // dispatch(fetchAppExchangeRates())
-                if (user) {
-                    dispatch(fetchBookingsAsync())
-                }
+                // You only want to fetch these once
+                dispatch(fetchExchangeRates());
 
+                if (user) {
+                    dispatch(fetchBookingsAsync());
+                }
             }
+        };
+
+        fetchInitialData();
+    }, [hasRun, dispatch]);
+
+
+    useEffect(() => {
+        const initializeUserState = async () => {
+            const user = getAuth().currentUser;
 
             if (user) {
                 if (!currentUser || currentUser.uid !== user.uid) {
                     const userDetails = await getUserDetails(user.uid);
                     if (userDetails) {
                         await dispatch(loginUser(userDetails));
-                        // dispatch(fetchAppExchangeRates());
-                        dispatch(fetchExchangeRates())
                     } else {
-                        router.push('/user-information')
+                        router.push('/user-information');
                     }
-                } else {
-
                 }
             }
         };
-        fetchData()
-    })
+
+        initializeUserState();
+    }, [currentUser, dispatch, router]);
+
     useEffect(() => {
-        const user = getAuth().currentUser;
-        if (user) {
-            if (!currentUser) {
+        const initializeAuth = async () => {
+            await setPersistence(auth, browserLocalPersistence);
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    if (!currentUser || currentUser.uid !== user.uid) {
+                        const userDetails = await getUserDetails(user.uid);
+                        if (userDetails) {
+                            await dispatch(loginUser(userDetails));
+                            setUserLoaded(true);
+                        } else {
+                            router.push('/user-information');
+                        }
+                    }
+                } else {
+                        dispatch(logoutUser());
+                        router.push('/');
 
-            }
+                }
+            });
+        };
+
+        if (!userLoaded) {
+            initializeAuth();
         }
-    })
-
-
+    }, []);
     const {
         isLoading: isMessagingLoading,
     } = useAppSelector(state => state.messaging)
