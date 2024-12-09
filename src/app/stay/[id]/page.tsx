@@ -39,11 +39,12 @@ export default function StayPage() {
 
 
     useEffect(() => {
+        console.log('stuy rn', stayId,stay);
         if (stayId && stayId !== stay.id) {
             dispatch(setCurrentStayFromId(stayId))
         }
 
-    }, [dispatch, stayId]);
+    }, [stay]);
     if (!stay || stay.id === undefined) {
 
         return <div></div>;

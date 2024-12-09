@@ -1,5 +1,5 @@
 'use client'
-import React, {useContext, useEffect} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import { Modal } from 'antd';
 import ErrorContext from "@/contex/errorContext";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
@@ -11,13 +11,18 @@ import {resetBookingError} from "@/slices/bookingSlice";
 
 
 export default function ErrorDialog() {
-    const errorContext = useContext(ErrorContext);
     const dispatch = useAppDispatch()
-    if (!errorContext) {
-        throw new Error('Error Context Must be provided');
-    }
-    const {show, hasError, errorMessage, setError,setShow } = errorContext;
+    const [show, setShow] = React.useState(false);
+    const [hasError, setHasError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
 
+
+
+    const setError = (error: boolean, message: string) => {
+        setShow(true);
+        setHasError(error);
+        setErrorMessage(message);
+    };
 
     const {hasError: messagingError, errorMessage: messagingErrorMessage
     } = useAppSelector(state => state.messaging)
@@ -30,6 +35,7 @@ export default function ErrorDialog() {
 
     const {hasError: bookingError,errorMessage: bookingErrorMessage} = useAppSelector(state => state.bookings)
     useEffect(() => {
+        console.log(authError, authErrorMessage, bookingError, bookingErrorMessage, error, messagingError, messagingErrorMessage, status, staysErrorMessage, staysHasError)
         if (authError) {
             setError(authError, authErrorMessage)
         } else if (messagingError) {
@@ -41,7 +47,7 @@ export default function ErrorDialog() {
         } else if (bookingError){
             setError(bookingError, bookingErrorMessage)
         }
-    }, [authError, authErrorMessage, bookingError, bookingErrorMessage, error, messagingError, messagingErrorMessage, setError, status, staysErrorMessage, staysHasError]);
+   }, [authError, authErrorMessage, bookingError, bookingErrorMessage, error, messagingError, messagingErrorMessage, status, staysErrorMessage, staysHasError]);
 
     const handleClose = () => {
         setError(false, '');

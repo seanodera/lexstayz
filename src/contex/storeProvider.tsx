@@ -30,13 +30,11 @@ export default function StoreProvider({children}: { children: ReactNode }) {
 
 
     return <Provider store={store}>
-        <ErrorProvider>
-            <ConfigProvider theme={theme}>
-                <ContextProvider>
+        <ConfigProvider theme={theme}>
+            <ContextProvider>
                 {children}
-                </ContextProvider>
-            </ConfigProvider>
-            <ErrorDialog/>
-        </ErrorProvider>
+            </ContextProvider>
+        </ConfigProvider>
+        <ErrorDialog/>
     </Provider>
 }

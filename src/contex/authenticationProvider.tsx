@@ -1,15 +1,11 @@
 'use client'
-import {ReactNode, Suspense, useEffect, useState} from "react";
+import {ReactNode, useEffect} from "react";
 import {usePathname, useRouter} from "next/navigation";
-import {loginUser, logoutUser, selectCurrentUser} from "@/slices/authenticationSlice";
-import {auth} from "@/lib/firebase";
-import {browserLocalPersistence, getAuth, onAuthStateChanged, setPersistence} from "firebase/auth";
-import {getUserDetails} from "@/data/usersData";
+import {getAuth} from "firebase/auth";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import Navbar from "@/components/navigation/Navbar";
 import {fetchBookingsAsync, selectHasBookingRun} from "@/slices/bookingSlice";
 import {fetchUserChatsAsync} from "@/slices/messagingSlice";
-import {fetchExchangeRates} from "@/slices/confirmBookingSlice";
 
 export const authRoutes = ['/login', '/register', '/forgot-password', '/reset-password', '/user-information']
 

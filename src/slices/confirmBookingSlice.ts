@@ -166,6 +166,13 @@ const ConfirmBookingSlice = createSlice({
         },
         setBookingStay: (state, action: PayloadAction<Stay>) => {
             state.stay = action.payload;
+            if (action.payload && action.payload.location && action.payload.location.country === 'Kenya'){
+                state.paymentCurrency = 'KES';
+                if (state.exchangeRates){
+                    state.paymentRate = state.exchangeRates['KES'];
+                }
+
+            }
             recalculateCosts(state); // Recalculate costs when the stay changes
         },
         convertCart: (state, action: PayloadAction<object[]>) => {

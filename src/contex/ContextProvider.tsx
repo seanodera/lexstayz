@@ -52,35 +52,36 @@ export default function ContextProvider({children}: { children: React.ReactNode 
     }, [hasRun, dispatch]);
 
 
-    useEffect(() => {
-        const initializeUserState = async () => {
-            const user = getAuth().currentUser;
-
-            if (user) {
-                if (!currentUser || currentUser.uid !== user.uid) {
-                    const userDetails = await getUserDetails(user.uid);
-                    if (userDetails) {
-                        await dispatch(loginUser(userDetails));
-                    } else {
-                        router.push('/user-information');
-                    }
-                }
-            }
-        };
-
-        initializeUserState();
-    }, [currentUser, dispatch, router]);
+    // useEffect(() => {
+    //     const initializeUserState = async () => {
+    //         const user = getAuth().currentUser;
+    //
+    //         if (user) {
+    //             if (!currentUser || currentUser.uid !== user.uid) {
+    //                 const userDetails = await getUserDetails(user.uid);
+    //                 if (userDetails) {
+    //                     await dispatch(loginUser(userDetails));
+    //                 } else {
+    //                     router.push('/user-information');
+    //                 }
+    //             }
+    //         }
+    //     };
+    //
+    //     initializeUserState();
+    // }, [currentUser, dispatch, router]);
 
     useEffect(() => {
         const initializeAuth = async () => {
             await setPersistence(auth, browserLocalPersistence);
             onAuthStateChanged(auth, async (user) => {
+                setUserLoaded(true);
                 if (user) {
                     if (!currentUser || currentUser.uid !== user.uid) {
                         const userDetails = await getUserDetails(user.uid);
                         if (userDetails) {
                             await dispatch(loginUser(userDetails));
-                            setUserLoaded(true);
+
                         } else {
                             router.push('/user-information');
                         }
@@ -93,7 +94,7 @@ export default function ContextProvider({children}: { children: React.ReactNode 
                 }
             });
         };
-
+        console.log('Context csledl')
         if (!userLoaded) {
             initializeAuth();
         }

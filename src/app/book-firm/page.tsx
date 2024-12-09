@@ -8,8 +8,6 @@ import Link from "next/link";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import {
     convertCart,
-    createBooking,
-    fetchExchangeRates,
     handlePaymentAsync,
     selectConfirmBooking,
     setBookingStay
@@ -46,7 +44,7 @@ export default function BookFirmPage() {
             router.push('/login');
         }
 
-    });
+    },[]);
     useEffect(() => {
         dispatch(setBookingStay(stay))
         setLength(differenceInDays(booking.checkOutDate, booking.checkInDate));

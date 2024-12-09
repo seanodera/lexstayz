@@ -18,6 +18,16 @@ export default function PaymentMethods() {
     return (
         <div>
             <h3 className="font-semibold">Payment Methods</h3>
+            {booking.paymentCurrency !== booking.currency && <div>
+                <div className={'flex gap-2'}>
+                    <h3 className={'text-xl'}>Total Price: </h3>
+                    <h2 className={'text-xl font-bold'}>{booking.currency} {toMoneyFormat(booking.grandTotal)}</h2>
+                </div>
+                <div
+                    className={'text-primary font-medium h4 mb-4 '}> 1 {booking.currency} = {toMoneyFormat(booking.paymentRate)} {booking.paymentCurrency}
+                </div>
+            </div>
+            }
             <div>
                 <RadioGroup
                     value={paymentMethod}
@@ -39,35 +49,28 @@ export default function PaymentMethods() {
                                         className={'font-bold text-lg'}>{booking.paymentCurrency} {toMoneyFormat(booking.grandTotal * booking.paymentRate)}</div>
 
                                 </div>
-                                {
-                                    booking.paymentCurrency !== booking.currency && <div
-                                        className={'text-primary text-center font-medium text-sm space-y-0'}>
-                                        <div className={'text-nowrap'}>1 {booking.currency}</div>
-                                        <div>=</div>
-                                        <div className={'text-nowrap'}>
-                                            {toMoneyFormat(booking.paymentRate)} {booking.paymentCurrency}
-                                        </div>
-                                    </div>
-                                }
+
                             </div>
                         )}
                     </Radio>
-                    {supportedCurrencies.includes(booking.currency) && <Radio value={'mobile-money'} className="">
-                        {({checked}) => (
-                            <div
-                                className={`w-full ${checked ? 'border-primary ' : 'border-gray-400'} flex gap-2 border-solid py-3 px-2 rounded-xl `}>
-                                <div className={'text-3xl'}>
-                                    <AiOutlineMobile/>
-                                </div>
-                                <div>
-                                    <div className="font-semibold">
-                                        Mobile Money
+                    {supportedCurrencies.includes(booking.paymentCurrency) &&
+                        <Radio value={'mobile-money'} className="">
+                            {({checked}) => (
+                                <div
+                                    className={`w-full ${checked ? 'border-primary ' : 'border-gray-400'} flex gap-2 border-solid py-3 px-2 rounded-xl `}>
+                                    <div className={'text-3xl'}>
+                                        <AiOutlineMobile/>
                                     </div>
-                                    <div className={'font-bold text-lg'}>{booking.currency} {toMoneyFormat(booking.grandTotal)}</div>
+                                    <div>
+                                        <div className="font-semibold">
+                                            Mobile Money
+                                        </div>
+                                        <div
+                                            className={'font-bold text-lg'}>{booking.paymentCurrency} {toMoneyFormat(booking.grandTotal * booking.paymentRate)}</div>
+                                    </div>
                                 </div>
-                            </div>
-                        )}
-                    </Radio>}
+                            )}
+                        </Radio>}
                 </RadioGroup>
             </div>
         </div>
