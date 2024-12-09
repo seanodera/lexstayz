@@ -5,6 +5,7 @@ import {verifyPayment} from "@/data/payment";
 import {useEffect, useState} from "react";
 import {Button, message, Result, Skeleton} from "antd";
 import {savePaymentMethod} from "@/data/usersData";
+import LoadingScreen from "@/components/LoadingScreen";
 
 
 export default function ConfirmBooking() {
@@ -14,6 +15,7 @@ export default function ConfirmBooking() {
     const userID = params.get('userID')
     const bookingID = params.get('booking')
     const preserve = params.get('preserve')
+    const depositId = params.get('depositId')
     const [messageApi, contextHolder] = message.useMessage();
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(false);
@@ -23,12 +25,12 @@ export default function ConfirmBooking() {
 
     async function runBooking(){
         if (userID && bookingID){
-            const response = await verifyPayment(bookingID);
+            const response = await  verifyPayment( depositId? depositId : bookingID, depositId ? 'Pawapay' : 'Paystack');
             if (response.status === 'success') {
                 completeBooking({
                     userId: userID,
                     id: bookingID,
-                    paymentData: response.data.data,
+                    paymentData: response.data,
                     isConfirmed: true,
                     status: 'Pending',
                 }).then((value) => {
@@ -42,7 +44,7 @@ export default function ConfirmBooking() {
                 completeBooking({
                     userId: userID,
                     id: bookingID,
-                    paymentData: response.data.data,
+                    paymentData: response.data,
                     isConfirmed: false,
                     status: 'Failed',
                 }).then((value) => {
@@ -65,9 +67,10 @@ const [savedData, setSavedData] = useState<any>()
 
 
 
-    return <div className={'h-full w-full flex flex-col justify-center'}>
+    return <div className={'h-screen w-full flex flex-col justify-center'}>
         {contextHolder}
-        {isLoading ? <Skeleton active/> : <Result
+        {isLoading ? <LoadingScreen/> : <Result
+
             title={`Booking Request ${error ? 'Failed' : 'Sent'}`}
             status={error ? 'error' : 'success'}
             subTitle={error ? errorMessage : <div>

@@ -1,9 +1,9 @@
-import {Dates, Stay} from "@/lib/types";
 import {auth, firestore} from "@/lib/firebase";
-import {writeBatch} from "@firebase/firestore";
+import {query, where, writeBatch} from "@firebase/firestore";
 import {collection, doc, getDoc, getDocs, runTransaction} from "firebase/firestore";
 import {addDays} from "date-fns";
 import axios from "axios";
+import {handler_url} from "@/lib/utils";
 
 
 export function getCurrentUser() {
@@ -39,8 +39,8 @@ export async function completeBooking({
                                       }: BookingParams) {
     try {
         const batch = writeBatch(firestore);
-        const userDoc = doc(firestore, 'users', userId, 'bookings', id);
-        const bookingSnap = await getDoc(userDoc);
+        const bookingsDoc = doc(firestore, 'bookings', id);
+        const bookingSnap = await getDoc(bookingsDoc);
 
         if (!bookingSnap.exists()) {
             throw new Error("Booking does not exist!");
@@ -51,11 +51,10 @@ export async function completeBooking({
         if (booking.status === status && booking.isConfirmed === isConfirmed)  {
             throw new Error("Booking status or confirmation status is already set!");
         }
-        const hostBookingsDoc = doc(firestore, 'hosts', booking.hostId, 'bookings', id);
+
         const hostTransactions = doc(firestore, 'hosts', booking.hostId, 'pendingTransactions', id);
 
-        batch.update(userDoc, {status, isConfirmed, paymentData});
-        batch.set(hostBookingsDoc, {...booking, status, isConfirmed, paymentData});
+        batch.update(bookingsDoc, {status, isConfirmed, paymentData});
 
         const transactionDoc = await getDoc(hostTransactions)
 
@@ -181,8 +180,9 @@ export async function getBookings() {
     try {
         let bookings: any = []
         const user = getCurrentUser()
-        const bookingsRef = collection(firestore, 'users', user.uid, 'bookings')
-        const snapshot = await getDocs(bookingsRef)
+        const bookingsRef = collection(firestore, 'bookings')
+        const bookingsQuery = query(bookingsRef, where('accountId', '==', user.uid));
+        const snapshot = await getDocs(bookingsQuery)
 
         snapshot.docs.forEach((document) => {
             bookings.push(document.data())
@@ -198,9 +198,9 @@ export async function getBookings() {
 export async function refundBooking(booking: any, amount?: number) {
     let response;
     if (amount){
-        response = await axios.post('/api/createRefund', {reference: booking.id, amount: amount})
+        response = await axios.post(`${handler_url}/api/createRefund`, {reference: booking.id, amount: amount})
     } else {
-        response = await axios.post('/api/createRefund', {reference: booking.id})
+        response = await axios.post(`${handler_url}/api/createRefund`, {reference: booking.id})
     }
     return response.data;
 }

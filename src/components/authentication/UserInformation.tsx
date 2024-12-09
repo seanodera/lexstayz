@@ -47,7 +47,8 @@ export default function UserInformation(){
             }
         }
         await createUser(details, user.uid);
-        dispatch(loginUser(details))
+        await dispatch(loginUser(details));
+            // dispatch(fetchAppExchangeRates());
         router.push('/');
         }
     }

@@ -1,12 +1,11 @@
-import { Stay } from "@/lib/types";
-import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";;
-import { addDays, differenceInDays } from "date-fns";
-import { RootState } from "@/data/types";
+import {Stay} from "@/lib/types";
+import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
+import {addDays, differenceInDays} from "date-fns";
+import {RootState} from "@/data/types";
 import {getCountry, getFeePercentage} from "@/lib/utils";
 import createBooking from "@/slices/confirmBookingThunks/createBooking";
-import handlePaymentAsync from '@/slices/confirmBookingThunks/handlePaymentAsync'
-import {state} from "sucrase/dist/types/parser/traverser/base";
-import {WritableDraft} from "immer";
+import handlePaymentAsync from '@/slices/confirmBookingThunks/handlePaymentAsync';
+import {setExchangeRates} from "@/slices/staysSlice";
 
 export interface ConfirmBookingState {
     stay: Stay;
@@ -30,8 +29,9 @@ export interface ConfirmBookingState {
     bookingStatus: 'Pending' | 'Confirmed' | 'Canceled' | 'Rejected';
     paymentMethod: any;
     exchangeRates: any;
-    paymentCurrency: 'GHS',
-    paymentRate: number,
+    paymentCurrency: 'GHS' | 'KES';
+    paymentRate: number;
+    country: string;
 }
 
 const initialState: ConfirmBookingState = {
@@ -60,14 +60,14 @@ const initialState: ConfirmBookingState = {
     bookingStatus: 'Pending', // Default status
     paymentCurrency: 'GHS',
     paymentRate: 1,
-    exchangeRates: {}
+    exchangeRates: {},
+    country: 'Kenya',
 };
 
 const recalculateCosts = (state: any) => {
     if (!state.stay.id){
         return ;
     }
-    console.log(state, state.stay.id)
     //calculate totals
     let subTotal = 0;
 
@@ -115,17 +115,19 @@ const recalculateCosts = (state: any) => {
 
 export const fetchExchangeRates = createAsyncThunk(
     'confirmBooking/fetchExchangeRates',
-    async (_, { getState }) => {
-        const { confirmBooking } = getState() as { confirmBooking: ConfirmBookingState };
+    async (_, { getState,dispatch,rejectWithValue }) => {
+        const { confirmBooking} = getState() as RootState;
         try {
             const country = await getCountry()
             let fromCurrency = country?.currency || confirmBooking.currency;
 
             const response = await fetch(`https://open.er-api.com/v6/latest/${fromCurrency}`);
-            console.log(response)
+
             const data = await response.json();
-            return {rates: data.rates, currency: data.base_code};
+            dispatch(setExchangeRates({rates: data.rates, currency: data.base_code}))
+            return {rates: data.rates, currency: data.base_code, country: country?.name};
         } catch (error) {
+            rejectWithValue('Error fetching the currency exchange')
             console.error('Error fetching exchange rates:', error);
         }
     }
@@ -164,6 +166,13 @@ const ConfirmBookingSlice = createSlice({
         },
         setBookingStay: (state, action: PayloadAction<Stay>) => {
             state.stay = action.payload;
+            if (action.payload && action.payload.location && action.payload.location.country === 'Kenya'){
+                state.paymentCurrency = 'KES';
+                if (state.exchangeRates){
+                    state.paymentRate = state.exchangeRates['KES'];
+                }
+
+            }
             recalculateCosts(state); // Recalculate costs when the stay changes
         },
         convertCart: (state, action: PayloadAction<object[]>) => {
@@ -173,7 +182,10 @@ const ConfirmBookingSlice = createSlice({
         setPaymentMethod: (state,action: PayloadAction<string>) => {
             state.paymentMethod = action.payload;
         },
-
+        resetConfirmBookingError: (state) => {
+            state.status = 'idle';
+            state.error = '';
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -202,16 +214,27 @@ const ConfirmBookingSlice = createSlice({
                 state.error = action.payload;
             })
             .addCase(fetchExchangeRates.fulfilled, (state, action) => {
+                console.log('Fetching Rates',action.payload)
                 state.exchangeRates = action.payload?.rates;
                 state.currency = action.payload?.currency || 'GHS';
+                state.country = action.payload?.country || 'Kenya';
+                if (action.payload && (action.payload.currency === 'KES' || action.payload.currency === 'GHS') ) {
+                    state.paymentCurrency = action.payload.currency;
+                    state.paymentRate = action.payload?.rates[action.payload.currency];
+                } else {
+                    state.paymentRate = action.payload?.rates[state.paymentCurrency] * 1.035
+                }
                 state.usedRate = action.payload?.rates[state.currency] * 1.02;
-                state.paymentRate = action.payload?.rates[state.paymentCurrency] * 1.035
-                recalculateCosts(state); // Recalculate costs after exchange rates are fetched
+
+                recalculateCosts(state);
+                state.status = 'idle';
             })
-            .addCase(fetchExchangeRates.pending, (state, action) => {
+            .addCase(fetchExchangeRates.pending, (state) => {
                 state.status = 'loading'
-                console.log('Fetching Rates',action.payload)
-            });
+            }).addCase(fetchExchangeRates.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string || 'An error occurred';
+        });
     }
 
 });
@@ -223,7 +246,8 @@ export const {
     updateBookingData,
     setBookingStay,
     convertCart,
-    setPaymentMethod
+    setPaymentMethod,
+    resetConfirmBookingError
 } = ConfirmBookingSlice.actions;
 
 export {createBooking, handlePaymentAsync}

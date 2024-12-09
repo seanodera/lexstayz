@@ -8,8 +8,6 @@ import Link from "next/link";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import {
     convertCart,
-    createBooking,
-    fetchExchangeRates,
     handlePaymentAsync,
     selectConfirmBooking,
     setBookingStay
@@ -35,9 +33,8 @@ export default function BookFirmPage() {
     const [length, setLength] = useState(0);
     const dispatch = useAppDispatch();
     const [loading, setLoading] = useState(false);
-    const [exchangeRate, setExchangeRate] = useState(1);
     const cart = useAppSelector(selectCart);
-    const currency = 'GHS'
+
     useEffect(() => {
         if (!stay) {
             router.push('/');
@@ -47,24 +44,11 @@ export default function BookFirmPage() {
             router.push('/login');
         }
 
-    });
+    },[]);
     useEffect(() => {
         dispatch(setBookingStay(stay))
         setLength(differenceInDays(booking.checkOutDate, booking.checkInDate));
     }, [booking.checkInDate, booking.checkOutDate]);
-
-    useEffect(() => {
-
-        const rate = booking.exchangeRates[ currency ];
-
-            if (rate !== 1){
-                setExchangeRate(rate * 1.035);
-            } else {
-                setExchangeRate(1)
-            }
-
-    }, [booking.exchangeRates, currency]);
-
 
 
     useEffect(() => {
@@ -91,6 +75,7 @@ export default function BookFirmPage() {
 
         dispatch(handlePaymentAsync({preserve: true})).then((value: any) => {
             setLoading(false)
+            console.log(value)
             if (value.meta.requestStatus === 'fulfilled') {
 
                 router.push(value.payload)
@@ -103,7 +88,6 @@ export default function BookFirmPage() {
 
     }
 
-    console.log(booking, stay)
 
     if (loading || !stay.id) {
         return <div className={'flex flex-col items-center justify-center h-full w-full min-h-96 bg-white'}>
@@ -181,7 +165,8 @@ export default function BookFirmPage() {
                                     <div
                                         className={'mb-0 text-primary'}>{booking.currency} {toMoneyFormat(booking.subtotal)}</div>
                                 </div>}
-                                {booking.rooms.map((cartItem: any, index: number) => <div key={index} className={'col-span-2 grid grid-cols-2'}>
+                                {booking.rooms.map((cartItem: any, index: number) => <div key={index}
+                                                                                          className={'col-span-2 grid grid-cols-2'}>
                                     <div
                                         className="capitalize text-gray-500">{stay.rooms.find((value: any) => value.id === cartItem.roomId).name}</div>
                                     <div
@@ -197,19 +182,19 @@ export default function BookFirmPage() {
 
                             </div>
                         </div>
-                        {booking.currency !== currency? <div>
-                            <small className={'italic text-gray-400 text-center block'}>We currently only accept
-                                payments in {currency}</small>
-                            <div
-                                className={'text-primary text-center font-medium h4 my-2 '}> 1 {booking.currency} = {toMoneyFormat(exchangeRate)} {currency}</div>
-                            <div className={'text-lg font-medium'}>You will Pay</div>
-                            <div
-                                className={'text-xl font-bold'}>{currency} {toMoneyFormat(booking.grandTotal * exchangeRate)}</div>
-                        </div> : <div>
-                            <div className={'text-lg font-medium'}>You will Pay</div>
-                            <div
-                                className={'text-xl font-bold'}>{booking.currency} {toMoneyFormat(booking.grandTotal)}</div>
-                        </div>}
+                        {/*{booking.currency !== booking.paymentCurrency ? <div>*/}
+                        {/*    <small className={'italic text-gray-400 text-center block'}>We currently only accept*/}
+                        {/*        payments in {booking.paymentCurrency}</small>*/}
+                        {/*    <div*/}
+                        {/*        className={'text-primary text-center font-medium h4 my-2 '}> 1 {booking.currency} = {toMoneyFormat(booking.paymentRate)} {booking.paymentCurrency}</div>*/}
+                        {/*    <div className={'text-lg font-medium'}>You will Pay</div>*/}
+                        {/*    <div*/}
+                        {/*        className={'text-xl font-bold'}>{booking.paymentCurrency} {toMoneyFormat(booking.grandTotal * booking.paymentRate)}</div>*/}
+                        {/*</div> : <div>*/}
+                        {/*    <div className={'text-lg font-medium'}>You will Pay</div>*/}
+                        {/*    <div*/}
+                        {/*        className={'text-xl font-bold'}>{booking.currency} {toMoneyFormat(booking.grandTotal)}</div>*/}
+                        {/*</div>}*/}
                         <Button block type={'primary'} size={'large'} onClick={handleConfirm}>Confirm</Button>
                     </Card>
                 </div>

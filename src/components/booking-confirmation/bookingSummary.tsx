@@ -1,40 +1,19 @@
 // components/BookingSummary.tsx
-import {getCountry, getExchangeRate, toMoneyFormat} from "@/lib/utils";
+import {toMoneyFormat} from "@/lib/utils";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import {selectCart} from "@/slices/bookingSlice";
-import {useEffect, useState} from "react";
-import {message} from "antd";
-import {selectConfirmBooking, setBookingStay, updateCostData} from "@/slices/confirmBookingSlice";
+import {useEffect} from "react";
+import {selectConfirmBooking, setBookingStay} from "@/slices/confirmBookingSlice";
 
 
 const BookingSummary = ({stay}: any) => {
     const cart = useAppSelector(selectCart);
-    const [subTotal, setSubTotal] = useState(0);
-    const [exchangeRate, setExchangeRate] = useState(0)
-    const currency = 'GHS'
+
+
     const booking = useAppSelector(selectConfirmBooking)
-    const [messageApi, contextHolder] = message.useMessage();
     const dispatch = useAppDispatch()
-    useEffect(() => {
-        let _subTotal = 0;
 
-        cart.forEach((value: any) => {
-            _subTotal += value.numRooms * stay.rooms.find((stay: any) => stay.id === value.roomId).price * booking.length;
-        });
-        setSubTotal(_subTotal);
-    }, [cart]);
 
-    useEffect(() => {
-
-        const rate = booking.exchangeRates[ currency ];
-
-        if (rate !== 1){
-            setExchangeRate(rate * 1.035);
-        } else {
-            setExchangeRate(1)
-        }
-
-    }, [booking.exchangeRates, currency]);
 
     function calculatePrice(amount: number) {
         let price = 0
@@ -49,7 +28,7 @@ const BookingSummary = ({stay}: any) => {
     useEffect(() => {
         dispatch(setBookingStay(stay))
 
-    }, [currency, subTotal])
+    })
     return (
         <div className="border border-gray-200 rounded-xl p-4 shadow-md shadow-primary">
             <h3 className="text-xl font-semibold">Price Summary</h3>
@@ -71,14 +50,14 @@ const BookingSummary = ({stay}: any) => {
                     {booking.currency} {toMoneyFormat(booking.grandTotal)}
                 </div>
             </div>
-            {booking.currency !== currency? <div className={'w-full'}>
+            {booking.currency !== booking.paymentCurrency? <div>
                 <small className={'italic text-gray-400 text-center block'}>We currently only accept
-                    payments in {currency}</small>
+                    payments in {booking.paymentCurrency}</small>
                 <div
-                    className={'text-primary text-center font-medium h4 my-2 '}> 1 {booking.currency} = {toMoneyFormat(exchangeRate)} {currency}</div>
+                    className={'text-primary text-center font-medium h4 my-2 '}> 1 {booking.currency} = {toMoneyFormat(booking.paymentRate)} {booking.paymentCurrency}</div>
                 <div className={'text-lg font-medium'}>You will Pay</div>
                 <div
-                    className={'text-xl font-bold'}>{currency} {toMoneyFormat(booking.grandTotal * exchangeRate)}</div>
+                    className={'text-xl font-bold'}>{booking.paymentCurrency} {toMoneyFormat(booking.grandTotal * booking.paymentRate)}</div>
             </div> : <div>
                 <div className={'text-lg font-medium'}>You will Pay</div>
                 <div

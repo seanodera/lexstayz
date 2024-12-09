@@ -22,6 +22,7 @@ import {selectConfirmBooking} from "@/slices/confirmBookingSlice";
 
 import ReservePanel from "@/components/stay/reservePanel";
 import dynamic from "next/dynamic";
+import YourHost from "@/components/stay/yourHost";
 
 const MapWithMarker = dynamic(() => import("@/components/stay/mapWithMarker"), {ssr: false});
 // Extend dayjs with the required plugins
@@ -38,11 +39,12 @@ export default function StayPage() {
 
 
     useEffect(() => {
+        console.log('stuy rn', stayId,stay);
         if (stayId && stayId !== stay.id) {
             dispatch(setCurrentStayFromId(stayId))
         }
 
-    }, [dispatch, stayId]);
+    }, [stay]);
     if (!stay || stay.id === undefined) {
 
         return <div></div>;
@@ -125,9 +127,7 @@ export default function StayPage() {
                             />
                         </Card>
                         <h3 className={'mt-4 font-bold'}>Your Host</h3>
-                        <Card className={'rounded-xl aspect-video'}>
-
-                        </Card>
+                        <YourHost/>
                         <h3 className={'mt-4 font-bold'}>Where You&apos;ll be</h3>
                         <Card className={'rounded-xl aspect-square p-0'} classNames={{body: 'p-0'}}>
                             <div className={'h-full w-full'}>

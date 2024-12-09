@@ -70,6 +70,7 @@ export default function SearchComponent() {
     };
 
     useEffect(() => {
+        console.log(allStays)
         setDisplayStays(allStays)
     }, []);
 
