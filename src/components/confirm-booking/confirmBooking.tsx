@@ -30,7 +30,7 @@ export default function ConfirmBooking() {
                 completeBooking({
                     userId: userID,
                     id: bookingID,
-                    paymentData: response.data.data,
+                    paymentData: response.data,
                     isConfirmed: true,
                     status: 'Pending',
                 }).then((value) => {
@@ -44,7 +44,7 @@ export default function ConfirmBooking() {
                 completeBooking({
                     userId: userID,
                     id: bookingID,
-                    paymentData: response.data.data,
+                    paymentData: response.data,
                     isConfirmed: false,
                     status: 'Failed',
                 }).then((value) => {
