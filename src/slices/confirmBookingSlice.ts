@@ -29,7 +29,7 @@ export interface ConfirmBookingState {
     bookingStatus: 'Pending' | 'Confirmed' | 'Canceled' | 'Rejected';
     paymentMethod: any;
     exchangeRates: any;
-    paymentCurrency: 'GHS';
+    paymentCurrency: 'GHS' | 'KES';
     paymentRate: number;
     country: string;
 }
@@ -115,7 +115,7 @@ const recalculateCosts = (state: any) => {
 
 export const fetchExchangeRates = createAsyncThunk(
     'confirmBooking/fetchExchangeRates',
-    async (_, { getState,dispatch }) => {
+    async (_, { getState,dispatch,rejectWithValue }) => {
         const { confirmBooking} = getState() as RootState;
         try {
             const country = await getCountry()
@@ -127,6 +127,7 @@ export const fetchExchangeRates = createAsyncThunk(
             dispatch(setExchangeRates({rates: data.rates, currency: data.base_code}))
             return {rates: data.rates, currency: data.base_code, country: country?.name};
         } catch (error) {
+            rejectWithValue('Error fetching the currency exchange')
             console.error('Error fetching exchange rates:', error);
         }
     }
@@ -206,18 +207,27 @@ const ConfirmBookingSlice = createSlice({
                 state.error = action.payload;
             })
             .addCase(fetchExchangeRates.fulfilled, (state, action) => {
+                console.log('Fetching Rates',action.payload)
                 state.exchangeRates = action.payload?.rates;
                 state.currency = action.payload?.currency || 'GHS';
                 state.country = action.payload?.country || 'Kenya';
+                if (action.payload && (action.payload.currency === 'KES' || action.payload.currency === 'GHS') ) {
+                    state.paymentCurrency = action.payload.currency;
+                    state.paymentRate = action.payload?.rates[action.payload.currency];
+                } else {
+                    state.paymentRate = action.payload?.rates[state.paymentCurrency] * 1.035
+                }
                 state.usedRate = action.payload?.rates[state.currency] * 1.02;
-                state.paymentRate = action.payload?.rates[state.paymentCurrency] * 1.035
-                recalculateCosts(state); // Recalculate costs after exchange rates are fetched
+
+                recalculateCosts(state);
                 state.status = 'idle';
             })
-            .addCase(fetchExchangeRates.pending, (state, action) => {
+            .addCase(fetchExchangeRates.pending, (state) => {
                 state.status = 'loading'
-                console.log('Fetching Rates',action.payload)
-            });
+            }).addCase(fetchExchangeRates.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string || 'An error occurred';
+        });
     }
 
 });

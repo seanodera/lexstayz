@@ -5,6 +5,7 @@ import {verifyPayment} from "@/data/payment";
 import {useEffect, useState} from "react";
 import {Button, message, Result, Skeleton} from "antd";
 import {savePaymentMethod} from "@/data/usersData";
+import LoadingScreen from "@/components/LoadingScreen";
 
 
 export default function ConfirmBooking() {
@@ -68,7 +69,8 @@ const [savedData, setSavedData] = useState<any>()
 
     return <div className={'h-screen w-full flex flex-col justify-center'}>
         {contextHolder}
-        {isLoading ? <Skeleton active/> : <Result
+        {isLoading ? <LoadingScreen/> : <Result
+
             title={`Booking Request ${error ? 'Failed' : 'Sent'}`}
             status={error ? 'error' : 'success'}
             subTitle={error ? errorMessage : <div>

@@ -11,7 +11,7 @@ import {AiOutlineMobile} from "react-icons/ai";
 
 export default function PaymentMethods() {
     const booking = useAppSelector(selectConfirmBooking)
-
+    const supportedCurrencies = ['GHS', 'KES']
     const paymentMethod = useAppSelector(selectPaymentMethod);
     const dispatch = useAppDispatch();
 
@@ -39,18 +39,20 @@ export default function PaymentMethods() {
                                         className={'font-bold text-lg'}>{booking.paymentCurrency} {toMoneyFormat(booking.grandTotal * booking.paymentRate)}</div>
 
                                 </div>
-                                <div
-                                    className={'text-primary text-center font-medium text-sm space-y-0'}>
-                                <div className={'text-nowrap'}>1 {booking.currency}</div>
-                                    <div>=</div>
-                                    <div className={'text-nowrap'}>
-                                        {toMoneyFormat(booking.paymentRate)} {booking.paymentCurrency}
+                                {
+                                    booking.paymentCurrency !== booking.currency && <div
+                                        className={'text-primary text-center font-medium text-sm space-y-0'}>
+                                        <div className={'text-nowrap'}>1 {booking.currency}</div>
+                                        <div>=</div>
+                                        <div className={'text-nowrap'}>
+                                            {toMoneyFormat(booking.paymentRate)} {booking.paymentCurrency}
+                                        </div>
                                     </div>
-                                </div>
+                                }
                             </div>
                         )}
                     </Radio>
-                    <Radio value={'mobile-money'} className="">
+                    {supportedCurrencies.includes(booking.currency) && <Radio value={'mobile-money'} className="">
                         {({checked}) => (
                             <div
                                 className={`w-full ${checked ? 'border-primary ' : 'border-gray-400'} flex gap-2 border-solid py-3 px-2 rounded-xl `}>
@@ -65,7 +67,7 @@ export default function PaymentMethods() {
                                 </div>
                             </div>
                         )}
-                    </Radio>
+                    </Radio>}
                 </RadioGroup>
             </div>
         </div>
