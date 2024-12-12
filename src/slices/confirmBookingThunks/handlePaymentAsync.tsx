@@ -16,7 +16,13 @@ const handlePaymentAsync = createAsyncThunk(
 
 
         try {
-            const country = state.authentication.country;
+            // const country = state.authentication.country;
+            const country =
+                paymentCurrency === "KES" ? "Kenya" :
+                    paymentCurrency === "GHS" ? "Ghana" :
+                        booking.configs.find((value) =>
+                            value.correspondents.some(correspondent => correspondent.currency === paymentCurrency)
+                        )?.country;
             const user = getCurrentUser();
             let amount = parseInt((booking.grandTotal).toFixed(2));
             if (booking.currency !== paymentCurrency) {
@@ -26,8 +32,8 @@ const handlePaymentAsync = createAsyncThunk(
             if (state.confirmBooking.paymentMethod === 'mobile-money') {
                 const res = await axios.post(`${handler_url}/api/payments/createTransaction`, {
                     email: booking.contact.email,
-                    amount: booking.grandTotal.toFixed(2),
-                    currency: booking.currency,
+                    amount: amount,
+                    currency: paymentCurrency,
                     callback_url: `${process.env.NEXT_PUBLIC_HOST}/confirm-booking?userID=${user.uid}&booking=${id}`,
                     country: booking.country,
                     booking: booking,
@@ -45,7 +51,7 @@ const handlePaymentAsync = createAsyncThunk(
                     amount: amount,
                     currency: booking.paymentCurrency,
                     callback_url: `${process.env.NEXT_PUBLIC_HOST}/confirm-booking?userID=${user.uid}&booking=${id}`,
-                    country: country?.name,
+                    country: country,
                     booking: booking,
                     reference: id
                 });

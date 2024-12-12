@@ -11,7 +11,7 @@ import {getUserDetails} from "@/data/usersData";
 import {loginUser, logoutUser, selectCurrentUser} from "@/slices/authenticationSlice";
 import {fetchStaysAsync, selectHasRun, selectIsStayLoading} from "@/slices/staysSlice";
 import Footer from "@/components/navigation/Footer";
-import {fetchExchangeRates} from "@/slices/confirmBookingSlice";
+import {fetchExchangeRates, fetchPawaPayConfigs} from "@/slices/confirmBookingSlice";
 import ErrorContext from "@/contex/errorContext";
 import {auth} from "@/lib/firebase";
 
@@ -41,7 +41,7 @@ export default function ContextProvider({children}: { children: React.ReactNode 
                 dispatch(fetchStaysAsync());
                 // You only want to fetch these once
                 dispatch(fetchExchangeRates());
-
+                dispatch(fetchPawaPayConfigs())
                 if (user) {
                     dispatch(fetchBookingsAsync());
                 }

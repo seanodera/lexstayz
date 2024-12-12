@@ -3,21 +3,43 @@
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import {Radio, RadioGroup} from "@headlessui/react";
 import {CiCreditCard2} from "react-icons/ci";
-import {selectConfirmBooking, selectPaymentMethod, setPaymentMethod} from "@/slices/confirmBookingSlice";
+import {
+    selectConfirmBooking,
+    selectPaymentMethod,
+    setPaymentCurrency,
+    setPaymentMethod
+} from "@/slices/confirmBookingSlice";
 import {toMoneyFormat} from "@/lib/utils";
 import {AiOutlineMobile} from "react-icons/ai";
+import {Dropdown, Select} from "antd";
+import {useEffect, useState} from "react";
 
 // Define the types for the user's payment methods
 
 export default function PaymentMethods() {
     const booking = useAppSelector(selectConfirmBooking)
-    const supportedCurrencies = ['GHS', 'KES']
+    const [supportedCurrencies,setSupportedCurrencies] = useState(['GHS', 'KES'])
+    const cardCurrencies = ['GHS', 'KES']
     const paymentMethod = useAppSelector(selectPaymentMethod);
     const dispatch = useAppDispatch();
 
+    useEffect(() => {
+        let data:string[] = ['GHS', 'KES'];
+        booking.configs.forEach((config) => {
+            config.correspondents.forEach((value) => {
+               if (!data.includes(value.currency)){
+                   data.push(value.currency);
+               }
+            })
+        })
+        setSupportedCurrencies(data)
+    }, [booking.configs]);
     return (
         <div>
-            <h3 className="font-semibold">Payment Methods</h3>
+            <div className={'flex justify-between'}>
+                <h3 className="font-semibold">Payment Methods</h3>
+                <Select value={booking.paymentCurrency} onChange={(value) => dispatch(setPaymentCurrency(value))} options={supportedCurrencies.map((currency) => ({value: currency, label: currency}))}/>
+            </div>
             {booking.paymentCurrency !== booking.currency && <div>
                 <div className={'flex gap-2'}>
                     <h3 className={'text-xl'}>Total Price: </h3>
@@ -34,7 +56,7 @@ export default function PaymentMethods() {
                     onChange={(value) => dispatch(setPaymentMethod(value))}
                     className="grid grid-cols-2 gap-4"
                 >
-                    <Radio value={'card-payment'} className="">
+                    {cardCurrencies.includes(booking.paymentCurrency) && <Radio value={'card-payment'} className="">
                         {({checked}) => (
                             <div
                                 className={`w-full ${checked ? 'border-primary ' : 'border-gray-400'} flex gap-2 border-solid py-3 px-2 rounded-xl `}>
@@ -52,7 +74,7 @@ export default function PaymentMethods() {
 
                             </div>
                         )}
-                    </Radio>
+                    </Radio>}
                     {supportedCurrencies.includes(booking.paymentCurrency) &&
                         <Radio value={'mobile-money'} className="">
                             {({checked}) => (
