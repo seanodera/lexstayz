@@ -4,10 +4,10 @@ import Link from "next/link";
 
 export default function AboutUsPage() {
     return (
-        <div className="md:px-16 px-7 py-8 pt-[4.5rem] bg-gradient-to-t from-primary-100 via-primary-100 via-60% to-transparent ">
-            <div className="grid grid-cols-3 gap-6 md:w-3/4">
-                <div className="px-7">
-                    <Menu className="rounded-xl fixed ms-auto" items={[
+        <div className="lg:px-16 px-7 py-8 pt-[4.5rem] bg-gradient-to-t from-primary-100 via-primary-50 via-60% to-transparent ">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6 lg:w-3/4">
+                <div className="lg:px-7 max-md:hidden">
+                    <Menu className="rounded-xl fixed ms-auto " items={[
                         {
                             key: 'About Us',
                             label: <Link href="#about">About Us</Link>,

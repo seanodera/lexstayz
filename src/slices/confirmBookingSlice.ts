@@ -258,7 +258,7 @@ const ConfirmBookingSlice = createSlice({
         })
 
             .addCase(fetchPawaPayConfigs.pending, (state) => {
-                state.status = 'loading';
+                // state.status = 'loading';
                 state.error = null;
             })
             .addCase(fetchPawaPayConfigs.fulfilled, (state, action) => {

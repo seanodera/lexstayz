@@ -80,9 +80,9 @@ export default function AdvertisePage() {
                             dynamic property and travel sectors.
                         </p>
                     </div>
-                    <div className={'col-span-2 grid grid-cols-1 md:grid-cols-4 gap-4 md:aspect-[20/7]'}>
+                    <div className={'col-span-2 grid grid-cols-1 md:grid-cols-4 gap-4 w-full md:aspect-[20/7]'}>
                         <div
-                            className={`${reachIndex === 0 && 'md:col-span-2'} bg-cover bg-center rounded-2xl overflow-hidden transition-all duration-500`}
+                            className={`${reachIndex === 0 && 'md:col-span-2'} bg-cover bg-center rounded-2xl overflow-hidden transition-all duration-500 h-full`}
                             style={{
                                 backgroundImage: 'url("/assets/advert-1.jpg")',
                             }}
@@ -169,7 +169,7 @@ export default function AdvertisePage() {
                         </a>{' '}
                         to discuss customized advertising opportunities and start driving results.
                     </p>
-                    <Button type={'primary'} size={'large'} className=" text-white font-bold">
+                    <Button href={'mailto:contact@lexstayz.com'} type={'primary'} size={'large'} className=" text-white font-bold">
                         Get in Touch
                     </Button>
                 </section>

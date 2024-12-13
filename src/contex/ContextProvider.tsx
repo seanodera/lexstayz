@@ -121,7 +121,7 @@ export default function ContextProvider({children}: { children: React.ReactNode 
     } else {
         return <div className={'min-h-screen'}>
             {pathname === '/' ? <Navbar/> : <div><Navbar/></div>}
-            <div className={pathname === '/' ? '' : 'h-full overflow-auto pt-auto'}>{children}</div>
+            <div className={pathname === '/' ? '' : 'h-full overflow-auto pt-[4.5rem]'}>{children}</div>
             <Footer/>
 
         </div>
