@@ -51,8 +51,10 @@ export const fetchStaysAsync = createAsyncThunk(
         try {
 
             const staysRef = query(collection(firestore, 'stays'), where('published', '==', true));
+            console.log(staysRef);
             const stays: Array<any> = [];
             const snapshot = await getDocs(staysRef);
+            console.log(snapshot);
             for (const doc1 of snapshot.docs) {
                 stays.push(doc1.data());
             }
@@ -146,6 +148,7 @@ const staysSlice = createSlice({
                 state.isLoading = true;
                 state.hasError = false;
                 state.errorMessage = '';
+                console.log('loading....fetch stays')
             })
             .addCase(fetchStaysAsync.fulfilled, (state, action) => {
                 state.isLoading = false;
@@ -159,6 +162,7 @@ const staysSlice = createSlice({
             })
             .addCase(setCurrentStayFromId.pending, (state) => {
                 state.isLoading = true;
+                console.log('loading....set frm id')
             })
             .addCase(setCurrentStayFromId.fulfilled, (state, action) => {
                 state.isLoading = false;
@@ -171,6 +175,7 @@ const staysSlice = createSlice({
             })
             .addCase(setCurrentHostById.pending, (state) => {
                 state.isLoading = true;
+                console.log('loading....set current Host ById')
             })
             .addCase(setCurrentHostById.fulfilled, (state, action) => {
                 state.isLoading = false;

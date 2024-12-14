@@ -77,7 +77,7 @@ const searchSlice = createSlice({
             })
             .addCase(searchAsync.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.preFilteredList = state.currentResults;
+                state.preFilteredList = action.payload.data;
                 state.currentResults = action.payload.data;
                 state.currentTerm = action.payload.term;
                 state.processedList = action.payload.processed;

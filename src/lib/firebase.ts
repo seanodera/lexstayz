@@ -1,14 +1,15 @@
 import {initializeApp} from 'firebase/app';
 import {getAuth} from 'firebase/auth';
 import {
-    getFirestore,
     initializeFirestore,
+    memoryLocalCache,
     persistentLocalCache,
     persistentMultipleTabManager
 } from 'firebase/firestore';
 import {getStorage} from 'firebase/storage';
-import {getAnalytics} from "firebase/analytics";
+import {Analytics, getAnalytics, isSupported} from "firebase/analytics";
 import algoliasearch from "algoliasearch/lite";
+
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -28,7 +29,7 @@ const isDev = process.env.NEXT_PUBLIC_STAGE === 'dev';
 
 const firestore = isDev
     ? initializeFirestore(app, {
-        localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+        localCache: memoryLocalCache()
     }, 'development')
     : initializeFirestore(app, {
         localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
@@ -37,4 +38,15 @@ const storage = getStorage(app);
 // const analytics = getAnalytics(app);
 const searchClient = algoliasearch("S192CBDSDM", "07dbe0e186e0f74a4ce9915a7fb74233");
 
-export {app, auth, firestore, storage, searchClient};
+
+// Initialize Firebase Analytics (check if the browser supports it)
+let analytics:Analytics | undefined;
+if (typeof window !== "undefined") {
+    isSupported().then((supported) => {
+        if (supported) {
+            analytics = getAnalytics(app);
+        }
+    });
+}
+
+export {analytics,app, auth, firestore, storage, searchClient};

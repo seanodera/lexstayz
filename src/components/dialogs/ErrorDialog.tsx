@@ -1,13 +1,14 @@
 'use client'
-import React, {useContext, useEffect, useState} from 'react';
-import { Modal } from 'antd';
-import ErrorContext from "@/contex/errorContext";
+import React, {useEffect, useState} from 'react';
+import {Modal} from 'antd';
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import {resetAuthError} from "@/slices/authenticationSlice";
 import {resetMessagingError} from "@/slices/messagingSlice";
 import {resetConfirmBookingError} from "@/slices/confirmBookingSlice";
 import {resetStayError} from "@/slices/staysSlice";
 import {resetBookingError} from "@/slices/bookingSlice";
+import {analytics} from "@/lib/firebase";
+import {logEvent} from "@firebase/analytics";
 
 
 export default function ErrorDialog() {
@@ -58,7 +59,15 @@ export default function ErrorDialog() {
         dispatch(resetStayError());
         dispatch(resetBookingError());
     };
-
+    useEffect(() => {
+        if (hasError && error && errorMessage && analytics) {
+            logEvent(analytics, "error_occurred", {
+                error: error.toString(),
+                message: errorMessage,
+                timestamp: new Date().toISOString(),
+            });
+        }
+    }, [error, errorMessage, hasError]);
     return (
         <Modal
             title="An error has occurred"

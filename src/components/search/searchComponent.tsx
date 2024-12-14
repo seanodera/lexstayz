@@ -1,35 +1,27 @@
 'use client'
-import {useAppSelector, useAppDispatch} from "@/hooks/hooks";
+import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import {selectConfirmBooking, updateBookingData} from "@/slices/confirmBookingSlice";
 import {useEffect, useMemo, useState} from "react";
-import {useRouter, useSearchParams} from "next/navigation";
+import {useSearchParams} from "next/navigation";
 import {useMediaQuery} from "react-responsive";
 import debounce from "lodash/debounce";
 import {Affix, Button, DatePicker, Drawer} from "antd";
-import {
-    Combobox,
-    ComboboxInput,
-    ComboboxOption,
-    ComboboxOptions,
-    Popover,
-    PopoverButton,
-    PopoverPanel
-} from "@headlessui/react";
-import {FilterOutlined, MinusOutlined, PlusOutlined} from "@ant-design/icons";
+import {isWithinInterval, parseISO} from "date-fns";
+import {Combobox, ComboboxInput, ComboboxOption, ComboboxOptions} from "@headlessui/react";
+import {FilterOutlined, MinusOutlined, PlusOutlined, SearchOutlined} from "@ant-design/icons";
 import HotelItem from "@/components/Grid Items/HotelItem";
 import HomeItem from "@/components/Grid Items/HomeItem";
 import SearchFilter from "@/components/search/searchFilter";
 import dayjs from "dayjs";
 import {
     searchAsync,
-    selectSearchResults,
-    selectIsLoading,
-    selectProcessedList,
     selectPreFilteredList,
+    selectProcessedList,
+    selectSearchResults,
     updatePreFilter
 } from '@/slices/searchSlice';
 import {selectAllStays} from "@/slices/staysSlice";
-import {all} from "axios";
+import {Stay} from "@/lib/types";
 
 const {RangePicker} = DatePicker;
 
@@ -40,7 +32,6 @@ export default function SearchComponent() {
     const stays = useAppSelector(selectSearchResults);
     const preFilter = useAppSelector(selectPreFilteredList);
     const processedOptions = useAppSelector(selectProcessedList);
-    const isLoading = useAppSelector(selectIsLoading);
     const [displayStays, setDisplayStays] = useState<any[]>(stays); // Initialize with all stays
     const [open, setOpen] = useState(false);
     const params = useSearchParams();
@@ -48,18 +39,12 @@ export default function SearchComponent() {
     const [selectedLocation, setSelectedLocation] = useState('');
     const [startDate, setStartDate] = useState(booking.checkInDate);
     const [endDate, setEndDate] = useState(booking.checkOutDate);
-    const [numRooms, setNumRooms] = useState(1);
     const [numGuests, setNumGuests] = useState(booking.numGuests);
-    const router = useRouter();
-    const [dates, setDates] = useState<any[]>([]);
-    const [hoveredDate, setHoveredDate] = useState(null);
     const isMobile = useMediaQuery({maxWidth: 640});
-    const [options, setOptions] = useState<any[]>(processedOptions);
-    const [count, setCount] = useState(0);
+
+
     const [searchTerm, setSearchTerm] = useState("");
-    const handleChange = (value: any) => {
-        setDates(value);
-    };
+
 
     const showDrawer = () => {
         setOpen(true);
@@ -70,9 +55,8 @@ export default function SearchComponent() {
     };
 
     useEffect(() => {
-        console.log(allStays)
-        setDisplayStays(allStays)
-    }, []);
+        setDisplayStays(filterStaysByDate(allStays));
+    }, [allStays]);
 
     useEffect(() => {
         if (params.has('loc')) {
@@ -94,19 +78,41 @@ export default function SearchComponent() {
 
     function handleSelect(value: string) {
         setSelectedLocation(value);
-        let filteredStays = stays
+        let filteredStays = filterStaysByDate(stays)
         // Implement filtering logic here using the stays or preFilter data from Redux
         value.split(',').forEach((item) => {
             filteredStays.filter(stay => {
                 const values = Object.values(stay.location).map((val: any) => String(val).toLowerCase());
+
+                let booked: boolean;
+                const checkInDate = startDate;
+                const checkOutDate = endDate;
+
+                    if (stay.type === "Home") {
+                        booked = stay.bookedDates?.some((date: string) =>
+                            isWithinInterval(parseISO(date), {
+                                start: parseISO(checkInDate),
+                                end: parseISO(checkOutDate),
+                            })
+                        );
+                    } else {
+                        booked = stay.fullyBookedDates?.some((date: string) =>
+                            isWithinInterval(parseISO(date), {
+                                start: parseISO(checkInDate),
+                                end: parseISO(checkOutDate),
+                            })
+                        );
+                    }
+
+
                 console.log(values.includes(item.toLowerCase()), 'values: ', values)
-                return values.includes(item.toLowerCase());
+                return !booked && values.includes(item.toLowerCase());
             });
         })
 
 
         if (value === ''){
-            dispatch(updatePreFilter(allStays))
+            dispatch(updatePreFilter(filterStaysByDate(allStays)))
         } else {
             setDisplayStays(filteredStays);
             console.log('Filtered', filteredStays, 'value: ', value);
@@ -116,14 +122,13 @@ export default function SearchComponent() {
 
     useEffect(() => {
         if (stays.length > 0) {
-            setDisplayStays(stays);
-            dispatch(updatePreFilter(stays))
+            let data = filterStaysByDate(stays)
+            setDisplayStays(data);
+            dispatch(updatePreFilter(data))
         }
-    }, [stays]);
+    }, [stays, startDate, endDate, dispatch]);
 
-    useEffect(() => {
-        console.log('selectedLocation: ',selectedLocation);
-    }, [selectedLocation]);
+
 
     useEffect(() => {
         return () => {
@@ -131,13 +136,26 @@ export default function SearchComponent() {
         };
     }, [debouncedHandleSearch]);
 
+    function filterStaysByDate (stays: Stay[]){
+
+        return [...stays].filter((stay) => {
+            const bookedDates = stay.type === "Home" ? stay.bookedDates : stay.fullyBookedDates;
+            if (!bookedDates) return true; // If no booked dates, it's available
+
+            return !bookedDates.some((date: string) =>
+                isWithinInterval(parseISO(date), {start: startDate, end: endDate})
+            );
+        });
+
+    }
+
     useEffect(() => {
         dispatch(updateBookingData({
             numGuests: numGuests,
             checkInDate: startDate,
             checkOutDate: endDate,
         }));
-    }, [numGuests, startDate, endDate]);
+    }, [numGuests, startDate, endDate, dispatch]);
 
     return (
         <div className={'bg-white'}>
@@ -168,8 +186,6 @@ export default function SearchComponent() {
                             </ComboboxOptions>
                         </Combobox>
                         <RangePicker
-                            onCalendarChange={handleChange}
-                            onMouseLeave={() => setHoveredDate(null)}
                             panelRender={(panelNode) => (
                                 <div className={`flex ${isMobile ? "flex-col" : "flex-row"}`}>
                                     {panelNode}
@@ -184,6 +200,7 @@ export default function SearchComponent() {
                             }}
                             className="bg-gray-200 rounded-lg border-0 "
                             format="DD MMMM"
+                            disabledDate={(current) => current.isBefore(dayjs().subtract(1,'day'))}
                             placeholder={["Check-in", "Check-out"]}
                             popupClassName=""
                         />
@@ -197,7 +214,7 @@ export default function SearchComponent() {
                                 icon={<PlusOutlined/>}
                             />
                         </div>
-
+                        <Button icon={<SearchOutlined/>} type={'primary'}/>
                     </div>
                     <Button className={'bg-gray-200 text-gray-500'} onClick={showDrawer} size={'large'} type={'text'}
                             icon={<FilterOutlined/>}>Filter</Button>
@@ -215,8 +232,9 @@ export default function SearchComponent() {
                 body: 'p-0'
             }}>
                 <SearchFilter stays={preFilter} onFilter={(filteredList: any) => {
-                    console.log('Prefilter: ',preFilter,' Filtered list: ', filteredList);
-                    setDisplayStays(filteredList)
+                    const data = filterStaysByDate(filteredList);
+                    console.log('Prefilter: ',preFilter,' Filtered list: ', filteredList, 'data: ', data);
+                    setDisplayStays(data)
                 }}/>
             </Drawer>
         </div>
