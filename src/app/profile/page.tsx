@@ -16,21 +16,21 @@ export default function Page(){
                 label: 'Address',
                 children: <AddressInfo/>
             },
-            {
-            key: 'Payment Methods',
-                label: 'Payment Methods',
-                children: <PaymentMethods/>
-            },
+            // {
+            // key: 'Payment Methods',
+            //     label: 'Payment Methods',
+            //     children: <PaymentMethods/>
+            // },
             {
                 key: 'Security',
                 label: 'Security',
                 children: <SecurityInfo/>
             },
-            {
-                key: 'Preferences',
-                label: 'Preferences',
-                children: <PreferencesTab/>
-            }
+            // {
+            //     key: 'Preferences',
+            //     label: 'Preferences',
+            //     children: <PreferencesTab/>
+            // }
         ]}/>
     </div>
 }
