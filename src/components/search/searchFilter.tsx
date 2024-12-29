@@ -1,31 +1,101 @@
 'use client'
 import {useEffect, useState} from "react";
-import {Button, Card, Checkbox, Collapse, Segmented, Select, Slider} from "antd";
+import {Button, Card, Checkbox, Collapse, Divider, Segmented, Select, Slider, Typography} from "antd";
 import {IoMdGlobe} from "react-icons/io";
 import {MdOutlineHotel, MdOutlineVilla} from "react-icons/md";
 import {toMoneyFormat} from "@/lib/utils";
-import {hotelFacilities} from "@/data/hotelsDataLocal";
+import {homeFacilities, hotelFacilities} from "@/data/hotelsDataLocal";
+import {useAppSelector} from "@/hooks/hooks";
+import {selectExchangeRate, selectGlobalCurrency} from "@/slices/staysSlice";
+import {MinusOutlined, PlusOutlined} from "@ant-design/icons";
+import LocationFilterComponent, {LocationFilter} from "@/components/search/locationFilter";
+import RoomAndBedsFilter from "@/components/search/roomAndBedsFilter";
 
 
+
+const {Title, Text} = Typography;
 // (filteredList: any[]) => void
 export default function SearchFilter({stays, onFilter}: { stays: any[ ], onFilter: any }) {
-
+    const globalCurrency = useAppSelector(selectGlobalCurrency)
+    const exchangeRates = useAppSelector(selectExchangeRate)
     const [displayStays, setDisplayStays] = useState<any[]>([]);
     const [typeFilter, setTypeFilter] = useState('All');
     const [highestPrice, setHighestPrice] = useState(200);
     const [lowestPrice, setLowestPrice] = useState(0);
     const [priceRange, setPriceRange] = useState([lowestPrice, highestPrice]);
     const [amenityFilters, setAmenityFilters] = useState<string[]>([]);
-    const [locationFilter, setLocationFilter] = useState<string | null>(null);
+    const [locationFilter, setLocationFilter] = useState<LocationFilter>();
     const [roomCountFilter, setRoomCountFilter] = useState<number | null>(null);
     const [ratingFilter, setRatingFilter] = useState<number[]>([0, 5]);
     const [availableFilters, setAvailableFilters] = useState<{
         amenities: string[],
         locations: string[]
     }>({amenities: [], locations: []});
+    const [collected, setCollectedProperties] = useState<{
+        [ key: string ]: any[];
+    }>({});
+    const [locationProperties, setLocationProperties] = useState<{
+        [ key: string ]: any[];
+    }>({})
+
+    function calculatePrice(price: number) {
+        let convertedPrice = price * 1.02 / exchangeRates[ 'USD' ]
+
+        return toMoneyFormat(convertedPrice);
+    }
+
+    // useEffect(() => {
+    //     onFilter(stays)
+    // },[stays]);
+
     useEffect(() => {
-        onFilter(stays)
-    },);
+        const collectedProperties: { [key: string]: any[] } = {};
+        const locationProps: { [key: string]: any[] } = {};
+        const locFilter: LocationFilter = {
+            city: undefined,
+            country: undefined,
+            district: undefined,
+            street2: undefined,
+            street: undefined,
+        }
+
+        stays.forEach(item => {
+            // const location = item.location || {};
+            const { location, ...otherProps } = item;
+
+            for (let key in otherProps) {
+                collectedProperties[key] = collectedProperties[key] || [];
+                if (!collectedProperties[key].includes(otherProps[key])) {
+                    collectedProperties[key].push(otherProps[key]);
+                }
+            }
+
+            for (let subKey in location) {
+                if (location[subKey] !== '') {
+                    locationProps[subKey] = locationProps[subKey] || [];
+                    if (!locationProps[subKey].includes(location[subKey])) {
+                        locationProps[subKey].push(location[subKey]);
+                    }
+                }
+            }
+        });
+
+        const keys = ['country', 'city', 'district', 'street2', 'street'];
+        for (let i = 0; i < keys.length; i++) {
+            const key = keys[i];
+            if (locationProps[key] && locationProps[key].length === 1) {
+                locFilter[key as keyof LocationFilter] = locationProps[key][0];
+            } else {
+                break;
+            }
+        }
+
+        setLocationFilter(locFilter);
+        setLocationProperties(locationProps);
+        setCollectedProperties(collectedProperties);
+
+        console.log(collectedProperties, locationProps);
+    }, []);
 
     useEffect(() => {
         setDisplayStays(stays);
@@ -107,10 +177,6 @@ export default function SearchFilter({stays, onFilter}: { stays: any[ ], onFilte
             });
         }
 
-        // Filter by location
-        if (locationFilter) {
-            filteredStays = filteredStays.filter(stay => stay.location === locationFilter);
-        }
 
         // Filter by room count
         if (roomCountFilter) {
@@ -126,14 +192,16 @@ export default function SearchFilter({stays, onFilter}: { stays: any[ ], onFilte
         onFilter(filteredStays);
     }
 
-    return <div >
-        <Card className={'space-y-2'}>
+    return <div>
+        <Card className={'space-y-2'} classNames={{
+            body: 'space-y-4'
+        }}>
             <div className={'flex gap-2'}>
                 <Button onClick={() => {
                     setTypeFilter('All');
                     setPriceRange([lowestPrice, highestPrice]);
                     setAmenityFilters([]);
-                    setLocationFilter(null);
+                    setLocationFilter(undefined);
                     setRoomCountFilter(null);
                     setRatingFilter([0, 5]);
                     setDisplayStays(stays);
@@ -141,7 +209,7 @@ export default function SearchFilter({stays, onFilter}: { stays: any[ ], onFilte
                 <Button type={'primary'} onClick={applyFilters}>Apply</Button>
             </div>
             <div>
-                <h3>Type</h3>
+                <Title level={5}>Type</Title>
                 <Segmented
                     options={[
                         {
@@ -162,12 +230,22 @@ export default function SearchFilter({stays, onFilter}: { stays: any[ ], onFilte
                     ]}
                     value={typeFilter}
                     onChange={setTypeFilter}
+                    size={'large'}
+                    block={true}
                 />
             </div>
+            <Divider type={'horizontal'}/>
+            {((typeFilter === 'Home') && collected.homeType) && <div>
+                <Title level={5}>Home Type</Title>
+                <Select className={'w-full'} size={'large'} placeholder={'Home type'} options={[{
+                    value: undefined,
+                    label: 'Any Type'
+                }, ...collected.homeType.map((value) => ({value: value, label: value}))]}/>
+            </div>}
             <div>
                 <div className={'flex justify-between'}><h3>Price</h3>
                     <span
-                        className={' text-primary'}>${toMoneyFormat(lowestPrice)} - ${toMoneyFormat(highestPrice)}</span>
+                        className={' text-primary'}>{globalCurrency} {calculatePrice(lowestPrice)} - {globalCurrency} {calculatePrice(highestPrice)}</span>
                 </div>
                 <Slider
                     range
@@ -177,31 +255,13 @@ export default function SearchFilter({stays, onFilter}: { stays: any[ ], onFilte
                     onChange={setPriceRange}
                 />
             </div>
+
+            <LocationFilterComponent stays={stays}/>
+            <Divider type={'horizontal'}/>
+            <RoomAndBedsFilter collectedProperties={collected}/>
+            <Divider type={'horizontal'}/>
             <div>
-                <h3>Location</h3>
-                <Select
-                    placeholder="Select a location"
-                    style={{width: '100%'}}
-                    onChange={value => setLocationFilter(value)}
-                >
-                    {availableFilters.locations.map((location, index) => (
-                        <Select.Option key={index} value={location}>
-                            {location}
-                        </Select.Option>
-                    ))}
-                </Select>
-            </div>
-            <div>
-                <h3>Room Count</h3>
-                <Slider
-                    min={1}
-                    max={10}
-                    onChange={value => setRoomCountFilter(value)}
-                    marks={{1: '1', 10: '10+'}}
-                />
-            </div>
-            <div>
-                <h3>Rating</h3>
+                <Title level={5}>Rating</Title>
                 <Slider
                     range
                     min={0}
@@ -212,8 +272,52 @@ export default function SearchFilter({stays, onFilter}: { stays: any[ ], onFilte
                     marks={{0: '0', 5: '5'}}
                 />
             </div>
-            <div className={''}>
-                <h3>Amenities</h3>
+            <Divider type={'horizontal'}/>
+            {collected.parties && <div>
+                <Title level={5}>Parties</Title>
+                <Select
+                    className={'w-full'}
+                    placeholder={'Parties'}
+                    options={[{
+                        value: undefined,
+                        label: 'Any'
+                    }, ...collected.parties.map((value) => ({value: value, label: value})).reverse()]}
+                    onChange={(value) => {
+                        console.log(value); // Handle selection logic here
+                    }}
+                />
+            </div>}
+
+            {collected.smoking && <div>
+                <Title level={5}>Smoking</Title>
+                <Select
+                    className={'w-full'}
+                    placeholder={'Smoking'}
+                    options={[{
+                        value: undefined,
+                        label: 'Any'
+                    }, ...collected.smoking.map((value) => ({value: value, label: value})).reverse()]}
+                    onChange={(value) => {
+                        console.log(value); // Handle selection logic here
+                    }}
+                />
+            </div>}
+            {collected.pets && <div>
+                <Title level={5}>Pets Allowed</Title>
+                <Select
+                    className={'w-full'}
+                    placeholder={'Pets'}
+                    options={[{
+                        value: undefined,
+                        label: 'Any'
+                    }, ...collected.pets.map((value) => ({value: value, label: value})).reverse()]}
+                    onChange={(value) => {
+                        console.log(value); // Handle selection logic here
+                    }}
+                />
+            </div>}
+            {typeFilter === 'Hotel' && <div className={''}>
+                <Title level={5}>Hotel Amenities</Title>
                 <Collapse ghost items={hotelFacilities.map((value: any, index) => {
                     let name: string = Object.keys(value)[ 0 ]
                     return {
@@ -236,9 +340,35 @@ export default function SearchFilter({stays, onFilter}: { stays: any[ ], onFilte
                             </Checkbox>
                         )),
                     };
-                })}/>
+                }).filter((value: any) => value.children.length > 0)}/>
 
-            </div>
+            </div>}
+            {typeFilter === 'Home' && <div className={''}>
+                <Title level={5}>Home Amenities</Title>
+                <Collapse ghost items={homeFacilities.map((value: any, index) => {
+                    let name: string = Object.keys(value)[ 0 ]
+                    return {
+                        key: index,
+                        label: value.name ? value.name : name,
+                        children: value.features.filter((value: string) => availableFilters.amenities.includes(value)).map((amenity: string, index: number) => (
+                            <Checkbox
+                                key={index}
+                                className={'flex'}
+                                checked={amenityFilters.includes(amenity)}
+                                onChange={(e) => {
+                                    if (e.target.checked) {
+                                        setAmenityFilters([...amenityFilters, amenity]);
+                                    } else {
+                                        setAmenityFilters(amenityFilters.filter(a => a !== amenity));
+                                    }
+                                }}
+                            >
+                                {amenity}
+                            </Checkbox>
+                        )),
+                    };
+                }).filter((value: any) => value.children.length > 0)}/>
+            </div>}
         </Card>
     </div>
 }

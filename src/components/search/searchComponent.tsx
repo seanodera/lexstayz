@@ -54,9 +54,24 @@ export default function SearchComponent() {
         setOpen(false);
     };
 
+
     useEffect(() => {
-        setDisplayStays(filterStaysByDate(allStays));
-    }, [allStays]);
+
+        const handleFilterUpdate = (staysArray:Stay[]) => {
+            const filteredStays = filterStaysByDate(staysArray);
+            setDisplayStays(filteredStays);
+            dispatch(updatePreFilter(filteredStays));
+        }
+
+        if (preFilter.length > 0) {
+            handleFilterUpdate(preFilter);
+        } else if (stays.length > 0) {
+            handleFilterUpdate(stays);
+        } else {
+            handleFilterUpdate(allStays);
+        }
+
+    }, []);
 
     useEffect(() => {
         if (params.has('loc')) {
@@ -233,8 +248,11 @@ export default function SearchComponent() {
             }}>
                 <SearchFilter stays={preFilter} onFilter={(filteredList: any) => {
                     const data = filterStaysByDate(filteredList);
-                    console.log('Prefilter: ',preFilter,' Filtered list: ', filteredList, 'data: ', data);
-                    setDisplayStays(data)
+                    if (data.length !== 0 && data.length !== displayStays.length) {
+                        console.log('Prefilter: ',preFilter,' Filtered list: ', filteredList, 'data: ', data);
+                        setDisplayStays(data);
+                    }
+
                 }}/>
             </Drawer>
         </div>
