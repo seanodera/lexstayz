@@ -1,29 +1,20 @@
 'use client'
 import {Button, Card} from "antd";
-import {BiChevronLeft} from "react-icons/bi";
 import SpecialRequests from "@/components/booking-confirmation/specialRequests";
 import ContactForm from "@/components/booking-confirmation/contactForm";
 import {LeftOutlined} from "@ant-design/icons";
-import Link from "next/link";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
-import {
-    convertCart,
-    handlePaymentAsync,
-    selectConfirmBooking,
-    setBookingStay
-} from "@/slices/confirmBookingSlice";
-import {dateReader, getExchangeRate, getFeePercentage, toMoneyFormat} from "@/lib/utils";
+import {convertCart, handlePaymentAsync, selectConfirmBooking, setBookingStay} from "@/slices/confirmBookingSlice";
+import {dateReader, toMoneyFormat} from "@/lib/utils";
 import {selectCurrentStay} from "@/slices/staysSlice";
 import {useRouter} from "next/navigation";
 import {useEffect, useState} from "react";
 import {getAuth} from "firebase/auth";
-import {count} from "@firebase/firestore";
 import {differenceInDays} from "date-fns";
-import {generateID} from "@/data/bookingData";
-import axios from "axios";
 import PaymentMethods from "@/components/confirm-booking/paymentMethods";
 import CancellationPolicy from "@/components/booking-confirmation/cancellationPolicy";
 import {selectCart} from "@/slices/bookingSlice";
+import {Home, Hotel} from "@/lib/types";
 
 
 export default function BookFirmPage() {
@@ -44,16 +35,19 @@ export default function BookFirmPage() {
             router.push('/login');
         }
 
-    },[]);
+    },[router, stay]);
+
     useEffect(() => {
-        dispatch(setBookingStay(stay))
+        if (stay){
+            dispatch(setBookingStay(stay))
+        }
         setLength(differenceInDays(booking.checkOutDate, booking.checkInDate));
-    }, [booking.checkInDate, booking.checkOutDate]);
+    }, [booking.checkInDate, booking.checkOutDate, dispatch, stay]);
 
 
     useEffect(() => {
         dispatch(convertCart(cart));
-    }, [cart]);
+    }, [cart, dispatch]);
 
     if (!booking || !stay) {
         return <div></div>;
@@ -61,6 +55,7 @@ export default function BookFirmPage() {
 
     function calculatePrice(amount: number) {
         let price = 0
+        if (!stay) return 0;
         if (booking.exchangeRates[ stay.currency ] && stay.currency !== booking.currency) {
             price = amount * 1.02 / booking.exchangeRates[ stay.currency ]
         } else {
@@ -127,9 +122,9 @@ export default function BookFirmPage() {
                                 <div>
                                     <div
                                         className={'text-white font-medium'}>{stay.name} | {stay.location?.city},{stay.location?.country}</div>
-                                    <div
-                                        className={'flex text-gray-200'}>{stay.beds} Beds &bull; {stay.bathrooms} Bath &bull; {stay.bedrooms} Bedrooms
-                                    </div>
+                                    {stay.type === 'Home' && <div
+                                        className={'flex text-gray-200'}>{(stay as Home).beds} Beds &bull; {(stay as Home).bathrooms} Bath &bull; {(stay as Home).bedrooms} Bedrooms
+                                    </div>}
                                 </div>
                             </div>
                         </div>
@@ -161,16 +156,16 @@ export default function BookFirmPage() {
                                     className={'text-dark'}>{booking.length} night</span></div>}
                                 {stay.type !== 'Hotel' && <div className={'text-end'}>
                                     <div
-                                        className={'mb-0'}>{booking.currency} {toMoneyFormat(stay.price * booking.usedRate)}</div>
+                                        className={'mb-0'}>{booking.currency} {toMoneyFormat((stay as Home).price * booking.usedRate)}</div>
                                     <div
                                         className={'mb-0 text-primary'}>{booking.currency} {toMoneyFormat(booking.subtotal)}</div>
                                 </div>}
                                 {booking.rooms.map((cartItem: any, index: number) => <div key={index}
                                                                                           className={'col-span-2 grid grid-cols-2'}>
                                     <div
-                                        className="capitalize text-gray-500">{stay.rooms.find((value: any) => value.id === cartItem.roomId).name}</div>
+                                        className="capitalize text-gray-500">{(stay as Hotel).rooms.find((value) => value.id === cartItem.roomId)?.name || 'Unknown Room'}</div>
                                     <div
-                                        className="capitalize text-end">{booking.currency} {calculatePrice(cartItem.numRooms * stay.rooms.find((value: any) => value.id === cartItem.roomId).price)}</div>
+                                        className="capitalize text-end">{booking.currency} {calculatePrice(cartItem.numRooms * ((stay as Hotel).rooms.find((value) => value.id === cartItem.roomId)?.price || 0))}</div>
                                 </div>)}
                                 <div className={'mb-0 text-gray-500'}>Booking Fees</div>
                                 <div

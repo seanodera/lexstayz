@@ -1,6 +1,7 @@
 export interface Stay {
     type: 'Home' | 'Hotel';
     id: string;
+    hostId: string;
     facilities: string[];
     smoking: string;
     checkInTime: string;
@@ -44,7 +45,7 @@ export interface Hotel extends Stay {
     fullyBookedDates?: string[];
 }
 
-export interface Location 
+export interface Location
     {
         latitude: number;
         longitude: number;

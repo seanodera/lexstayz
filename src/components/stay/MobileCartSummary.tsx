@@ -20,6 +20,9 @@ export default function MobileCartSummary() {
         });
         setTotalRooms(_totalRooms);
     }, [cart]);
+    if (!stay){
+        return <div></div>
+    }
     return (
         <div
             className="md:hidden fixed end-0 bottom-0 w-full bg-primary-50 z-10 flex justify-between border border-gray-200 py-3 px-7">

@@ -70,14 +70,14 @@ export default function Page() {
             </div> : <div></div>}
         </div>
         <div className={'space-y-4'}>
-            {stay.id ? <StayWidget stay={stay}/> : <Skeleton active/>}
-            {stay.id ? <RoomsWidget booking={booking} stay={stay}/> : <Skeleton active/>}
+            {stay ? <StayWidget stay={stay}/> : <Skeleton active/>}
+            {stay ? <RoomsWidget booking={booking} stay={stay}/> : <Skeleton active/>}
         </div>
         <div className={'md:col-span-2 space-y-4'}>
             {booking.id ? <ReservationDetails booking={booking}/> : <Skeleton active/>}
             {booking.id ? <BookingUserDetails booking={booking}/> : <Skeleton active/>}
         </div>
-        {(stay.id && booking.id) &&
+        {(stay && booking.id) &&
             <ReviewDialog isOpen={openDialog} setIsOpen={setOpenDialog} booking={booking} stay={stay}/>}
     </div>
 }

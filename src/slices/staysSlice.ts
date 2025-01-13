@@ -13,18 +13,18 @@ import {
   getCountFromServer,
 } from "@firebase/firestore";
 import { setBookingStay } from "@/slices/confirmBookingSlice";
-import { Host, Stay } from "@/lib/types";
+import {Home, Host, Hotel, Stay} from "@/lib/types";
 
 
 interface StaysState {
-  stays: Stay[];
+  stays: (Home | Hotel )[];
   fetchedPages: Record<string, number[]>;
   page: number;
   limit: number;
   staysCount: number;
   homesCount: number;
   hotelsCount: number;
-  currentStay: Stay;
+  currentStay: Home | Hotel | undefined;
   fetchedHosts: Host[];
   currentHost?: Host;
   currentId: number | string;
@@ -42,7 +42,7 @@ const initialState: StaysState = {
   currentHost: undefined,
   fetchedHosts: [],
   stays: [],
-  currentStay: {} as Stay,
+  currentStay: undefined,
   currentId: -1,
   isLoading: true,
   hasError: false,
@@ -192,10 +192,10 @@ const staysSlice = createSlice({
   name: "stays",
   initialState: initialState,
   reducers: {
-    setAllStays: (state, action: PayloadAction<Stay[]>) => {
+    setAllStays: (state, action: PayloadAction<any[]>) => {
       state.stays = action.payload;
     },
-    setCurrentStay: (state, action: PayloadAction<Stay>) => {
+    setCurrentStay: (state, action: PayloadAction<Home | Hotel>) => {
       state.currentStay = action.payload;
       state.currentId = -1;
     },
@@ -242,7 +242,7 @@ const staysSlice = createSlice({
             ...state.stays,
             ...(stays.filter(
               (newStay) => !state.stays.some((stay) => stay.id === newStay.id)
-            ) as Stay[]),
+            ) as (Home | Hotel)[]),
           ];
         }
         state.hasRun = true;
@@ -260,7 +260,7 @@ const staysSlice = createSlice({
       })
       .addCase(setCurrentStayFromId.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.currentStay = action.payload as Stay;
+        state.currentStay = action.payload as (Home | Hotel);
       })
       .addCase(setCurrentStayFromId.rejected, (state, action) => {
         state.isLoading = false;
