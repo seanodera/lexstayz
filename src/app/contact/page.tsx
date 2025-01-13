@@ -50,7 +50,7 @@ export default function ContactUsPage() {
 
                         <h3 className={'text-xl font-semibold mb-0'}>General Inquiries</h3>
                         <h4 className={'text-gray-400 mb-3'}>+44333837758</h4>
-                        <Link className={'underline font-bold text-dark'} href={'mailto:general@lexstayz.com'}>general@lexstayz.com</Link>
+                        <Link className={'underline font-bold text-dark'} href={'mailto:hello@fadorteclimited.com'}>hello@fadorteclimited.com</Link>
                     </div>
                 </div>
             </Card>
@@ -63,7 +63,7 @@ export default function ContactUsPage() {
 
                         <h3 className={'text-xl font-semibold mb-0'}>Call us</h3>
                         <h4 className={'text-gray-400 mb-3'}>Mon-Fri from 9 AM to 5 PM (GMT)</h4>
-                        <Link className={'underline font-bold text-dark'} href={'tel:general@lexstayz.com'}>+44333837758</Link>
+                        <Link className={'underline font-bold text-dark'} href={'tel:h+44333837758'}>+44333837758</Link>
                     </div>
                 </div>
             </Card>

@@ -10,6 +10,116 @@ const indexName = "stays";
 const index = searchClient.initIndex(indexName);
 
 
+function checkFirebaseQuery(state: RootState) {
+    const filters = state.search
+    const staysRef = collection(firestore, "stays");
+    let staysQuery = query(staysRef, where("published", "==", true));
+
+    // Filter by type
+    if (filters.typeFilter !== "All") {
+        staysQuery = query(staysQuery, where("type", "==", filters.typeFilter));
+    }
+
+    if (filters.priceRange) {
+        staysQuery = query(
+            staysQuery,
+            where("price", ">=", filters.priceRange[ 0 ]),
+            where("price", "<=", filters.priceRange[ 1 ])
+            // or(
+            //     and(
+            //         where("price", ">=", filters.priceRange[ 0 ]),
+            //         where("price", "<=", filters.priceRange[ 1 ])
+            //     ),
+            //     and(
+            //         where("rooms.price", ">=", filters.priceRange[ 0 ]),
+            //         where("rooms.price", "<=", filters.priceRange[ 1 ])
+            //     )
+            // )
+        );
+    }
+    // Filter by amenities
+    if (filters.amenityFilters.length > 0) {
+        staysQuery = query(
+            staysQuery,
+            where("facilities", "array-contains-any", filters.amenityFilters)
+        );
+    }
+
+    // Filter by location
+    if (filters.locationFilter) {
+        Object.keys(filters.locationFilter).forEach((key) => {
+            if (filters.locationFilter![ key as keyof LocationFilter ]) {
+                staysQuery = query(
+                    staysQuery,
+                    where(
+                        `location.${key}`,
+                        "==",
+                        filters.locationFilter![ key as keyof LocationFilter ]
+                    )
+                );
+            }
+        });
+    }
+
+    if (filters.roomAndBedFilter) {
+        const {bedrooms, beds, bathrooms} = filters.roomAndBedFilter as {
+            bedrooms: number;
+            beds: number;
+            bathrooms: number;
+        };
+
+        staysQuery = query(
+            staysQuery,
+            or(
+                and(
+                    where("type", "==", "Home"),
+                    where("bedrooms", ">=", bedrooms),
+                    where("beds", ">=", beds),
+                    where("bathrooms", ">=", bathrooms)
+                ),
+                and(
+                    where("type", "==", "Hotel"),
+                    where("rooms.beds", "array-contains", {number: beds})
+                )
+            )
+        );
+    }
+    if (filters.smokingFilter) {
+        staysQuery = query(staysQuery, where("smoking", "==", filters.smokingFilter));
+    }
+
+    if (filters.petsFilter) {
+        staysQuery = query(staysQuery, where("pets", "==", filters.petsFilter));
+    }
+    if (filters.partiesFilter) {
+        staysQuery = query(staysQuery, where("parties", "==", filters.partiesFilter));
+    }
+
+    // Filter by date range for Home types
+    const startDate = parseISO(state.confirmBooking.checkInDate);
+    const endDate = parseISO(state.confirmBooking.checkOutDate);
+    const datesInRange = eachDayOfInterval({
+        start: startDate,
+        end: endDate
+    }).map(date => formatISO(date).split('T')[ 0 ]);
+
+    // Split datesInRange into chunks of 10 to comply with Firestore's not-in limitation
+    const dateChunks = [];
+    for (let i = 0; i < datesInRange.length; i += 10) {
+        dateChunks.push(datesInRange.slice(i, i + 10));
+    }
+
+    let finalQuery = staysQuery;
+    dateChunks.forEach(chunk => {
+        finalQuery = query(finalQuery, or(
+            where("bookedDates", "not-in", chunk),
+            where("fullyBookedDates", "not-in", chunk)
+        ));
+    });
+    return finalQuery;
+
+}
+
 export const fetchLocationSuggestions = createAsyncThunk(
     'search/fetchLocationSuggestions',
     async (query: string, {rejectWithValue}) => {
@@ -116,111 +226,7 @@ export const fetchFilteredStaysCount = createAsyncThunk(
         {rejectWithValue, getState}) => {
         try {
             const state = getState() as RootState;
-            const filters = state.search
-            const staysRef = collection(firestore, "stays");
-            let staysQuery = query(staysRef, where("published", "==", true));
-
-            // Filter by type
-            if (filters.typeFilter !== "All") {
-                staysQuery = query(staysQuery, where("type", "==", filters.typeFilter));
-            }
-
-            if (filters.priceRange) {
-                staysQuery = query(
-                    staysQuery,
-                    or(
-                        and(
-                            where("price", ">=", filters.priceRange[ 0 ]),
-                            where("price", "<=", filters.priceRange[ 1 ])
-                        ),
-                        and(
-                            where("rooms.price", ">=", filters.priceRange[ 0 ]),
-                            where("rooms.price", "<=", filters.priceRange[ 1 ])
-                        )
-                    )
-                );
-            }
-            // Filter by amenities
-            if (filters.amenityFilters.length > 0) {
-                staysQuery = query(
-                    staysQuery,
-                    where("facilities", "array-contains-any", filters.amenityFilters)
-                );
-            }
-
-            // Filter by location
-            if (filters.locationFilter) {
-                Object.keys(filters.locationFilter).forEach((key) => {
-                    if (filters.locationFilter![ key as keyof LocationFilter ]) {
-                        staysQuery = query(
-                            staysQuery,
-                            where(
-                                `location.${key}`,
-                                "==",
-                                filters.locationFilter![ key as keyof LocationFilter ]
-                            )
-                        );
-                    }
-                });
-            }
-
-            if (filters.roomAndBedFilter) {
-                const {bedrooms, beds, bathrooms} = filters.roomAndBedFilter as {
-                    bedrooms: number;
-                    beds: number;
-                    bathrooms: number;
-                };
-
-                staysQuery = query(
-                    staysQuery,
-                    or(
-                        and(
-                            where("type", "==", "Home"),
-                            where("bedrooms", ">=", bedrooms),
-                            where("beds", ">=", beds),
-                            where("bathrooms", ">=", bathrooms)
-                        ),
-                        and(
-                            where("type", "==", "Hotel"),
-                            where("rooms.beds", "array-contains", {number: beds})
-                        )
-                    )
-                );
-            }
-            if (filters.smokingFilter) {
-                staysQuery = query(staysQuery, where("smoking", "==", filters.smokingFilter));
-            }
-
-            if (filters.petsFilter) {
-                staysQuery = query(staysQuery, where("pets", "==", filters.petsFilter));
-            }
-            if (filters.partiesFilter) {
-                staysQuery = query(staysQuery, where("parties", "==", filters.partiesFilter));
-            }
-
-            // Filter by date range for Home types
-            const startDate = parseISO(state.confirmBooking.checkInDate);
-            const endDate = parseISO(state.confirmBooking.checkInDate);
-            const datesInRange = eachDayOfInterval({
-                start: startDate,
-                end: endDate
-            }).map(date => formatISO(date).split('T')[ 0 ]);
-
-            // Split datesInRange into chunks of 10 to comply with Firestore's not-in limitation
-            const dateChunks = [];
-            for (let i = 0; i < datesInRange.length; i += 10) {
-                dateChunks.push(datesInRange.slice(i, i + 10));
-            }
-
-            let finalQuery = staysQuery;
-            dateChunks.forEach(chunk => {
-                finalQuery = query(finalQuery, or(
-                    where("bookedDates", "not-in", chunk),
-                    where("fullyBookedDates", "not-in", chunk)
-                ));
-            });
-
-            console.log(staysQuery)
+            const finalQuery = checkFirebaseQuery(state);
             const countSnapshot = await getCountFromServer(finalQuery);
             return countSnapshot.data().count;
         } catch (error) {
@@ -240,112 +246,7 @@ export const fetchFilteredStays = createAsyncThunk(
         {rejectWithValue, getState}) => {
         try {
             const state = getState() as RootState;
-            const filters = state.search;
-            console.log(filters);
-            const staysRef = collection(firestore, "stays");
-            let staysQuery = query(staysRef, where("published", "==", true));
-
-            // Filter by type
-            if (filters.typeFilter !== "All") {
-                staysQuery = query(staysQuery, where("type", "==", filters.typeFilter));
-            }
-
-            if (filters.priceRange) {
-                staysQuery = query(
-                    staysQuery,
-                    or(
-                        and(
-                            where("price", ">=", filters.priceRange[ 0 ]),
-                            where("price", "<=", filters.priceRange[ 1 ])
-                        ),
-                        and(
-                            where("rooms.price", ">=", filters.priceRange[ 0 ]),
-                            where("rooms.price", "<=", filters.priceRange[ 1 ])
-                        )
-                    )
-                );
-            }
-            // Filter by amenities
-            if (filters.amenityFilters.length > 0) {
-                staysQuery = query(
-                    staysQuery,
-                    where("facilities", "array-contains-any", filters.amenityFilters)
-                );
-            }
-
-            // Filter by location
-            if (filters.locationFilter) {
-                Object.keys(filters.locationFilter).forEach((key) => {
-                    if (filters.locationFilter![ key as keyof LocationFilter ]) {
-                        staysQuery = query(
-                            staysQuery,
-                            where(
-                                `location.${key}`,
-                                "==",
-                                filters.locationFilter![ key as keyof LocationFilter ]
-                            )
-                        );
-                    }
-                });
-            }
-
-            if (filters.roomAndBedFilter) {
-                const {bedrooms, beds, bathrooms} = filters.roomAndBedFilter as {
-                    bedrooms: number;
-                    beds: number;
-                    bathrooms: number;
-                };
-
-                staysQuery = query(
-                    staysQuery,
-                    or(
-                        and(
-                            where("type", "==", "Home"),
-                            where("bedrooms", ">=", bedrooms),
-                            where("beds", ">=", beds),
-                            where("bathrooms", ">=", bathrooms)
-                        ),
-                        and(
-                            where("type", "==", "Hotel"),
-                            where("rooms.beds", "array-contains", {number: beds})
-                        )
-                    )
-                );
-            }
-
-            if (filters.smokingFilter) {
-                staysQuery = query(staysQuery, where("smoking", "==", filters.smokingFilter));
-            }
-
-            if (filters.petsFilter) {
-                staysQuery = query(staysQuery, where("pets", "==", filters.petsFilter));
-            }
-            if (filters.partiesFilter) {
-                staysQuery = query(staysQuery, where("parties", "==", filters.partiesFilter));
-            }
-
-            // Filter by date range for Home types
-            const startDate = parseISO(state.confirmBooking.checkInDate);
-            const endDate = parseISO(state.confirmBooking.checkInDate);
-            const datesInRange = eachDayOfInterval({
-                start: startDate,
-                end: endDate
-            }).map(date => formatISO(date).split('T')[ 0 ]);
-
-            // Split datesInRange into chunks of 10 to comply with Firestore's not-in limitation
-            const dateChunks = [];
-            for (let i = 0; i < datesInRange.length; i += 10) {
-                dateChunks.push(datesInRange.slice(i, i + 10));
-            }
-
-            let finalQuery = staysQuery;
-            dateChunks.forEach(chunk => {
-                finalQuery = query(finalQuery, and(
-                    where("bookedDates", "not-in", chunk),
-                    where("fullyBookedDates", "not-in", chunk)
-                ));
-            });
-
+            const finalQuery = checkFirebaseQuery(state);
             const snapshot = await getDocs(finalQuery);
             console.log(snapshot.docs.length);
             return snapshot.docs.map((doc) => doc.data());
