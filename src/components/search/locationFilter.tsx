@@ -106,6 +106,7 @@ export default function LocationFilterComponent({stays }: { stays: Stay[] }) {
                     value: value,
                     label: value
                 })) : []}
+                value={locationProperties.country}
                 onChange={value => dispatch(setLocationFilter(locationFilter ? {
                     ...locationFilter,
                     country: value
@@ -122,6 +123,7 @@ export default function LocationFilterComponent({stays }: { stays: Stay[] }) {
                     value: value,
                     label: value
                 })) : []}
+                value={locationFilter.city}
                 onChange={value => dispatch(setLocationFilter({
                     ...locationFilter,
                     city: value
@@ -138,6 +140,7 @@ export default function LocationFilterComponent({stays }: { stays: Stay[] }) {
                     value: value,
                     label: value
                 })) : []}
+                value={locationFilter.district}
                 onChange={value => dispatch(setLocationFilter(locationFilter ? {
                     ...locationFilter,
                     district: value
@@ -153,6 +156,7 @@ export default function LocationFilterComponent({stays }: { stays: Stay[] }) {
                     value: value,
                     label: value
                 })) : []}
+                value={locationFilter.street2}
                 onChange={value => dispatch(setLocationFilter(locationFilter ? {
                     ...locationFilter,
                     street2: value
@@ -168,6 +172,7 @@ export default function LocationFilterComponent({stays }: { stays: Stay[] }) {
                     value: value,
                     label: value
                 })) : []}
+                value={locationFilter.street}
                 onChange={value => dispatch(setLocationFilter(locationFilter ? {
                     ...locationFilter,
                     street: value
