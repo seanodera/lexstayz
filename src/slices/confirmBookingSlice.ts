@@ -5,7 +5,7 @@ import {RootState} from "@/data/types";
 import {getCountry, getFeePercentage, handler_url} from "@/lib/utils";
 import createBooking from "@/slices/confirmBookingThunks/createBooking";
 import handlePaymentAsync from '@/slices/confirmBookingThunks/handlePaymentAsync';
-import {setExchangeRates} from "@/slices/staysSlice";
+import {setExchangeRates, setUserLocation} from "@/slices/staysSlice";
 import Error from "next/error";
 import axios from "axios";
 
@@ -129,6 +129,7 @@ export const fetchExchangeRates = createAsyncThunk(
 
             const data = await response.json();
             dispatch(setExchangeRates({rates: data.rates, currency: data.base_code}))
+            dispatch(setUserLocation({latitude: country?.latitude, longitude: country?.longitude}))
             return {rates: data.rates, currency: data.base_code, country: country?.name};
         } catch (error) {
             rejectWithValue('Error fetching the currency exchange')

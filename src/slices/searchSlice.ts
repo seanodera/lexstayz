@@ -1,7 +1,9 @@
 'use client'
-import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
-import { searchClient } from "@/lib/firebase";
-import {RootState} from "@/data/types";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { searchClient, firestore } from "@/lib/firebase";
+import { collection, query, where, getCountFromServer, getDocs } from 'firebase/firestore';
+import { RootState } from "@/data/types";
+import { LocationFilter } from "@/components/search/locationFilter";
 
 const indexName = 'stays';
 const index = searchClient.initIndex(indexName);
@@ -37,8 +39,121 @@ export const searchAsync = createAsyncThunk(
     }
 );
 
+export const fetchFilteredStaysCount = createAsyncThunk(
+    'search/fetchFilteredStaysCount',
+    async (filters: {
+        typeFilter: string;
+        priceRange: number[];
+        amenityFilters: string[];
+        locationFilter?: LocationFilter;
+        roomCountFilter?: number | null;
+        ratingFilter: number[];
+    }, { rejectWithValue }) => {
+        try {
+            const staysRef = collection(firestore, 'stays');
+            let staysQuery = query(staysRef, where('published', '==', true));
+
+            // Filter by type
+            if (filters.typeFilter !== 'All') {
+                staysQuery = query(staysQuery, where('type', '==', filters.typeFilter));
+            }
+
+            // Filter by price
+            staysQuery = query(staysQuery, where('price', '>=', filters.priceRange[0]), where('price', '<=', filters.priceRange[1]));
+
+            // Filter by amenities
+            if (filters.amenityFilters.length > 0) {
+                filters.amenityFilters.forEach(amenity => {
+                    staysQuery = query(staysQuery, where('amenities', 'array-contains', amenity));
+                });
+            }
+
+            // Filter by location
+            if (filters.locationFilter) {
+                Object.keys(filters.locationFilter).forEach(key => {
+                    if (filters.locationFilter![key as keyof LocationFilter]) {
+                        staysQuery = query(staysQuery, where(`location.${key}`, '==', filters.locationFilter![key as keyof LocationFilter]));
+                    }
+                });
+            }
+
+            // Filter by room count
+            if (filters.roomCountFilter) {
+                staysQuery = query(staysQuery, where('rooms.length', '==', filters.roomCountFilter));
+            }
+
+            // Filter by rating
+            staysQuery = query(staysQuery, where('rating', '>=', filters.ratingFilter[0]), where('rating', '<=', filters.ratingFilter[1]));
+
+            const countSnapshot = await getCountFromServer(staysQuery);
+            return countSnapshot.data().count;
+        } catch (error) {
+            if (error instanceof Error) {
+                return rejectWithValue(error.message);
+            }
+            return rejectWithValue('An unknown error occurred');
+        }
+    }
+);
+
+export const fetchFilteredStays = createAsyncThunk('search/fetchFilteredStays', async (filters: {
+    typeFilter: string;
+    priceRange: number[];
+    amenityFilters: string[];
+    locationFilter?: LocationFilter;
+    roomCountFilter?: number | null;
+    ratingFilter: number[];
+}, { rejectWithValue }) => {
+    try {
+        const staysRef = collection(firestore, 'stays');
+        let staysQuery = query(staysRef, where('published', '==', true));
+
+        // Filter by type
+        if (filters.typeFilter !== 'All') {
+            staysQuery = query(staysQuery, where('type', '==', filters.typeFilter));
+        }
+
+        // Filter by price
+        staysQuery = query(staysQuery, where('price', '>=', filters.priceRange[0]), where('price', '<=', filters.priceRange[1]));
+
+        // Filter by amenities
+        if (filters.amenityFilters.length > 0) {
+            filters.amenityFilters.forEach(amenity => {
+                staysQuery = query(staysQuery, where('amenities', 'array-contains', amenity));
+            });
+        }
+
+        // Filter by location
+        if (filters.locationFilter) {
+            Object.keys(filters.locationFilter).forEach(key => {
+                if (filters.locationFilter![key as keyof LocationFilter]) {
+                    staysQuery = query(staysQuery, where(`location.${key}`, '==', filters.locationFilter![key as keyof LocationFilter]));
+                }
+            });
+        }
+
+        // Filter by room count
+        if (filters.roomCountFilter) {
+            staysQuery = query(staysQuery, where('rooms.length', '==', filters.roomCountFilter));
+        }
+
+        // Filter by rating
+        staysQuery = query(staysQuery, where('rating', '>=', filters.ratingFilter[0]), where('rating', '<=', filters.ratingFilter[1]));
+
+        const snapshot = await getDocs(staysQuery);
+        const data = snapshot.docs.map(doc => doc.data())
+        return data;
+    } catch (error) {
+    console.log(error)
+    if (error instanceof Error) {
+        return rejectWithValue(error.message);
+    }
+    return rejectWithValue('An unknown error occurred');
+}
+})
 interface SearchState {
     isLoading: boolean;
+    isCountLoading: boolean;
     hasError: boolean;
     errorMessage: string;
     currentTerm: string;
@@ -46,6 +161,7 @@ interface SearchState {
     preFilteredList: any[];
     processedList: any[];
     displayList: any[];
+    availableCount: number;
 }
 
 const initialState: SearchState = {
@@ -57,6 +173,8 @@ const initialState: SearchState = {
     preFilteredList: [],
     processedList: [],
     displayList: [],
+    availableCount: 0,
+    isCountLoading: false
 };
 
 const searchSlice = createSlice({
@@ -86,11 +204,38 @@ const searchSlice = createSlice({
                 state.isLoading = false;
                 state.hasError = true;
                 state.errorMessage = action.payload as string || 'Search failed';
-            });
+            })
+            .addCase(fetchFilteredStaysCount.pending, (state) => {
+                state.isCountLoading = true;
+            })
+            .addCase(fetchFilteredStaysCount.fulfilled, (state, action) => {
+                state.isCountLoading = false;
+                state.availableCount = action.payload;
+            })
+            .addCase(fetchFilteredStaysCount.rejected, (state, action) => {
+                state.isCountLoading = false;
+                state.hasError = true;
+                state.errorMessage = action.payload as string || 'Failed to fetch filtered stays count';
+            })
+            .addCase(fetchFilteredStays.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(fetchFilteredStays.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.preFilteredList = action.payload;
+                state.currentResults = action.payload;
+                state.displayList = action.payload;
+            })
+            .addCase(fetchFilteredStays.rejected, (state, action) => {
+                state.isLoading = false;
+                state.hasError = true;
+                state.errorMessage = action.payload as string || 'Failed to fetch filtered stays';
+            })
+            ;
     }
 });
 
-export const {updatePreFilter} = searchSlice.actions;
+export const { updatePreFilter, setDisplayList } = searchSlice.actions;
 export const selectDisplayList = (state: RootState) => state.search.displayList;
 export const selectSearchResults = (state: RootState) => state.search.currentResults;
 export const selectIsLoading = (state: RootState) => state.search.isLoading;

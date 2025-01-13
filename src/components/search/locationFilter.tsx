@@ -1,4 +1,5 @@
 'use client'
+import { Stay } from "@/lib/types";
 import {Select, Typography} from "antd";
 import {useEffect, useState} from "react";
 
@@ -12,7 +13,7 @@ export interface LocationFilter {
     street: string | undefined;
 }
 
-export default function LocationFilterComponent({stays}: { stays: any[ ] }) {
+export default function LocationFilterComponent({stays, onFilter}: { stays: Stay[]; onFilter: (stays: Stay[], locationFilter: LocationFilter | undefined) => void }) {
     const [locationProperties, setLocationProperties] = useState<{
         [ key: string ]: any[];
     }>({})
@@ -78,7 +79,7 @@ export default function LocationFilterComponent({stays}: { stays: any[ ] }) {
                 return filterValue ? filterValue === location[key] : true;
             });
         });
-
+        onFilter(output, locationFilter);
         console.log(output.length, stays.length, output.length === stays.length);
         generateFilters(output);
     }

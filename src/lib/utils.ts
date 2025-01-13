@@ -93,17 +93,19 @@ export async function getCountry() {
         // Fetch the client's IP address using Axios
         const ipResponse = await axios.get('https://api.ipify.org?format=json');
         const ip = ipResponse.data.ip;
-
+        const apiKey = process.env.NEXT_PUBLIC_IPGEOLOCATION_API_KEY;
         // Try the primary API route first
         try {
-            const countryResponse = await axios.get(`https://ipapi.co/${ip}/json/`);
-            const countryCode = countryResponse.data.country;
+            const countryResponse = await axios.get(`https://api.ipgeolocation.io/ipgeo?apiKey=${apiKey}&ip=${ip}`);
+            const countryCode = countryResponse.data.country_code2;
 
             const country = countries[countryCode];
             return {
                 name: country.name,
                 emoji: country.emoji,
-                currency: country.currencies[0]
+                currency: country.currencies[0],
+                latitude: countryResponse.data.latitude,
+                longitude: countryResponse.data.longitude,
             };
 
         } catch (primaryError) {
@@ -116,11 +118,13 @@ export async function getCountry() {
             return {
                 name: backupCountry.name,
                 emoji: backupCountry.emoji,
-                currency: backupCountry.currencies[0]
+                currency: backupCountry.currencies[0],
+                latitude: backupCountryResponse.data.latitude,
+                longitude: backupCountryResponse.data.longitude,
             };
         }
     } catch (error) {
-        console.error("Error fetching country data: ", error);
+        // console.error("Error fetching country data: ", error);
         return undefined;
     }
 }
