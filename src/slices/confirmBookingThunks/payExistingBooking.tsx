@@ -10,7 +10,7 @@ import { firestore } from "@/lib/firebase";
 async function updateBooking (id:string, paymentData : any, method: string, newRef: string, paymentRate: number, paymentCurrency: string) {
     const bookingsDoc = doc(firestore, 'bookings', id);
     await updateDoc(bookingsDoc, {paymentData: paymentData,
-        paymentMethod: method,paymentDate: (new Date).toISOString(),paymentReference: newRef });
+        paymentMethod: method,paymentDate: (new Date).toISOString(),paymentReference: newRef, paymentCurrency: paymentCurrency, paymentRate: paymentRate, });
 }
 
 export const payExistingBooking = createAsyncThunk('confirmBooking/payExistingBooking',async (existingBooking: any, {dispatch, getState, rejectWithValue}) => {
