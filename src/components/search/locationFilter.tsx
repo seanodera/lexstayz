@@ -1,5 +1,5 @@
 'use client'
-import { Stay } from "@/lib/types";
+import { Stay, Location } from "@/lib/types";
 import {Select, Typography} from "antd";
 import {useEffect, useState} from "react";
 
@@ -76,7 +76,7 @@ export default function LocationFilterComponent({stays, onFilter}: { stays: Stay
             const location = stay.location;
             return !locationFilter || Object.keys(locationFilter).every(key => {
                 const filterValue = locationFilter[key as keyof LocationFilter];
-                return filterValue ? filterValue === location[key] : true;
+                return filterValue ? filterValue === location[key as keyof Location] : true;
             });
         });
         onFilter(output, locationFilter);

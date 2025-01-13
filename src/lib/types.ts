@@ -1,9 +1,81 @@
 export interface Stay {
+    type: 'Home' | 'Hotel';
     id: string;
-    rooms: any[];
-
-    [ key: string ]: any;
+    facilities: string[];
+    smoking: string;
+    checkInTime: string;
+    checkOutTime: string;
+    currency: string;
+    published: boolean;
+    poster: string;
+    description: string;
+    rating: number;
+    publishedDate: string;
+    location: Location ;
+    images: string[];
+    name: string;
+    numReviews: number;
+    parties: string;
+    cancellation: {
+        timeSpace: string;
+        preDate: boolean;
+        time: number;
+        cancellation: string;
+        rate: number;
+    };
+    pets: string;
+    minAge: number;
 }
+
+export interface Home extends Stay {
+    type: 'Home';
+    maxGuests: number;
+    bathrooms: number;
+    beds: number;
+    price: number;
+    bedrooms: number;
+    homeType: string;
+    bookedDates?: string[];
+}
+
+export interface Hotel extends Stay {
+    type: 'Hotel';
+    rooms: Room[];
+    fullyBookedDates?: string[];
+}
+
+export interface Location 
+    {
+        latitude: number;
+        longitude: number;
+        zipCode: string;
+        street2: string;
+        fullAddress: string;
+        district: string;
+        country: string;
+        street: string;
+        city: string;
+    }
+
+
+export interface Room {
+    poster: string;
+    beds: Array<{
+        number: number;
+        type: string;
+    }>;
+    description: string;
+    amenities: string[];
+    name: string;
+    maxGuests: number;
+    available: number;
+    id: string;
+    price: number;
+    images: string[];
+    bookedDates?: { [ key: string ]: number;};
+    fullDates?: string[]
+}
+
 
 export interface Dates {
     startDate: string;

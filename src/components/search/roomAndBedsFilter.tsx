@@ -2,7 +2,7 @@
 import { Button, Typography } from "antd";
 import { MinusOutlined, PlusOutlined } from "@ant-design/icons";
 import { useState, useEffect } from "react";
-import { Stay } from "@/lib/types";
+import { Home, Hotel, Stay } from "@/lib/types";
 
 const { Title, Text } = Typography;
 
@@ -13,7 +13,14 @@ export default function RoomAndBedsFilter({
 }: {
   collectedProperties: any;
   stays: Stay[];
-  onFilter: (stays: Stay[]) => void;
+  onFilter: (
+    stays: Stay[],
+    filters: {
+      bedrooms: number;
+      beds: number;
+      bathrooms: number;
+    }
+  ) => void;
 }) {
   // Initialize the states
   const [bedrooms, setBedrooms] = useState<number>(0);
@@ -39,17 +46,30 @@ export default function RoomAndBedsFilter({
   }, [collectedProperties]); // Rerun when collectedProperties changes
 
   useEffect(() => {
+    function applyFilters() {
+      const output = stays.filter((stay) => {
+        if (stay.type === "Home") {
+          return (
+            (stay as Home).bedrooms >= bedrooms &&
+            (stay as Home).beds >= beds &&
+            (stay as Home).bathrooms >= bathrooms
+          );
+        } else if (stay.type === "Hotel") {
+          return (stay as Hotel).rooms.some((room) =>
+            room.beds.some((bed) => bed.number >= beds)
+          );
+        }
+        return false;
+      });
+      onFilter(output, {
+        bedrooms,
+        beds,
+        bathrooms,
+      });
+    }
     applyFilters();
   }, [bedrooms, beds, bathrooms]);
-  function applyFilters() {
-    const output = stays.filter(
-      (stay) =>
-        stay.bedrooms >= bedrooms &&
-        stay.beds >= beds &&
-        stay.bathrooms >= bathrooms
-    );
-    onFilter(output);
-  }
+
   return (
     <div className={"grid grid-cols-2 gap-2"}>
       <Title level={5} className={"col-span-2"}>

@@ -13,14 +13,8 @@ import {
   getCountFromServer,
 } from "@firebase/firestore";
 import { setBookingStay } from "@/slices/confirmBookingSlice";
-import { Host } from "@/lib/types";
+import { Host, Stay } from "@/lib/types";
 
-export interface Stay {
-  id: string;
-  rooms: any[];
-
-  [key: string]: any;
-}
 
 interface StaysState {
   stays: Stay[];
