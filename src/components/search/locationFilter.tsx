@@ -2,8 +2,10 @@
 import { Stay, Location } from "@/lib/types";
 import {Select, Typography} from "antd";
 import {useEffect, useState} from "react";
+import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
+import {setLocationFilter} from "@/slices/searchSlice";
 
-const {Title, Text} = Typography;
+const {Title} = Typography;
 
 export interface LocationFilter {
     city: string | undefined;
@@ -13,16 +15,20 @@ export interface LocationFilter {
     street: string | undefined;
 }
 
-export default function LocationFilterComponent({stays, onFilter}: { stays: Stay[]; onFilter: (stays: Stay[], locationFilter: LocationFilter | undefined) => void }) {
+export default function LocationFilterComponent({stays }: { stays: Stay[] }) {
     const [locationProperties, setLocationProperties] = useState<{
         [ key: string ]: any[];
     }>({})
-    const [locationFilter, setLocationFilter] = useState<LocationFilter>();
-    const keys = ['country', 'city', 'district', 'street2', 'street'];
+
+    const dispatch = useAppDispatch();
+    const {locationFilter} = useAppSelector(state => state.search);
+    // const keys = ['country', 'city', 'district', 'street2', 'street'];
     useEffect(() => {
         generateFilters(stays);
-        minFilters()
+        // minFilters()
     }, []);
+
+
 
     function generateFilters(locStays: any[]) {
         const collectedProperties: { [ key: string ]: any[] } = {};
@@ -45,46 +51,47 @@ export default function LocationFilterComponent({stays, onFilter}: { stays: Stay
 
 
         setLocationProperties(locationProps);
-
-
         console.log(collectedProperties, locationProps);
+        return locationProps;
+
     }
 
-    function minFilters() {
-        const locationProps = locationProperties;
-        const locFilter: LocationFilter = {
-            city: undefined,
-            country: undefined,
-            district: undefined,
-            street2: undefined,
-            street: undefined,
-        }
-        for (let i = 0; i < keys.length; i++) {
-            const key = keys[ i ];
-            if (locationProps[ key ] && locationProps[ key ].length === 1) {
-                locFilter[ key as keyof LocationFilter ] = locationProps[ key ][ 0 ];
-            } else {
-                break;
-            }
-        }
+    // function minFilters() {
+    //     const locationProps = locationProperties;
+    //     const locFilter: LocationFilter = {
+    //         city: undefined,
+    //         country: undefined,
+    //         district: undefined,
+    //         street2: undefined,
+    //         street: undefined,
+    //     }
+    //     for (let i = 0; i < keys.length; i++) {
+    //         const key = keys[ i ];
+    //         if (locationProps[ key ] && locationProps[ key ].length === 1) {
+    //             locFilter[ key as keyof LocationFilter ] = locationProps[ key ][ 0 ];
+    //         } else {
+    //             break;
+    //         }
+    //     }
+    //
+    //     dispatch(setLocationFilter(locFilter));
+    // }
 
-        setLocationFilter(locFilter);
-    }
 
-    function applyFilters() {
-        const output = stays.filter(stay => {
-            const location = stay.location;
-            return !locationFilter || Object.keys(locationFilter).every(key => {
-                const filterValue = locationFilter[key as keyof LocationFilter];
-                return filterValue ? filterValue === location[key as keyof Location] : true;
-            });
-        });
-        onFilter(output, locationFilter);
-        console.log(output.length, stays.length, output.length === stays.length);
-        generateFilters(output);
-    }
 
     useEffect(() => {
+        function applyFilters() {
+            const output = stays.filter(stay => {
+                const location = stay.location;
+                return !locationFilter || Object.keys(locationFilter).every(key => {
+                    const filterValue = locationFilter[key as keyof LocationFilter];
+                    return filterValue ? filterValue === location[key as keyof Location] : true;
+                });
+            });
+
+
+            generateFilters(output);
+        }
         applyFilters()
     }, [locationFilter]);
 
@@ -99,10 +106,10 @@ export default function LocationFilterComponent({stays, onFilter}: { stays: Stay
                     value: value,
                     label: value
                 })) : []}
-                onChange={value => setLocationFilter(locationFilter ? {
+                onChange={value => dispatch(setLocationFilter(locationFilter ? {
                     ...locationFilter,
                     country: value
-                } : {city: value, country: undefined, district: undefined, street: undefined, street2: undefined})}
+                } : {city: value, country: undefined, district: undefined, street: undefined, street2: undefined}))}
             />
         </div>
 
@@ -115,10 +122,10 @@ export default function LocationFilterComponent({stays, onFilter}: { stays: Stay
                     value: value,
                     label: value
                 })) : []}
-                onChange={value => setLocationFilter({
+                onChange={value => dispatch(setLocationFilter({
                     ...locationFilter,
                     city: value
-                })}
+                }))}
             />
         </div>}
 
@@ -131,10 +138,10 @@ export default function LocationFilterComponent({stays, onFilter}: { stays: Stay
                     value: value,
                     label: value
                 })) : []}
-                onChange={value => setLocationFilter(locationFilter ? {
+                onChange={value => dispatch(setLocationFilter(locationFilter ? {
                     ...locationFilter,
                     district: value
-                } : {city: undefined, country: undefined, district: value, street: undefined, street2: undefined})}
+                } : {city: undefined, country: undefined, district: value, street: undefined, street2: undefined}))}
             />
         </div>}
         {locationFilter && locationFilter.district && <div>
@@ -146,10 +153,10 @@ export default function LocationFilterComponent({stays, onFilter}: { stays: Stay
                     value: value,
                     label: value
                 })) : []}
-                onChange={value => setLocationFilter(locationFilter ? {
+                onChange={value => dispatch(setLocationFilter(locationFilter ? {
                     ...locationFilter,
                     street2: value
-                } : {city: undefined, country: undefined, district: undefined, street: undefined, street2: value})}
+                } : {city: undefined, country: undefined, district: undefined, street: undefined, street2: value}))}
             />
         </div>}
         {locationFilter && locationFilter.street2 && <div>
@@ -161,10 +168,10 @@ export default function LocationFilterComponent({stays, onFilter}: { stays: Stay
                     value: value,
                     label: value
                 })) : []}
-                onChange={value => setLocationFilter(locationFilter ? {
+                onChange={value => dispatch(setLocationFilter(locationFilter ? {
                     ...locationFilter,
                     street: value
-                } : {city: undefined, country: undefined, district: undefined, street: value, street2: undefined})}
+                } : {city: undefined, country: undefined, district: undefined, street: value, street2: undefined}))}
             />
         </div>}
     </div>

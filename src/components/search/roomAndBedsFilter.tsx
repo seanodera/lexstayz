@@ -1,27 +1,21 @@
 "use client";
-import { Button, Typography } from "antd";
-import { MinusOutlined, PlusOutlined } from "@ant-design/icons";
-import { useState, useEffect } from "react";
-import { Home, Hotel, Stay } from "@/lib/types";
+import {Button, Typography} from "antd";
+import {MinusOutlined, PlusOutlined} from "@ant-design/icons";
+import {useEffect, useState} from "react";
+import {useAppDispatch} from "@/hooks/hooks";
+import {setRoomAndBedFilter} from "@/slices/searchSlice";
 
 const { Title, Text } = Typography;
 
 export default function RoomAndBedsFilter({
   collectedProperties,
-  stays,
-  onFilter,
+
+
 }: {
   collectedProperties: any;
-  stays: Stay[];
-  onFilter: (
-    stays: Stay[],
-    filters: {
-      bedrooms: number;
-      beds: number;
-      bathrooms: number;
-    }
-  ) => void;
+
 }) {
+    const dispatch = useAppDispatch();
   // Initialize the states
   const [bedrooms, setBedrooms] = useState<number>(0);
   const [beds, setBeds] = useState<number>(0);
@@ -47,28 +41,16 @@ export default function RoomAndBedsFilter({
 
   useEffect(() => {
     function applyFilters() {
-      const output = stays.filter((stay) => {
-        if (stay.type === "Home") {
-          return (
-            (stay as Home).bedrooms >= bedrooms &&
-            (stay as Home).beds >= beds &&
-            (stay as Home).bathrooms >= bathrooms
-          );
-        } else if (stay.type === "Hotel") {
-          return (stay as Hotel).rooms.some((room) =>
-            room.beds.some((bed) => bed.number >= beds)
-          );
-        }
-        return false;
-      });
-      onFilter(output, {
-        bedrooms,
-        beds,
-        bathrooms,
-      });
+
+      dispatch(setRoomAndBedFilter( {
+          bedrooms,
+          beds,
+          bathrooms,
+      }))
+
     }
     applyFilters();
-  }, [bedrooms, beds, bathrooms]);
+  }, [bedrooms, beds, bathrooms, dispatch]);
 
   return (
     <div className={"grid grid-cols-2 gap-2"}>

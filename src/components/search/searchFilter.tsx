@@ -1,31 +1,28 @@
 "use client";
-import { useEffect, useState } from "react";
-import {
-  Button,
-  Card,
-  Checkbox,
-  Collapse,
-  Divider,
-  Segmented,
-  Select,
-  Slider,
-  Typography,
-} from "antd";
-import { IoMdGlobe } from "react-icons/io";
-import { MdOutlineHotel, MdOutlineVilla } from "react-icons/md";
-import { toMoneyFormat } from "@/lib/utils";
-import { homeFacilities, hotelFacilities } from "@/data/hotelsDataLocal";
-import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { selectExchangeRate, selectGlobalCurrency } from "@/slices/staysSlice";
-import { MinusOutlined, PlusOutlined } from "@ant-design/icons";
-import LocationFilterComponent, {
-  LocationFilter,
-} from "@/components/search/locationFilter";
+import {useEffect, useState} from "react";
+import {Button, Card, Divider, Segmented, Select, Slider, Typography,} from "antd";
+import {IoMdGlobe} from "react-icons/io";
+import {MdOutlineHotel, MdOutlineVilla} from "react-icons/md";
+import {toMoneyFormat} from "@/lib/utils";
+import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
+import {selectExchangeRate, selectGlobalCurrency} from "@/slices/staysSlice";
+import LocationFilterComponent, {LocationFilter,} from "@/components/search/locationFilter";
 import RoomAndBedsFilter from "@/components/search/roomAndBedsFilter";
-import { fetchFilteredStays, fetchFilteredStaysCount } from "@/slices/searchSlice";
-import { Home, Hotel, Room } from "@/lib/types";
+import {
+  fetchFilteredStays,
+  fetchFilteredStaysCount,
+  resetFilters,
+  setDisplayList,
+  setPartiesFilter,
+  setPetsFilter,
+  setPriceRangeFilter,
+  setSmokingFilter,
+  setTypeFilter,
+  updatePreFilter
+} from "@/slices/searchSlice";
+import {Home, Hotel, Room} from "@/lib/types";
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 export default function SearchFilter({
   stays,
@@ -37,30 +34,25 @@ export default function SearchFilter({
   const dispatch = useAppDispatch();
   const globalCurrency = useAppSelector(selectGlobalCurrency);
   const exchangeRates = useAppSelector(selectExchangeRate);
-  const [displayStays, setDisplayStays] = useState<any[]>([]);
-  const [typeFilter, setTypeFilter] = useState("All");
+  // const [displayStays, setDisplayStays] = useState<any[]>([]);
+  const {displayList,typeFilter,priceRange,amenityFilters,locationFilter,roomAndBedFilter,smokingFilter,petsFilter,partiesFilter} = useAppSelector(state => state.search);
+
   const [highestPrice, setHighestPrice] = useState(200);
   const [lowestPrice, setLowestPrice] = useState(0);
-  const [priceRange, setPriceRange] = useState([lowestPrice, highestPrice]);
+
   const { isCountLoading, availableCount } = useAppSelector(
     (state) => state.search
   );
-  const [amenityFilters, setAmenityFilters] = useState<string[]>([]);
-  const [locationFilter, setLocationFilter] = useState<LocationFilter>();
-  const [roomCountFilter, setRoomCountFilter] = useState<number | null>(null);
-  const [ratingFilter, setRatingFilter] = useState<number[]>([0, 5]);
-  const [roomAndBedsFilter, setRoomAndBedsFilter] = useState<{
-    bedrooms: number;
-    beds: number;
-    bathrooms: number;
-}>()
-  const [availableFilters, setAvailableFilters] = useState<{
-    amenities: string[];
-    locations: string[];
-  }>({ amenities: [], locations: [] });
+
+
+  // const [availableFilters, setAvailableFilters] = useState<{
+  //   amenities: string[];
+  //   locations: string[];
+  // }>({ amenities: [], locations: [] });
   const [collected, setCollectedProperties] = useState<{
     [key: string]: any[];
   }>({});
+
 
   function calculatePrice(price: number) {
     let convertedPrice = (price * 1.02) / exchangeRates["USD"];
@@ -70,15 +62,8 @@ export default function SearchFilter({
   useEffect(() => {
     const collectedProperties: { [key: string]: any[] } = {};
     const locationProps: { [key: string]: any[] } = {};
-    const locFilter: LocationFilter = {
-      city: undefined,
-      country: undefined,
-      district: undefined,
-      street2: undefined,
-      street: undefined,
-    };
-
-    stays.forEach((item) => {
+    let list = displayList.length > stays.length? displayList : stays;
+    list.forEach((item) => {
       const { location,rooms, ...otherProps } = item;
 
       for (let key in otherProps) {
@@ -105,57 +90,42 @@ export default function SearchFilter({
         }
     }
     });
-    
-
-    const keys = ["country", "city", "district", "street2", "street"];
-    for (let i = 0; i < keys.length; i++) {
-      const key = keys[i];
-      if (locationProps[key] && locationProps[key].length === 1) {
-        locFilter[key as keyof LocationFilter] = locationProps[key][0];
-      } else {
-        break;
-      }
-    }
-
-    setLocationFilter(locFilter);
     setCollectedProperties(collectedProperties);
     const prices: number[] = collectedProperties.price;
 
     if (prices && prices.length > 0) {
-      prices.sort((a, b) => a - b); 
+      prices.sort((a, b) => a - b);
       const low = prices[0];
       const high = prices[prices.length - 1];
       setHighestPrice(high);
       setLowestPrice(low);
-      setPriceRange([low, high]);
+      dispatch(setPriceRangeFilter([low, high]))
     }
-    setAvailableFilters(generateFilters());
+    // function generateFilters() {
+    //   const amenitiesSet = new Set<string>();
+    //   const locationsSet = new Set<string>();
+    //   stays.forEach((stay) => {
+    //     stay.rooms.forEach((room: any) => {
+    //       room.amenities.forEach((amenity: string) => {
+    //         amenitiesSet.add(amenity);
+    //       });
+    //     });
+    //     stay.facilities.forEach((facility: string) => {
+    //       amenitiesSet.add(facility);
+    //     });
+    //     locationsSet.add(stay.location.city); // Assuming stays have a location field
+    //   });
+    //   return {
+    //     amenities: Array.from(amenitiesSet),
+    //     locations: Array.from(locationsSet),
+    //   };
+    // }
+    // setAvailableFilters(generateFilters());
     console.log(collectedProperties, locationProps);
-  }, [stays]);
+  }, [dispatch, displayList, stays]);
 
-  useEffect(() => {
-    onFilter(displayStays);
-  }, [displayStays, onFilter]);
 
-  function generateFilters() {
-    const amenitiesSet = new Set<string>();
-    const locationsSet = new Set<string>();
-    stays.forEach((stay) => {
-      stay.rooms.forEach((room: any) => {
-        room.amenities.forEach((amenity: string) => {
-          amenitiesSet.add(amenity);
-        });
-      });
-      stay.facilities.forEach((facility: string) => {
-        amenitiesSet.add(facility);
-      });
-      locationsSet.add(stay.location.city); // Assuming stays have a location field
-    });
-    return {
-      amenities: Array.from(amenitiesSet),
-      locations: Array.from(locationsSet),
-    };
-  }
+
 
   function applyFilters() {
     let filteredStays = stays;
@@ -165,18 +135,20 @@ export default function SearchFilter({
       filteredStays = filteredStays.filter((stay) => stay.type === typeFilter);
     }
 
-    // Filter by price
-    filteredStays = filteredStays.filter((stay) => {
-      if (stay.type === "Hotel") {
-        return stay.rooms.some(
-          (room: any) =>
-            room.price >= priceRange[0] && room.price <= priceRange[1]
-        );
-      } else {
-        return stay.price >= priceRange[0] && stay.price <= priceRange[1];
-      }
-    });
+    if (priceRange){
+      // Filter by price
+      filteredStays = filteredStays.filter((stay) => {
+        if (stay.type === "Hotel") {
+          return stay.rooms.some(
+              (room: any) =>
+                  room.price >= priceRange[0] && room.price <= priceRange[1]
+          );
+        } else {
+          return stay.price >= priceRange[0] && stay.price <= priceRange[1];
+        }
+      });
 
+    }
     // Filter by amenities
     if (amenityFilters.length > 0) {
       filteredStays = filteredStays.filter((stay) => {
@@ -200,16 +172,17 @@ export default function SearchFilter({
         });
       }
 
-      dispatch(fetchFilteredStays({  typeFilter: typeFilter,
-        priceRange: (priceRange[0] === lowestPrice && priceRange[1] === highestPrice)? undefined :priceRange,
-        amenityFilters: amenityFilters,
-        locationFilter: locationFilter,roomAndBedFilter: roomAndBedsFilter}))
-    setDisplayStays(filteredStays);
+      dispatch(fetchFilteredStays()).then((value) => {
+          if (value.meta.requestStatus === 'rejected') {
+            dispatch(setDisplayList(filteredStays))
+          }
+      })
+    // setDisplayStays(filteredStays);
     onFilter(filteredStays);
   }
 
   function previewFilters() {
-    
+
     let filteredStays = [...stays];
 
     // Filter by type
@@ -217,17 +190,19 @@ export default function SearchFilter({
       filteredStays = filteredStays.filter((stay) => stay.type === typeFilter);
     }
 
-    // Filter by price
-    filteredStays = filteredStays.filter((stay) => {
-      if (stay.type === "Hotel") {
-        return stay.rooms.some(
-          (room: any) =>
-            room.price >= priceRange[0] && room.price <= priceRange[1]
-        );
-      } else {
-        return stay.price >= priceRange[0] && stay.price <= priceRange[1];
-      }
-    });
+    if (priceRange) {
+      // Filter by price
+      filteredStays = filteredStays.filter((stay) => {
+        if (stay.type === "Hotel") {
+          return stay.rooms.some(
+              (room: any) =>
+                  room.price >= priceRange[0] && room.price <= priceRange[1]
+          );
+        } else {
+          return stay.price >= priceRange[0] && stay.price <= priceRange[1];
+        }
+      });
+    }
 
     // Filter by amenities
     if (amenityFilters.length > 0) {
@@ -252,8 +227,8 @@ export default function SearchFilter({
       });
     }
 
-    if (roomAndBedsFilter) {
-        const {bedrooms, beds, bathrooms} = roomAndBedsFilter;
+    if (roomAndBedFilter) {
+        const {bedrooms, beds, bathrooms} = roomAndBedFilter;
         filteredStays = filteredStays.filter((stay) => {
                 if (stay.type === "Home") {
                   return (
@@ -275,15 +250,9 @@ export default function SearchFilter({
 
   useEffect(() => {
     dispatch(
-        fetchFilteredStaysCount({
-          typeFilter: typeFilter,
-          priceRange: (priceRange[0] === lowestPrice && priceRange[1] === highestPrice)? undefined :priceRange,
-          amenityFilters: amenityFilters,
-          locationFilter: locationFilter,
-          roomAndBedFilter: roomAndBedsFilter,
-        })
+        fetchFilteredStaysCount()
       );
-  }, [typeFilter, priceRange, amenityFilters, locationFilter])
+  }, [typeFilter, priceRange, amenityFilters, locationFilter, dispatch])
 
   const totalCount = () => {
     const localCount = previewFilters();
@@ -305,13 +274,9 @@ export default function SearchFilter({
         <div className={"flex gap-2"}>
           <Button
             onClick={() => {
-              setTypeFilter("All");
-              setPriceRange([lowestPrice, highestPrice]);
-              setAmenityFilters([]);
-              setLocationFilter(undefined);
-              setRoomCountFilter(null);
-              setRatingFilter([0, 5]);
-              setDisplayStays(stays);
+              dispatch(resetFilters());
+              dispatch(setDisplayList(stays));
+              dispatch(updatePreFilter(stays))
             }}
           >
             Reset
@@ -345,7 +310,7 @@ export default function SearchFilter({
               },
             ]}
             value={typeFilter}
-            onChange={setTypeFilter}
+            onChange={(value) => dispatch(setTypeFilter(value))}
             size={"large"}
             block={true}
           />
@@ -380,33 +345,29 @@ export default function SearchFilter({
             </span>
           </div>
           <Slider
-            range
-            min={lowestPrice}
-            max={highestPrice}
-            value={priceRange}
-            onChange={setPriceRange}
+              range
+              min={lowestPrice}
+              max={highestPrice}
+              value={priceRange}
+              tooltip={{
+                formatter: (value) =>
+                    value !== undefined ? calculatePrice(value) : "",
+              }}
+              onChange={(values) => {
+                console.log("Raw USD values:", values);
+                return dispatch(setPriceRangeFilter(values));
+              }}
+
           />
         </div>
 
         <LocationFilterComponent
           stays={stays}
-          onFilter={(_, filters) => {
-            // setDisplayStays(value);
-            if (filters) {
-              setLocationFilter(filters);
-            }
-          }}
         />
         <Divider type={"horizontal"} />
         <RoomAndBedsFilter
           collectedProperties={collected}
-          stays={stays}
-          onFilter={(_, filters) => {
-            // setDisplayStays(value);
-            if (filters) {
-                setRoomAndBedsFilter(filters);
-            }
-          }}
+
         />
         <Divider type={"horizontal"} />
         {collected.parties && (
@@ -415,6 +376,7 @@ export default function SearchFilter({
             <Select
               className={"w-full"}
               placeholder={"Parties"}
+              value={partiesFilter}
               options={[
                 {
                   value: undefined,
@@ -425,7 +387,7 @@ export default function SearchFilter({
                   .reverse(),
               ]}
               onChange={(value) => {
-                console.log(value); // Handle selection logic here
+               dispatch(setPartiesFilter(value));
               }}
             />
           </div>
@@ -437,6 +399,7 @@ export default function SearchFilter({
             <Select
               className={"w-full"}
               placeholder={"Smoking"}
+              value={smokingFilter}
               options={[
                 {
                   value: undefined,
@@ -447,7 +410,7 @@ export default function SearchFilter({
                   .reverse(),
               ]}
               onChange={(value) => {
-                console.log(value); // Handle selection logic here
+               dispatch(setSmokingFilter(value));
               }}
             />
           </div>
@@ -458,6 +421,7 @@ export default function SearchFilter({
             <Select
               className={"w-full"}
               placeholder={"Pets"}
+              value={petsFilter}
               options={[
                 {
                   value: undefined,
@@ -468,89 +432,87 @@ export default function SearchFilter({
                   .reverse(),
               ]}
               onChange={(value) => {
-                console.log(value); // Handle selection logic here
+                dispatch(setPetsFilter(value));
               }}
             />
           </div>
         )}
-        {typeFilter === "Hotel" && (
-          <div className={""}>
-            <Title level={5}>Hotel Amenities</Title>
-            <Collapse
-              ghost
-              items={hotelFacilities
-                .map((value: any, index) => {
-                  let name: string = Object.keys(value)[0];
-                  return {
-                    key: index,
-                    label: name,
-                    children: value[name]
-                      .filter((value: string) =>
-                        availableFilters.amenities.includes(value)
-                      )
-                      .map((amenity: string, index: number) => (
-                        <Checkbox
-                          key={index}
-                          className={"flex"}
-                          checked={amenityFilters.includes(amenity)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setAmenityFilters([...amenityFilters, amenity]);
-                            } else {
-                              setAmenityFilters(
-                                amenityFilters.filter((a) => a !== amenity)
-                              );
-                            }
-                          }}
-                        >
-                          {amenity}
-                        </Checkbox>
-                      )),
-                  };
-                })
-                .filter((value: any) => value.children.length > 0)}
-            />
-          </div>
-        )}
-        {typeFilter === "Home" && (
-          <div className={""}>
-            <Title level={5}>Home Amenities</Title>
-            <Collapse
-              ghost
-              items={homeFacilities
-                .map((value: any, index) => {
-                  let name: string = Object.keys(value)[0];
-                  return {
-                    key: index,
-                    label: value.name ? value.name : name,
-                    children: value.features
-                      .filter((value: string) =>
-                        availableFilters.amenities.includes(value)
-                      )
-                      .map((amenity: string, index: number) => (
-                        <Checkbox
-                          key={index}
-                          className={"flex"}
-                          checked={amenityFilters.includes(amenity)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setAmenityFilters([...amenityFilters, amenity]);
-                            } else {
-                              setAmenityFilters(
-                                amenityFilters.filter((a) => a !== amenity)
-                              );
-                            }
-                          }}
-                        >
-                          {amenity}
-                        </Checkbox>
-                      )),
-                  };
-                })
-                .filter((value: any) => value.children.length > 0)}
-            />
-          </div>
-        )}
+        {/*{typeFilter === "Hotel" && (*/}
+        {/*  <div className={""}>*/}
+        {/*    <Title level={5}>Hotel Amenities</Title>*/}
+        {/*    <Collapse*/}
+        {/*      ghost*/}
+        {/*      items={hotelFacilities*/}
+        {/*        .map((value: any, index) => {*/}
+        {/*          let name: string = Object.keys(value)[0];*/}
+        {/*          return {*/}
+        {/*            key: index,*/}
+        {/*            label: name,*/}
+        {/*            children: value[name]*/}
+        {/*              .filter((value: string) =>*/}
+        {/*                availableFilters.amenities.includes(value)*/}
+        {/*              )*/}
+        {/*              .map((amenity: string, index: number) => (*/}
+        {/*                <Checkbox*/}
+        {/*                  key={index}*/}
+        {/*                  className={"flex"}*/}
+        {/*                  checked={amenityFilters.includes(amenity)}*/}
+        {/*                  onChange={(e) => {*/}
+        {/*                    if (e.target.checked) {*/}
+        {/*                      dispatch(setAmenityFilters([...amenityFilters, amenity]));*/}
+        {/*                    } else {*/}
+        {/*                    dispatch(setAmenityFilters([...amenityFilters, amenity]));*/}
+        {/*                    }*/}
+        {/*                  }}*/}
+        {/*                >*/}
+        {/*                  {amenity}*/}
+        {/*                </Checkbox>*/}
+        {/*              )),*/}
+        {/*          };*/}
+        {/*        })*/}
+        {/*        .filter((value: any) => value.children.length > 0)}*/}
+        {/*    />*/}
+        {/*  </div>*/}
+        {/*)}*/}
+        {/*{typeFilter === "Home" && (*/}
+        {/*  <div className={""}>*/}
+        {/*    <Title level={5}>Home Amenities</Title>*/}
+        {/*    <Collapse*/}
+        {/*      ghost*/}
+        {/*      items={homeFacilities*/}
+        {/*        .map((value: any, index) => {*/}
+        {/*          let name: string = Object.keys(value)[0];*/}
+        {/*          return {*/}
+        {/*            key: index,*/}
+        {/*            label: value.name ? value.name : name,*/}
+        {/*            children: value.features*/}
+        {/*              .filter((value: string) =>*/}
+        {/*                availableFilters.amenities.includes(value)*/}
+        {/*              )*/}
+        {/*              .map((amenity: string, index: number) => (*/}
+        {/*                <Checkbox*/}
+        {/*                  key={index}*/}
+        {/*                  className={"flex"}*/}
+        {/*                  checked={amenityFilters.includes(amenity)}*/}
+        {/*                  onChange={(e) => {*/}
+        {/*                    if (e.target.checked) {*/}
+        {/*                     dispatch(setAmenityFilters([...amenityFilters, amenity]));*/}
+        {/*                    } else {*/}
+        {/*                      dispatch(setAmenityFilters(*/}
+        {/*                          amenityFilters.filter((a) => a !== amenity)*/}
+        {/*                      ));*/}
+        {/*                    }*/}
+        {/*                  }}*/}
+        {/*                >*/}
+        {/*                  {amenity}*/}
+        {/*                </Checkbox>*/}
+        {/*              )),*/}
+        {/*          };*/}
+        {/*        })*/}
+        {/*        .filter((value: any) => value.children.length > 0)}*/}
+        {/*    />*/}
+        {/*  </div>*/}
+        {/*)}*/}
       </Card>
     </div>
   );

@@ -2,67 +2,47 @@
 import HomeItem from "@/components/Grid Items/HomeItem";
 import HotelItem from "@/components/Grid Items/HotelItem";
 import SearchFilter from "@/components/search/searchFilter";
-import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { Home, Hotel, Stay } from "@/lib/types";
-import {
-    selectConfirmBooking,
-    updateBookingData,
-} from "@/slices/confirmBookingSlice";
+import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
+import {Home, Hotel, Stay} from "@/lib/types";
+import {selectConfirmBooking, updateBookingData,} from "@/slices/confirmBookingSlice";
 import {
     fetchFilteredStays,
     fetchLocationSuggestions,
     searchAsync,
     selectPreFilteredList,
-    selectProcessedList,
     selectSearchResults,
+    setDisplayList,
+    setLocationFilter,
     updatePreFilter,
 } from "@/slices/searchSlice";
-import { selectAllStays } from "@/slices/staysSlice";
-import {
-    FilterOutlined,
-    MinusOutlined,
-    PlusOutlined,
-    SearchOutlined,
-} from "@ant-design/icons";
-import {
-    Affix,
-    AutoComplete,
-    Button,
-    DatePicker,
-    Drawer,
-    Input
-} from "antd";
-import { isWithinInterval, parseISO } from "date-fns";
+import {selectAllStays} from "@/slices/staysSlice";
+import {FilterOutlined, MinusOutlined, PlusOutlined, SearchOutlined,} from "@ant-design/icons";
+import {Affix, AutoComplete, Button, DatePicker, Drawer} from "antd";
+import {isWithinInterval, parseISO} from "date-fns";
 import dayjs from "dayjs";
 import debounce from "lodash/debounce";
-import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useMediaQuery } from "react-responsive";
-import { LocationFilter } from "./locationFilter";
+import {useSearchParams} from "next/navigation";
+import {useEffect, useMemo, useRef, useState} from "react";
+import {useMediaQuery} from "react-responsive";
 
 const { RangePicker } = DatePicker;
-const { Search } = Input;
 export default function SearchComponent() {
   const dispatch = useAppDispatch();
 
   const allStays = useAppSelector(selectAllStays);
   const stays = useAppSelector(selectSearchResults);
   const preFilter = useAppSelector(selectPreFilteredList);
-  const processedOptions = useAppSelector(selectProcessedList);
-  const { locationSuggestions } = useAppSelector((state) => state.search);
-  const [displayStays, setDisplayStays] = useState<any[]>(stays); // Initialize with all stays
+  const { locationSuggestions, displayList } = useAppSelector((state) => state.search);
   const [open, setOpen] = useState(false);
   const params = useSearchParams();
   const booking = useAppSelector(selectConfirmBooking);
-  const [selectedLocation, setSelectedLocation] = useState("");
   const [startDate, setStartDate] = useState(booking.checkInDate);
   const [endDate, setEndDate] = useState(booking.checkOutDate);
   const [numGuests, setNumGuests] = useState(booking.numGuests);
   const isMobile = useMediaQuery({ maxWidth: 640 });
   const [selectedLabel, setSelectedLabel] = useState<string>("");
   const rangePickerRef = useRef<any>(null);
-const [locationFilter, setLocationFilter] = useState<LocationFilter>();
-  const [searchTerm, setSearchTerm] = useState("");
+
 
   const showDrawer = () => {
     setOpen(true);
@@ -75,7 +55,7 @@ const [locationFilter, setLocationFilter] = useState<LocationFilter>();
   useEffect(() => {
     const handleFilterUpdate = (staysArray: Stay[]) => {
       const filteredStays = filterStaysByDate(staysArray);
-      setDisplayStays(filteredStays);
+      dispatch(setDisplayList(filteredStays));
       dispatch(updatePreFilter(filteredStays));
     };
 
@@ -92,8 +72,7 @@ const [locationFilter, setLocationFilter] = useState<LocationFilter>();
     if (params.has("loc")) {
       const location = params.get("loc") || "";
       if (location) {
-        setSelectedLocation(location);
-        setSearchTerm(location);
+        setSelectedLabel(location);
 
         dispatch(searchAsync(location));
       }
@@ -114,59 +93,14 @@ const [locationFilter, setLocationFilter] = useState<LocationFilter>();
     if (rangePickerRef.current) {
       rangePickerRef.current.focus();
     }
-    setLocationFilter(JSON.parse(value))
+    dispatch(setLocationFilter(JSON.parse(value)))
   };
 
-//   function handleSelect(value: string) {
-//     setSelectedLocation(value);
-//     let filteredStays = filterStaysByDate(stays);
-//     // Implement filtering logic here using the stays or preFilter data from Redux
-//     value.split(",").forEach((item) => {
-//       filteredStays.filter((stay) => {
-//         const values = Object.values(stay.location).map((val: any) =>
-//           String(val).toLowerCase()
-//         );
-
-//         let booked: boolean;
-//         const checkInDate = startDate;
-//         const checkOutDate = endDate;
-
-//         if (stay.type === "Home") {
-//           booked =
-//             (stay as Home).bookedDates?.some((date: string) =>
-//               isWithinInterval(parseISO(date), {
-//                 start: parseISO(checkInDate),
-//                 end: parseISO(checkOutDate),
-//               })
-//             ) ?? false;
-//         } else {
-//           booked =
-//             (stay as Hotel).fullyBookedDates?.some((date: string) =>
-//               isWithinInterval(parseISO(date), {
-//                 start: parseISO(checkInDate),
-//                 end: parseISO(checkOutDate),
-//               })
-//             ) ?? false;
-//         }
-
-//         console.log(values.includes(item.toLowerCase()), "values: ", values);
-//         return !booked && values.includes(item.toLowerCase());
-//       });
-//     });
-
-//     if (value === "") {
-//       dispatch(updatePreFilter(filterStaysByDate(allStays)));
-//     } else {
-//       setDisplayStays(filteredStays);
-//       console.log("Filtered", filteredStays, "value: ", value);
-//       dispatch(updatePreFilter(filteredStays));
-//     }
-//   }
 
   useEffect(() => {
     if (stays.length > 0) {
       let data = filterStaysByDate(stays);
-      setDisplayStays(data);
+      dispatch(setDisplayList(data));
       dispatch(updatePreFilter(data));
     }
   }, [stays, startDate, endDate, dispatch]);
@@ -220,6 +154,7 @@ const [locationFilter, setLocationFilter] = useState<LocationFilter>();
               variant="borderless"
               value={selectedLabel}
               onSelect={handleSelect}
+              onChange={(value) => setSelectedLabel(value)}
             />
             <RangePicker
             ref={rangePickerRef}
@@ -262,11 +197,7 @@ const [locationFilter, setLocationFilter] = useState<LocationFilter>();
             </div>
             <Button
               onClick={() => {
-                dispatch(fetchFilteredStays({
-                    typeFilter: "",
-                    amenityFilters: [],
-                    locationFilter: locationFilter
-                }))
+                dispatch(fetchFilteredStays())
               }}
               icon={<SearchOutlined />}
               type={"primary"}
@@ -289,7 +220,7 @@ const [locationFilter, setLocationFilter] = useState<LocationFilter>();
           "px-7 py-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
         }
       >
-        {[...displayStays]
+        {[...displayList]
           .filter((stay) => stay.published)
           .map((stay: any, index) =>
             stay.type === "Hotel" ? (
@@ -311,7 +242,7 @@ const [locationFilter, setLocationFilter] = useState<LocationFilter>();
           stays={preFilter}
           onFilter={(filteredList: any) => {
             const data = filterStaysByDate(filteredList);
-            if (data.length !== 0 && data.length !== displayStays.length) {
+            if (data.length !== 0 && data.length !== displayList.length) {
               console.log(
                 "Prefilter: ",
                 preFilter,
@@ -320,7 +251,7 @@ const [locationFilter, setLocationFilter] = useState<LocationFilter>();
                 "data: ",
                 data
               );
-              setDisplayStays(data);
+
             }
           }}
         />
