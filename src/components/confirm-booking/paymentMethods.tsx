@@ -22,7 +22,7 @@ export default function PaymentMethods() {
     const cardCurrencies = ['GHS', 'KES']
     const paymentMethod = useAppSelector(selectPaymentMethod);
     const dispatch = useAppDispatch();
-
+    console.log(booking)
     useEffect(() => {
         let data:string[] = ['GHS', 'KES'];
         booking.configs.forEach((config) => {
@@ -36,7 +36,7 @@ export default function PaymentMethods() {
     }, [booking.configs]);
     return (
         <div>
-            <div className={'flex justify-between'}>
+            <div className={'flex justify-between mb-4'}>
                 <h3 className="font-semibold">Payment Methods</h3>
                 <Select value={booking.paymentCurrency} onChange={(value) => dispatch(setPaymentCurrency(value))} options={supportedCurrencies.map((currency) => ({value: currency, label: currency}))}/>
             </div>

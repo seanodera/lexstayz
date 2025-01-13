@@ -1,6 +1,6 @@
 import {PawaPayCountryData, Stay} from "@/lib/types";
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {addDays, differenceInDays} from "date-fns";
+import {addDays, differenceInDays, endOfDay, startOfDay} from "date-fns";
 import {RootState} from "@/data/types";
 import {getCountry, getFeePercentage, handler_url} from "@/lib/utils";
 import createBooking from "@/slices/confirmBookingThunks/createBooking";
@@ -8,6 +8,7 @@ import handlePaymentAsync from '@/slices/confirmBookingThunks/handlePaymentAsync
 import {setExchangeRates, setUserLocation} from "@/slices/staysSlice";
 import Error from "next/error";
 import axios from "axios";
+import {payExistingBooking} from "@/slices/confirmBookingThunks/payExistingBooking";
 
 export interface ConfirmBookingState {
     stay: Stay;
@@ -172,7 +173,7 @@ const ConfirmBookingSlice = createSlice({
             checkInDate: string;
             checkOutDate: string
         }>) => {
-            state.length = differenceInDays(action.payload.checkOutDate, action.payload.checkInDate);
+            state.length = differenceInDays(endOfDay(action.payload.checkOutDate), startOfDay(action.payload.checkInDate));
             state.numGuests = action.payload.numGuests;
             state.checkInDate = action.payload.checkInDate;
             state.checkOutDate = action.payload.checkOutDate;
@@ -269,6 +270,18 @@ const ConfirmBookingSlice = createSlice({
             .addCase(fetchPawaPayConfigs.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string || 'Error fetching PawaPay payment configs';
+            })
+            .addCase(payExistingBooking.pending, (state) => {
+                state.status = 'loading';
+                state.error = null;
+            })
+            .addCase(payExistingBooking.fulfilled, (state) => {
+                state.status = 'succeeded';
+                state.bookingStatus = 'Pending';
+            })
+            .addCase(payExistingBooking.rejected, (state,action: PayloadAction<any>) => {
+                state.status = 'failed';
+                state.error = action.payload;
             })
         ;
     }
