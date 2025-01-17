@@ -8,7 +8,8 @@ import {useAppDispatch} from "@/hooks/hooks";
 import {setBookingStay, updateBookingData, updateContact} from "@/slices/confirmBookingSlice";
 import {payExistingBooking} from "@/slices/confirmBookingThunks/payExistingBooking";
 import { useRouter } from "next/navigation";
-import {isAfter} from "date-fns";
+import {addMinutes, isAfter} from "date-fns";
+import {addMilliseconds} from "date-fns/fp";
 
 
 export default function RoomsWidget({booking, stay}: { booking: any, stay: any }) {
@@ -44,7 +45,7 @@ export default function RoomsWidget({booking, stay}: { booking: any, stay: any }
                         <h3 className={'mb-0'}>You {booking.isConfirmed ? 'Paid' : 'Owe'}</h3>
                         <h3 className={'font-bold mb-0'}>{booking.paymentCurrency} {toMoneyFormat(booking.grandTotal * booking.paymentRate)}</h3>
                         <h4 className={'text-gray-400'}>{booking.paymentCurrency} {toMoneyFormat(booking.fees * booking.paymentRate)} Fees</h4>
-                        {!booking.isConfirmed && !isAfter(new Date, booking.checkInDate) && <Button type={'text'} className={'text-primary'} onClick={() => {
+                        {!booking.isConfirmed && !isAfter(new Date, addMinutes(booking.createdAt, 30)) && <Button type={'text'} className={'text-primary'} onClick={() => {
                             dispatch(setBookingStay(stay))
                             dispatch(updateBookingData({numGuests: booking.numGuests,checkInDate: booking.checkInDate,checkOutDate: booking.checkOutDate}))
                             dispatch(updateContact(booking.user))

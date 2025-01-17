@@ -77,7 +77,7 @@ export async function completeBooking({
             });
 
             // Update host balance
-            updateHostBalance(transaction, hostRef, booking, status);
+            await updateHostBalance(transaction, hostRef, booking, status);
 
             // Update stay availability
             if (stayData.type === 'Hotel') {
