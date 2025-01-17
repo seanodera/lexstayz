@@ -10,6 +10,7 @@ import { state } from "sucrase/dist/types/parser/traverser/base";
 import { fetchStaysAsync, getStayCountsAsync } from "./staysSlice";
 import { fetchExchangeRates, fetchPawaPayConfigs } from "./confirmBookingSlice";
 import { fetchBookingsAsync } from "./bookingSlice";
+import {fetchCollectedProperties} from "@/slices/searchSlice";
 
 export const getUserDetailsAsync = createAsyncThunk(
   "authentication/user",
@@ -175,29 +176,38 @@ export const loginUser = createAsyncThunk(
 );
 
 export const initializeAppAsync = createAsyncThunk(
-  "authentication/initialize",
-  async (_, { getState, dispatch, rejectWithValue }) => {
-    try {
-        const {authentication} = getState() as {authentication: AuthenticationState}
+    "authentication/initialize",
+    async (_, { getState, dispatch, rejectWithValue }) => {
+      try {
+        const { authentication } = getState() as { authentication: AuthenticationState };
 
-        console.log(authentication)
-      if (!authentication.initialized){
-        const user = getAuth().currentUser;
-        await dispatch(getStayCountsAsync())
-      await dispatch(fetchStaysAsync({ page: 1, type: "All" }));
-      // You only want to fetch these once
-      console.log("running from auth");
-      await dispatch(fetchExchangeRates());
-      await dispatch(fetchPawaPayConfigs());
-      if (user) {
-        await dispatch(fetchBookingsAsync());
-      }
-      }
-    } catch (error) {
-        console.error(error)
+        if (!authentication.initialized) {
+          const user = getAuth().currentUser;
+
+          console.log("Running initialization");
+
+          // Run all independent async actions in parallel
+          const promises = [
+            dispatch(getStayCountsAsync()),
+            dispatch(fetchStaysAsync({ page: 1, type: "All" })),
+            dispatch(fetchCollectedProperties()),
+            dispatch(fetchExchangeRates()),
+            dispatch(fetchPawaPayConfigs()),
+          ];
+
+          // If user is authenticated, fetch bookings as well
+          if (user) {
+            promises.push(dispatch(fetchBookingsAsync()));
+          }
+
+          // Wait for all promises to resolve
+          await Promise.all(promises);
+        }
+      } catch (error) {
+        console.error(error);
         return rejectWithValue("An unknown error occurred");
+      }
     }
-  }
 );
 
 interface AuthenticationState {

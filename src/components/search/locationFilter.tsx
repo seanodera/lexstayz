@@ -16,45 +16,19 @@ export interface LocationFilter {
 }
 
 export default function LocationFilterComponent({stays }: { stays: Stay[] }) {
-    const [locationProperties, setLocationProperties] = useState<{
-        [ key: string ]: any[];
-    }>({})
+
 
     const dispatch = useAppDispatch();
-    const {locationFilter} = useAppSelector(state => state.search);
+    const {locationFilter, collectedProperties} = useAppSelector(state => state.search);
+    const locationProperties = collectedProperties? collectedProperties.location : {};
     // const keys = ['country', 'city', 'district', 'street2', 'street'];
     useEffect(() => {
-        generateFilters(stays);
+
         // minFilters()
     }, []);
 
 
 
-    function generateFilters(locStays: any[]) {
-        const collectedProperties: { [ key: string ]: any[] } = {};
-        const locationProps: { [ key: string ]: any[] } = {};
-
-
-        locStays.forEach(item => {
-            const {location} = item;
-
-
-            for (let subKey in location) {
-                if (location[ subKey ] !== '') {
-                    locationProps[ subKey ] = locationProps[ subKey ] || [];
-                    if (!locationProps[ subKey ].includes(location[ subKey ])) {
-                        locationProps[ subKey ].push(location[ subKey ]);
-                    }
-                }
-            }
-        });
-
-
-        setLocationProperties(locationProps);
-        console.log(collectedProperties, locationProps);
-        return locationProps;
-
-    }
 
     // function minFilters() {
     //     const locationProps = locationProperties;
@@ -79,21 +53,7 @@ export default function LocationFilterComponent({stays }: { stays: Stay[] }) {
 
 
 
-    useEffect(() => {
-        function applyFilters() {
-            const output = stays.filter(stay => {
-                const location = stay.location;
-                return !locationFilter || Object.keys(locationFilter).every(key => {
-                    const filterValue = locationFilter[key as keyof LocationFilter];
-                    return filterValue ? filterValue === location[key as keyof Location] : true;
-                });
-            });
 
-
-            generateFilters(output);
-        }
-        applyFilters()
-    }, [locationFilter]);
 
     return <div className={'space-y-4'}>
         <Title level={5}>Location</Title>

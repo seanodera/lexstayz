@@ -35,8 +35,8 @@ export default function SearchFilter({
   const globalCurrency = useAppSelector(selectGlobalCurrency);
   const exchangeRates = useAppSelector(selectExchangeRate);
   // const [displayStays, setDisplayStays] = useState<any[]>([]);
-  const {displayList,typeFilter,priceRange,amenityFilters,locationFilter,roomAndBedFilter,smokingFilter,petsFilter,partiesFilter} = useAppSelector(state => state.search);
-
+  const {displayList,typeFilter,priceRange,amenityFilters,locationFilter,roomAndBedFilter,smokingFilter,petsFilter,partiesFilter,collectedProperties} = useAppSelector(state => state.search);
+  const collected = collectedProperties;
   const [highestPrice, setHighestPrice] = useState(200);
   const [lowestPrice, setLowestPrice] = useState(0);
 
@@ -49,9 +49,7 @@ export default function SearchFilter({
   //   amenities: string[];
   //   locations: string[];
   // }>({ amenities: [], locations: [] });
-  const [collected, setCollectedProperties] = useState<{
-    [key: string]: any[];
-  }>({});
+
 
 
   function calculatePrice(price: number) {
@@ -60,38 +58,8 @@ export default function SearchFilter({
   }
 
   useEffect(() => {
-    const collectedProperties: { [key: string]: any[] } = {};
-    const locationProps: { [key: string]: any[] } = {};
-    let list = displayList.length > stays.length? displayList : stays;
-    list.forEach((item) => {
-      const { location,rooms, ...otherProps } = item;
 
-      for (let key in otherProps) {
-        collectedProperties[key] = collectedProperties[key] || [];
-        if (!collectedProperties[key].includes(otherProps[key])) {
-          collectedProperties[key].push(otherProps[key]);
-        }
-      }
-
-      for (let subKey in location) {
-        if (location[subKey] !== "") {
-          locationProps[subKey] = locationProps[subKey] || [];
-          if (!locationProps[subKey].includes(location[subKey])) {
-            locationProps[subKey].push(location[subKey]);
-          }
-        }
-      }
-          if (rooms) {
-        for (let room of rooms as Room[]) {
-            if (room.price) {
-                collectedProperties.price = collectedProperties.price || [];
-                collectedProperties.price.push(room.price);
-            }
-        }
-    }
-    });
-    setCollectedProperties(collectedProperties);
-    const prices: number[] = collectedProperties.price;
+    const prices: number[] = collectedProperties && collectedProperties.price? collectedProperties.price as number[] :[];
 
     if (prices && prices.length > 0) {
       prices.sort((a, b) => a - b);
@@ -121,8 +89,7 @@ export default function SearchFilter({
     //   };
     // }
     // setAvailableFilters(generateFilters());
-    console.log(collectedProperties, locationProps);
-  }, [dispatch, displayList, stays]);
+  }, [collectedProperties, dispatch]);
 
 
 
@@ -316,7 +283,7 @@ export default function SearchFilter({
           />
         </div>
         <Divider type={"horizontal"} />
-        {typeFilter === "Home" && collected.homeType && (
+        {typeFilter === "Home" && collected && collected.homeType && (
           <div>
             <Title level={5}>Home Type</Title>
             <Select
@@ -328,7 +295,7 @@ export default function SearchFilter({
                   value: undefined,
                   label: "Any Type",
                 },
-                ...collected.homeType.map((value) => ({
+                ...collected.homeType.map((value:string) => ({
                   value: value,
                   label: value,
                 })),
@@ -370,7 +337,7 @@ export default function SearchFilter({
 
         />
         <Divider type={"horizontal"} />
-        {collected.parties && (
+        {collected && collected.parties && (
           <div>
             <Title level={5}>Parties</Title>
             <Select
@@ -383,7 +350,7 @@ export default function SearchFilter({
                   label: "Any",
                 },
                 ...collected.parties
-                  .map((value) => ({ value: value, label: value }))
+                  .map((value:any) => ({ value: value, label: value }))
                   .reverse(),
               ]}
               onChange={(value) => {
@@ -393,7 +360,7 @@ export default function SearchFilter({
           </div>
         )}
 
-        {collected.smoking && (
+        {collected && collected.smoking && (
           <div>
             <Title level={5}>Smoking</Title>
             <Select
@@ -406,7 +373,7 @@ export default function SearchFilter({
                   label: "Any",
                 },
                 ...collected.smoking
-                  .map((value) => ({ value: value, label: value }))
+                  .map((value:any) => ({ value: value, label: value }))
                   .reverse(),
               ]}
               onChange={(value) => {
@@ -415,7 +382,7 @@ export default function SearchFilter({
             />
           </div>
         )}
-        {collected.pets && (
+        {collected && collected.pets && (
           <div>
             <Title level={5}>Pets Allowed</Title>
             <Select
@@ -428,7 +395,7 @@ export default function SearchFilter({
                   label: "Any",
                 },
                 ...collected.pets
-                  .map((value) => ({ value: value, label: value }))
+                  .map((value:any) => ({ value: value, label: value }))
                   .reverse(),
               ]}
               onChange={(value) => {

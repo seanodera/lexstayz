@@ -235,7 +235,7 @@ const bookingsSlice = createSlice({
                 state.hasError = true;
                 state.errorMessage = action.error.message || 'Failed to fetch bookings';
             }).addCase(checkUnpaidBookingAsync.pending, (state, action) => {
-            state.isLoading = true;
+            // state.isLoading = true;
         }).addCase(checkUnpaidBookingAsync.fulfilled, (state, action) => {
             if (action.payload.updated) {
                 const pos = state.bookings.findIndex(value => value.id === action.payload.booking.id)
@@ -244,11 +244,11 @@ const bookingsSlice = createSlice({
                     state.currentBooking = action.payload.booking;
                 }
             }
-            state.isLoading = false;
+            // state.isLoading = false;
         }).addCase(checkUnpaidBookingAsync.rejected, (state, action) => {
-            state.isLoading = false;
-            state.hasError = true;
-            state.errorMessage = action.error.message || 'Failed to fetch bookings';
+            // state.isLoading = false;
+            // state.hasError = true;
+            // state.errorMessage = action.error.message || 'Failed to fetch bookings';
         }).addCase(fetchBookingAsync.pending, (state, action) => {
             state.isLoading = true
         })

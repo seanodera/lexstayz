@@ -2,7 +2,7 @@
 
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "@/data/types";
-import { collection, doc, getDoc, getDocs } from "firebase/firestore";
+import {arrayUnion, collection, doc, getDoc, getDocs, setDoc, updateDoc} from "firebase/firestore";
 import { firestore } from "@/lib/firebase";
 import {
   query,
@@ -18,6 +18,7 @@ import {Home, Host, Hotel, Stay} from "@/lib/types";
 
 interface StaysState {
   stays: (Home | Hotel )[];
+  fetchedStays: (Home | Hotel )[];
   fetchedPages: Record<string, number[]>;
   page: number;
   limit: number;
@@ -52,12 +53,13 @@ const initialState: StaysState = {
   globalCurrency: "GHS",
   latitude: -1.29207,
   longitude: 36.82195,
-  fetchedPages: { All: [], Homes: [], Hotels: [] },
+  fetchedPages: {All: [], Homes: [], Hotels: []},
   page: 0,
   limit: 8,
   staysCount: 0,
   homesCount: 0,
   hotelsCount: 0,
+  fetchedStays: []
 };
 
 export const fetchStaysAsync = createAsyncThunk(
@@ -67,7 +69,8 @@ export const fetchStaysAsync = createAsyncThunk(
     { getState, rejectWithValue }
   ) => {
     const state = (getState() as { stays: StaysState }).stays;
-    const limit = state.limit;
+    // const limit = state.limit;
+    const limit = 26;
     try {
       if (state.fetchedPages[type].includes(page)) {
         return { stays: [], page, type };
@@ -107,6 +110,8 @@ export const fetchStaysAsync = createAsyncThunk(
     }
   }
 );
+
+
 
 export const getStayCountsAsync = createAsyncThunk(
   "stays/getStayCounts",
@@ -193,7 +198,12 @@ const staysSlice = createSlice({
   initialState: initialState,
   reducers: {
     setAllStays: (state, action: PayloadAction<any[]>) => {
-      state.stays = action.payload;
+      state.fetchedStays = [
+        ...state.fetchedStays,
+        ...(action.payload.filter(
+            (newStay:Stay) => !state.fetchedStays.some((stay) => stay.id === newStay.id)
+        ) as (Home | Hotel)[]),
+      ];
     },
     setCurrentStay: (state, action: PayloadAction<Home | Hotel>) => {
       state.currentStay = action.payload;
@@ -222,6 +232,14 @@ const staysSlice = createSlice({
             : action.payload.longitude;
       }
     },
+    updateFetchedStays: (state, action) => {
+      state.fetchedStays = [
+        ...state.fetchedStays,
+        ...(action.payload.filter(
+            (newStay:Stay) => !state.fetchedStays.some((stay) => stay.id === newStay.id)
+        ) as (Home | Hotel)[]),
+      ]
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -242,6 +260,12 @@ const staysSlice = createSlice({
             ...state.stays,
             ...(stays.filter(
               (newStay) => !state.stays.some((stay) => stay.id === newStay.id)
+            ) as (Home | Hotel)[]),
+          ];
+          state.fetchedStays = [
+            ...state.fetchedStays,
+            ...(stays.filter(
+                (newStay) => !state.fetchedStays.some((stay) => stay.id === newStay.id)
             ) as (Home | Hotel)[]),
           ];
         }
@@ -306,7 +330,7 @@ const staysSlice = createSlice({
 });
 
 export const selectCurrentStay = (state: RootState) => state.stays.currentStay;
-export const selectAllStays = (state: RootState) => state.stays.stays;
+export const selectAllStays = (state: RootState) => state.stays.fetchedStays;
 export const selectIsStayLoading = (state: RootState) => state.stays.isLoading;
 export const selectHasRun = (state: RootState) => state.stays.hasRun;
 export const selectStayById = (state: RootState, id: string | number) =>

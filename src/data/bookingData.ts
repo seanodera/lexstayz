@@ -4,6 +4,7 @@ import {collection, doc, getDoc, getDocs, runTransaction} from "firebase/firesto
 import {addDays} from "date-fns";
 import axios from "axios";
 import {handler_url} from "@/lib/utils";
+import {Balance} from "@/lib/types";
 
 
 export function getCurrentUser() {
@@ -29,79 +30,61 @@ interface BookingParams {
 }
 
 
-
 export async function completeBooking({
                                           userId,
                                           id,
                                           paymentData,
                                           isConfirmed = true,
-                                          status = 'Confirmed'
+                                          status = 'Confirmed',
                                       }: BookingParams) {
     try {
         const batch = writeBatch(firestore);
         const bookingsDoc = doc(firestore, 'bookings', id);
         const bookingSnap = await getDoc(bookingsDoc);
 
-        if (!bookingSnap.exists()) {
-            throw new Error("Booking does not exist!");
-        }
-
+        if (!bookingSnap.exists()) throw new Error("Booking does not exist!");
         const booking = bookingSnap.data();
 
-        if (booking.status === status && booking.isConfirmed === isConfirmed)  {
+        if (booking.status === status && booking.isConfirmed === isConfirmed) {
             throw new Error("Booking status or confirmation status is already set!");
         }
 
-        const hostTransactions = doc(firestore, 'hosts', booking.hostId, 'pendingTransactions', id);
+        const hostRef = doc(firestore, 'hosts', booking.hostId);
+        const hostTransactionsRef = doc(firestore, 'hosts', booking.hostId, 'pendingTransactions', id);
+        const stayRef = doc(firestore, 'stays', booking.accommodationId);
 
         batch.update(bookingsDoc, {status, isConfirmed, paymentData});
 
-        const transactionDoc = await getDoc(hostTransactions)
-
-        const stayRef = doc(firestore, 'stays', booking.accommodationId);
+        const transactionDoc = await getDoc(hostTransactionsRef);
 
         await runTransaction(firestore, async (transaction) => {
             const staySnap = await transaction.get(stayRef);
-
-            if (!staySnap.exists()) {
-                throw new Error("Accommodation document does not exist!");
-            }
-
+            if (!staySnap.exists()) throw new Error("Accommodation document does not exist!");
             const stayData = staySnap.data();
+
             const checkIn = new Date(booking.checkInDate);
             const checkOut = new Date(booking.checkOutDate);
 
-            if (transactionDoc.exists()) {
-                if (status === 'Canceled' || status === 'Rejected') {
-                    batch.delete(hostTransactions)
-                } else {
+            // Update host transactions
+            handleTransactionUpdates({
+                transactionDoc,
+                status,
+                booking,
+                stayData,
+                hostTransactionsRef,
+                batch,
+                paymentData,
+            });
 
-                }
-            } else {
-                if (status === 'Confirmed') {
-                    batch.set(hostTransactions, {
-                        id: booking.id,
-                        amount: booking.totalPrice,
-                        currency: stayData.currency,
-                        paymentData: paymentData,
-                        date: booking.createdAt,
-                        hostId: booking.hostId,
-                        userId: userId,
-                        status: status,
-                        availableDate: addDays(booking.checkOutDate, 3).toISOString(),
-                    })
-                }
-            }
+            // Update host balance
+            updateHostBalance(transaction, hostRef, booking, status);
 
-
+            // Update stay availability
             if (stayData.type === 'Hotel') {
-
                 const {updatedRooms, fullyBookedDates} = processHotelBooking(stayData, booking, checkIn, checkOut);
-                console.log(updatedRooms, fullyBookedDates);
-                transaction.update(stayRef, {rooms: updatedRooms, fullyBookedDates});
+                transaction.update(stayRef, {rooms: updatedRooms,bookedDates: fullyBookedDates});
             } else if (stayData.type === 'Home') {
                 const unavailableDates = processHomeBooking(stayData, checkIn, checkOut);
-                console.log(unavailableDates)
                 transaction.update(stayRef, {bookedDates: unavailableDates});
             }
         });
@@ -113,6 +96,75 @@ export async function completeBooking({
     }
 }
 
+/**
+ * Handles updates to the host transactions document.
+ */
+function handleTransactionUpdates({
+                                      transactionDoc,
+                                      status,
+                                      booking,
+                                      stayData,
+                                      hostTransactionsRef,
+                                      batch,
+                                      paymentData,
+                                  }: {
+    transactionDoc: any;
+    status: string;
+    booking: any;
+    stayData: any;
+    hostTransactionsRef: any;
+    batch: any;
+    paymentData: any;
+}) {
+    if (transactionDoc.exists()) {
+        if (status === 'Canceled' || status === 'Rejected') {
+            batch.delete(hostTransactionsRef);
+        }
+    } else if (status === 'Confirmed') {
+        batch.set(hostTransactionsRef, {
+            id: booking.id,
+            amount: booking.totalPrice,
+            currency: stayData.currency,
+            paymentData,
+            date: booking.createdAt,
+            hostId: booking.hostId,
+            userId: booking.userId,
+            status,
+            availableDate: addDays(booking.checkOutDate, 3).toISOString(),
+        });
+    }
+}
+
+/**
+ * Updates the host's balance in the database.
+ */
+async function updateHostBalance(transaction: any, hostRef: any, booking: any, status: string) {
+    const hostSnap = await transaction.get(hostRef);
+    const hostData = hostSnap.data();
+
+    if (!hostData) throw new Error("Host data not found!");
+
+    const currentBalance: Balance = hostData.balance || {
+        available: 0,
+        prevAvailable: 0,
+        pending: 0,
+        prevPending: 0,
+    };
+
+    const updatedBalance = {...currentBalance};
+
+    if (status === 'Confirmed') {
+        updatedBalance.pending += booking.totalPrice;
+    } else if (status === 'Canceled' || status === 'Rejected') {
+        updatedBalance.pending -= booking.totalPrice;
+    }
+
+    updatedBalance.prevPending = currentBalance.pending;
+    updatedBalance.prevAvailable = currentBalance.available;
+
+    transaction.update(hostRef, {balance: updatedBalance});
+}
+
 function processHotelBooking(stayData: any, booking: any, checkIn: Date, checkOut: Date): {
     updatedRooms: any[],
     fullyBookedDates: string[]
@@ -122,7 +174,7 @@ function processHotelBooking(stayData: any, booking: any, checkIn: Date, checkOu
     const bookingIds = bookedRooms.map((room: any) => room.roomId);
 
     let updatedRooms: any[] = [];
-    let fullyBookedDates: string[] = [];
+    let fullyBookedDates: string[] = stayData.bookedDates?? [];
 
 
     rooms.forEach((room: any) => {
@@ -131,10 +183,10 @@ function processHotelBooking(stayData: any, booking: any, checkIn: Date, checkOu
 
             const bookedRoomData = bookedRooms.find((r: any) => r.roomId === room.id);
             let {bookedDates, fullDates} = room;
-            console.log(bookedDates,fullDates, room)
+            console.log(bookedDates, fullDates, room)
 
-            bookedDates = bookedDates? {...bookedDates} : {};
-            fullDates = fullDates? [...fullDates] : [];
+            bookedDates = bookedDates ? {...bookedDates} : {};
+            fullDates = fullDates ? [...fullDates] : [];
             console.log(bookingIds);
             iterateDaysBetween(checkIn, checkOut, (date) => {
                 const currentDateStr = date.toISOString().split('T')[ 0 ];
@@ -200,7 +252,7 @@ export async function getBookings() {
 
 export async function refundBooking(booking: any, amount?: number) {
     let response;
-    if (amount){
+    if (amount) {
         response = await axios.post(`${handler_url}/api/createRefund`, {reference: booking.id, amount: amount})
     } else {
         response = await axios.post(`${handler_url}/api/createRefund`, {reference: booking.id})

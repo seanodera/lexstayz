@@ -1,11 +1,17 @@
 "use client";
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {firestore, searchClient} from "@/lib/firebase";
-import {and, collection, getCountFromServer, getDocs, or, query, where,} from "firebase/firestore";
+import {and, collection, doc, getCountFromServer, getDoc, getDocs, or, query, where,} from "firebase/firestore";
 import {RootState} from "@/data/types";
 import {LocationFilter} from "@/components/search/locationFilter";
 import {eachDayOfInterval, formatISO, parseISO} from "date-fns";
+import {setAllStays} from "@/slices/staysSlice";
 
+export interface ICollectedProperties {
+    location: { [ key: string ]: string[] };
+
+    [ key: string ]: string[] | number[] | any;
+}
 const indexName = "stays";
 const index = searchClient.initIndex(indexName);
 
@@ -113,7 +119,6 @@ function checkFirebaseQuery(state: RootState) {
     dateChunks.forEach(chunk => {
         finalQuery = query(finalQuery, or(
             where("bookedDates", "not-in", chunk),
-            where("fullyBookedDates", "not-in", chunk)
         ));
     });
     return finalQuery;
@@ -242,16 +247,47 @@ export const fetchFilteredStaysCount = createAsyncThunk(
 export const fetchFilteredStays = createAsyncThunk(
     "search/fetchFilteredStays",
     async (
-       _,
-        {rejectWithValue, getState}) => {
+        _,
+        {rejectWithValue, getState, dispatch}) => {
         try {
             const state = getState() as RootState;
             const finalQuery = checkFirebaseQuery(state);
             const snapshot = await getDocs(finalQuery);
             console.log(snapshot.docs.length);
-            return snapshot.docs.map((doc) => doc.data());
+            const stays = snapshot.docs.map((doc) => doc.data());
+            dispatch(setAllStays(stays))
+            return stays;
         } catch (error) {
             console.log(error);
+            if (error instanceof Error) {
+                return rejectWithValue(error.message);
+            }
+            return rejectWithValue("An unknown error occurred");
+        }
+    }
+);
+
+
+export const fetchCollectedProperties = createAsyncThunk(
+    "search/fetchCollectedProperties",
+    async (_, {rejectWithValue}) => {
+        try {
+            // Reference to the Firestore document
+            const docRef = doc(firestore, "general", "collectedProperties");
+
+            // Fetch the document
+            const docSnapshot = await getDoc(docRef);
+
+            // Check if the document exists
+            if (!docSnapshot.exists()) {
+                throw new Error("Collected properties document does not exist");
+            }
+
+            // Get the data
+            // Return the collected properties
+            return docSnapshot.data();
+        } catch (error) {
+            console.error(error);
             if (error instanceof Error) {
                 return rejectWithValue(error.message);
             }
@@ -272,7 +308,7 @@ interface SearchState {
     displayList: any[];
     availableCount: number;
     locationSuggestions: { label: string, value: any }[]
-
+    collectedProperties: ICollectedProperties | undefined;
     typeFilter: string;
     priceRange?: number[];
     amenityFilters: string[];
@@ -288,6 +324,7 @@ interface SearchState {
 }
 
 const initialState: SearchState = {
+    collectedProperties: undefined,
     amenityFilters: [], typeFilter: "All",
     isLoading: false,
     hasError: false,
@@ -415,6 +452,20 @@ const searchSlice = createSlice({
                 state.hasError = true;
                 state.errorMessage =
                     (action.payload as string) || "Failed to fetch location suggestions";
+            }).addCase(fetchCollectedProperties.pending, (state) => {
+            state.isLoading = true;
+        })
+            .addCase(fetchCollectedProperties.fulfilled, (state, action) => {
+                    state.isLoading = false;
+                    state.collectedProperties = action.payload as {
+                        [ key: string ]: any[] | { [ key: string ]: any[]; }; location: { [ key: string ]: any[]; };
+                    }
+                }
+            )
+            .addCase(fetchCollectedProperties.rejected, (state, action) => {
+                state.isLoading = false;
+                state.hasError = true;
+                state.errorMessage = action.payload as string;
             })
         ;
     },
