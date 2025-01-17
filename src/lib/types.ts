@@ -86,7 +86,9 @@ export interface Dates {
 
 export interface Balance {
     available: number;
+    prevAvailable: number;
     pending: number;
+    prevPending: number;
 }
 
 export interface WithdrawAccount {

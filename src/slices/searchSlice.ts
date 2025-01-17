@@ -119,7 +119,6 @@ function checkFirebaseQuery(state: RootState) {
     dateChunks.forEach(chunk => {
         finalQuery = query(finalQuery, or(
             where("bookedDates", "not-in", chunk),
-            where("fullyBookedDates", "not-in", chunk)
         ));
     });
     return finalQuery;
