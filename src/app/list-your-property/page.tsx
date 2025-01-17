@@ -11,6 +11,7 @@ export default function ListYourPropertyPage() {
         {
             title: 'Create Your Account',
             description: 'Sign up as a host on LexStayz through our quick and easy registration process. Provide your basic information, and you’re ready to get started.',
+            subtitle: <Button href={'https://dashboard.lexstayz.com/login'} className={''} type={'primary'} size={'small'}>Get Started</Button>
         },
         {
             title: 'List Your Property',
@@ -151,6 +152,7 @@ export default function ListYourPropertyPage() {
                         items={steps.map((step, index) => ({
                             title: step.title,
                             description: index === current ? step.description : null,
+                            subTitle: step.subtitle && index === current? step.subtitle : null
                         }))}
                     />
                 </div>
@@ -163,7 +165,7 @@ export default function ListYourPropertyPage() {
         <section className={'px-4 sm:px-6 md:px-12 lg:px-24 py-10 sm:py-14 lg:py-20'}>
             <div className={'flex justify-between items-center'}>
                 <h1 className={'text-2xl sm:text-3xl md:text-4xl font-semibold'}>What our <span className={'text-primary'}>clients say</span></h1>
-                <span>
+                <span className={'space-x-1'}>
                     <Button shape={'circle'} size={'large'} className={'border-gray-500 text-gray-500'} ghost icon={<LeftOutlined/>}></Button>
                     <Button shape={'circle'} size={'large'} type={'primary'} icon={<RightOutlined/>}/>
                 </span>

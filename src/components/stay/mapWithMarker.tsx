@@ -19,7 +19,7 @@ L.Icon.Default.mergeOptions({
 export default function MapWithMarker() {
 
     const stay = useAppSelector(selectCurrentStay);
-    const location = stay.location;
+    const location = stay?.location;
     const [selectedPosition, setSelectedPosition] = useState<LatLngTuple>([51.505, -0.09]);
     console.log(location)
     useEffect(() => {

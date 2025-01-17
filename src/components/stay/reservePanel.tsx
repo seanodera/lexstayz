@@ -10,6 +10,7 @@ import {useEffect, useState} from "react";
 import {MinusOutlined, PlusOutlined} from "@ant-design/icons";
 import Link from "next/link";
 import {RangePickerProps} from "antd/es/date-picker";
+import {addDays, isAfter, isWithinInterval, parseISO} from "date-fns";
 
 const { RangePicker } = DatePicker;
 
@@ -34,6 +35,26 @@ export default function ReservePanel({stay}: {stay: any}) {
     }
 
     useEffect(() => {
+        // Start with `startDate` and iterate until we find an available date
+        let strDate = new Date(startDate);
+        console.log(stay.bookedDates)
+        // Loop to find the next available `startDate`
+        while (stay.bookedDates?.includes(strDate.toISOString().split("T")[0])) {
+            console.log(strDate.toISOString())
+            strDate = addDays(strDate, 1); // Add one day
+        }
+
+        // Update the startDate to the available one
+        setStartDate(strDate.toISOString());
+
+        // Ensure `endDate` is after the new `startDate`
+        if (!isAfter(new Date(endDate), strDate)) {
+            const newEndDate = addDays(strDate, 1); // Default end date to one day after the new start date
+            setEndDate(newEndDate.toISOString());
+        }
+    }, []);
+
+    useEffect(() => {
         dispatch(updateBookingData({
             numGuests: numGuests,
             checkInDate: startDate,
@@ -46,12 +67,37 @@ export default function ReservePanel({stay}: {stay: any}) {
         let booked;
         if (stay.type === 'Home'){
             booked = stay.bookedDates?.includes(curr);
-
+            if (booked){
+                console.log(stay.bookedDates.find((value:string) => value === curr), curr)
+            }
         } else {
             booked = stay.fullyBookedDates?.includes(curr)
         }
         return booked || current.isBefore(dayjs().subtract(1,'day'));
     };
+
+    function disabledButton (){
+        let booked: boolean;
+        const checkInDate = startDate;
+        const checkOutDate = endDate;
+
+        if (stay.type === "Home") {
+            booked = stay.bookedDates?.some((date: string) =>
+                isWithinInterval(parseISO(date), {
+                    start: parseISO(checkInDate),
+                    end: parseISO(checkOutDate),
+                })
+            );
+        } else {
+            booked = stay.fullyBookedDates?.some((date: string) =>
+                isWithinInterval(parseISO(date), {
+                    start: parseISO(checkInDate),
+                    end: parseISO(checkOutDate),
+                })
+            );
+        }
+        return booked;
+    }
     return <div className={'space-y-4'}>
         <h2 className={'font-bold text-xl'}>{globalCurrency} {calculatePrice()} <span className={'text-sm font-normal'}>/ night</span>
         </h2>
@@ -84,8 +130,17 @@ export default function ReservePanel({stay}: {stay: any}) {
                     icon={<PlusOutlined/>}
             />
         </div>
-        <Link href={'/book-firm'} className={'block'}><Button type={'primary'} block size={'large'}>Book Now</Button></Link>
-        <hr/>
+        {!disabledButton() ? (
+            <Link href={'/book-firm'} className={'block'}>
+                <Button type={'primary'} block size={'large'}>
+                    Book Now
+                </Button>
+            </Link>
+        ) : (
+            <Button disabled={true} type={'primary'} block size={'large'}>
+                Book Now
+            </Button>
+        )}<hr/>
         <div className={'grid grid-cols-2'}>
             <h4 className={'text-gray-600'}>{booking.length} Nights</h4>
             <h4 className={'text-end'}>{globalCurrency} {toMoneyFormat(booking.subtotal)}</h4>

@@ -1,11 +1,14 @@
-import {Stay} from "@/lib/types";
+import {PawaPayCountryData, Stay} from "@/lib/types";
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {addDays, differenceInDays} from "date-fns";
+import {addDays, differenceInDays, endOfDay, startOfDay} from "date-fns";
 import {RootState} from "@/data/types";
-import {getCountry, getFeePercentage} from "@/lib/utils";
+import {getCountry, getFeePercentage, handler_url} from "@/lib/utils";
 import createBooking from "@/slices/confirmBookingThunks/createBooking";
 import handlePaymentAsync from '@/slices/confirmBookingThunks/handlePaymentAsync';
-import {setExchangeRates} from "@/slices/staysSlice";
+import {setExchangeRates, setUserLocation} from "@/slices/staysSlice";
+import Error from "next/error";
+import axios from "axios";
+import {payExistingBooking} from "@/slices/confirmBookingThunks/payExistingBooking";
 
 export interface ConfirmBookingState {
     stay: Stay;
@@ -29,9 +32,10 @@ export interface ConfirmBookingState {
     bookingStatus: 'Pending' | 'Confirmed' | 'Canceled' | 'Rejected';
     paymentMethod: any;
     exchangeRates: any;
-    paymentCurrency: 'GHS' | 'KES';
+    paymentCurrency: string;
     paymentRate: number;
     country: string;
+    configs: PawaPayCountryData[];
 }
 
 const initialState: ConfirmBookingState = {
@@ -62,6 +66,7 @@ const initialState: ConfirmBookingState = {
     paymentRate: 1,
     exchangeRates: {},
     country: 'Kenya',
+    configs: []
 };
 
 const recalculateCosts = (state: any) => {
@@ -125,6 +130,7 @@ export const fetchExchangeRates = createAsyncThunk(
 
             const data = await response.json();
             dispatch(setExchangeRates({rates: data.rates, currency: data.base_code}))
+            dispatch(setUserLocation({latitude: country?.latitude, longitude: country?.longitude}))
             return {rates: data.rates, currency: data.base_code, country: country?.name};
         } catch (error) {
             rejectWithValue('Error fetching the currency exchange')
@@ -132,6 +138,17 @@ export const fetchExchangeRates = createAsyncThunk(
         }
     }
 );
+
+export const fetchPawaPayConfigs = createAsyncThunk(
+    'confirmBooking/fetchPawaPayConfigs', async (_, {rejectWithValue}) => {
+        try {
+            const res = await axios.get(`${handler_url}/api/payments/configs`)
+            return res.data.data;
+        } catch (e) {
+            return rejectWithValue('Error fetching payment configs')
+        }
+    }
+)
 
 const ConfirmBookingSlice = createSlice({
     name: 'confirmBooking',
@@ -156,7 +173,7 @@ const ConfirmBookingSlice = createSlice({
             checkInDate: string;
             checkOutDate: string
         }>) => {
-            state.length = differenceInDays(action.payload.checkOutDate, action.payload.checkInDate);
+            state.length = differenceInDays(endOfDay(action.payload.checkOutDate), startOfDay(action.payload.checkInDate));
             state.numGuests = action.payload.numGuests;
             state.checkInDate = action.payload.checkInDate;
             state.checkOutDate = action.payload.checkOutDate;
@@ -185,6 +202,12 @@ const ConfirmBookingSlice = createSlice({
         resetConfirmBookingError: (state) => {
             state.status = 'idle';
             state.error = '';
+        },
+        setPaymentCurrency: (state, action: PayloadAction<string>) => {
+            state.paymentCurrency = action.payload;
+            if (state.exchangeRates){
+                state.paymentRate = state.exchangeRates[action.payload];
+            }
         }
     },
     extraReducers: (builder) => {
@@ -234,7 +257,33 @@ const ConfirmBookingSlice = createSlice({
             }).addCase(fetchExchangeRates.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string || 'An error occurred';
-        });
+        })
+
+            .addCase(fetchPawaPayConfigs.pending, (state) => {
+                // state.status = 'loading';
+                state.error = null;
+            })
+            .addCase(fetchPawaPayConfigs.fulfilled, (state, action) => {
+                state.status = 'idle';
+                state.configs = action.payload;
+            })
+            .addCase(fetchPawaPayConfigs.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string || 'Error fetching PawaPay payment configs';
+            })
+            .addCase(payExistingBooking.pending, (state) => {
+                state.status = 'loading';
+                state.error = null;
+            })
+            .addCase(payExistingBooking.fulfilled, (state) => {
+                state.status = 'succeeded';
+                state.bookingStatus = 'Pending';
+            })
+            .addCase(payExistingBooking.rejected, (state,action: PayloadAction<any>) => {
+                state.status = 'failed';
+                state.error = action.payload;
+            })
+        ;
     }
 
 });
@@ -247,7 +296,8 @@ export const {
     setBookingStay,
     convertCart,
     setPaymentMethod,
-    resetConfirmBookingError
+    resetConfirmBookingError,
+    setPaymentCurrency
 } = ConfirmBookingSlice.actions;
 
 export {createBooking, handlePaymentAsync}

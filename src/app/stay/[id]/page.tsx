@@ -40,8 +40,10 @@ export default function StayPage() {
 
     useEffect(() => {
         console.log('stuy rn', stayId,stay);
-        if (stayId && stayId !== stay.id) {
-            dispatch(setCurrentStayFromId(stayId))
+        if (stayId) {
+            if (!stay || stayId !== stay.id) {
+                dispatch(setCurrentStayFromId(stayId))
+            }
         }
 
     }, [stay]);
@@ -69,14 +71,9 @@ export default function StayPage() {
                             fullscreen={false}
                             disabledDate={(date) => {
                                 const curr = date.toISOString().split('T')[ 0 ]
-                                let booked: boolean;
-                                if (stay.type === 'Home') {
-                                    booked = stay.bookedDates?.includes(curr);
-                                    console.log(booked)
-                                } else {
-                                    booked = stay.fullyBookedDates?.includes(curr)
-                                }
-                                return date.isBefore(dayjs()) || booked || (stay.fullDates && stay.fullDates.includes(date.toISOString().split("T")[ 0 ]));
+                                const  booked = stay.fullyBookedDates?.includes(curr) ?? false;
+
+                                return date.isBefore(dayjs()) || booked;
                             }}
                             fullCellRender={(date) => {
                                 const isCheckIn = date.isSame(checkInDate, 'date');
