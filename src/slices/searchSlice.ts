@@ -15,6 +15,20 @@ export interface ICollectedProperties {
 const indexName = "stays";
 const index = searchClient.initIndex(indexName);
 
+export const fetchNextLocationLevel = createAsyncThunk(
+    "search/fetchNextLocationLevel",
+    async ({ level, path }: { level: string; path: string }, { rejectWithValue }) => {
+        try {
+            const snapshot = await getDocs(collection(firestore, 'general', path));
+            const locations = snapshot.docs.map((doc) => doc.id);
+
+            return { level, path, locations };
+        } catch (error) {
+            console.log(error)
+            return rejectWithValue(`Failed to fetch ${level} data`);
+        }
+    }
+);
 
 function checkFirebaseQuery(state: RootState) {
     const filters = state.search
@@ -320,7 +334,9 @@ interface SearchState {
     },
     smokingFilter?: string,
     petsFilter?: string,
-    partiesFilter?: string
+    partiesFilter?: string,
+    locationProperties: Record<string, string[]>
+
 }
 
 const initialState: SearchState = {
@@ -336,7 +352,8 @@ const initialState: SearchState = {
     displayList: [],
     availableCount: 0,
     isCountLoading: false,
-    locationSuggestions: []
+    locationSuggestions: [],
+    locationProperties: {},
 };
 
 const searchSlice = createSlice({
@@ -463,6 +480,23 @@ const searchSlice = createSlice({
                 }
             )
             .addCase(fetchCollectedProperties.rejected, (state, action) => {
+                state.isLoading = false;
+                state.hasError = true;
+                state.errorMessage = action.payload as string;
+            })
+            .addCase(fetchNextLocationLevel.pending, (state) => {
+            state.isLoading = true;
+
+        })
+            .addCase(fetchNextLocationLevel.fulfilled, (state, action: PayloadAction<any>) => {
+                state.isLoading = false;
+                const { level, locations } = action.payload;
+
+                    state.locationProperties[level] = locations;
+
+
+            })
+            .addCase(fetchNextLocationLevel.rejected, (state, action: PayloadAction<any>) => {
                 state.isLoading = false;
                 state.hasError = true;
                 state.errorMessage = action.payload as string;

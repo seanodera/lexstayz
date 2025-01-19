@@ -3,7 +3,7 @@ import { Stay, Location } from "@/lib/types";
 import {Select, Typography} from "antd";
 import {useEffect, useState} from "react";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
-import {setLocationFilter} from "@/slices/searchSlice";
+import {fetchNextLocationLevel, setLocationFilter} from "@/slices/searchSlice";
 
 const {Title} = Typography;
 
@@ -19,41 +19,50 @@ export default function LocationFilterComponent({stays }: { stays: Stay[] }) {
 
 
     const dispatch = useAppDispatch();
-    const {locationFilter, collectedProperties} = useAppSelector(state => state.search);
-    const locationProperties = collectedProperties? collectedProperties.location : {};
-    // const keys = ['country', 'city', 'district', 'street2', 'street'];
+    const {locationFilter, locationProperties} = useAppSelector(state => state.search);
+    console.log(locationProperties)
+
     useEffect(() => {
+        // Initial fetch for countries
+        if (!locationProperties.country) {
+            dispatch(fetchNextLocationLevel({ level: "country", path: "locations/countries" }));
+        }
+    }, [dispatch, locationProperties.country]);
 
-        // minFilters()
-    }, []);
+    const handleSelect = (level: string, value: string) => {
+        const newFilter = { ...locationFilter, [level]: value };
 
+        // Reset subsequent filters
+        if (level === "country") {
+            newFilter.city = undefined;
+            newFilter.district = undefined;
+            newFilter.street2 = undefined;
+            newFilter.street = undefined;
 
+            // Fetch cities for the selected country
+            dispatch(fetchNextLocationLevel({ level: "city", path: `locations/countries/${value}/cities` }));
+        } else if (level === "city") {
+            newFilter.district = undefined;
+            newFilter.street2 = undefined;
+            newFilter.street = undefined;
 
+            // Fetch districts for the selected city
+            dispatch(fetchNextLocationLevel({ level: "district", path: `locations/countries/${locationFilter?.country}/cities/${value}/districts` }));
+        } else if (level === "district") {
+            newFilter.street2 = undefined;
+            newFilter.street = undefined;
 
-    // function minFilters() {
-    //     const locationProps = locationProperties;
-    //     const locFilter: LocationFilter = {
-    //         city: undefined,
-    //         country: undefined,
-    //         district: undefined,
-    //         street2: undefined,
-    //         street: undefined,
-    //     }
-    //     for (let i = 0; i < keys.length; i++) {
-    //         const key = keys[ i ];
-    //         if (locationProps[ key ] && locationProps[ key ].length === 1) {
-    //             locFilter[ key as keyof LocationFilter ] = locationProps[ key ][ 0 ];
-    //         } else {
-    //             break;
-    //         }
-    //     }
-    //
-    //     dispatch(setLocationFilter(locFilter));
-    // }
+            // Fetch street2 for the selected district
+            dispatch(fetchNextLocationLevel({ level: "street2", path: `locations/countries/${locationFilter?.country}/cities/${locationFilter?.city}/districts/${value}/street2` }));
+        } else if (level === "street2") {
+            newFilter.street = undefined;
 
+            // Fetch streets for the selected street2
+            dispatch(fetchNextLocationLevel({ level: "street", path: `locations/countries/${locationFilter?.country}/cities/${locationFilter?.city}/districts/${locationFilter?.district}/street2/${value}/streets` }));
+        }
 
-
-
+        dispatch(setLocationFilter(newFilter));
+    };
 
     return <div className={'space-y-4'}>
         <Title level={5}>Location</Title>
@@ -66,11 +75,8 @@ export default function LocationFilterComponent({stays }: { stays: Stay[] }) {
                     value: value,
                     label: value
                 })) : []}
-                value={locationProperties.country}
-                onChange={value => dispatch(setLocationFilter(locationFilter ? {
-                    ...locationFilter,
-                    country: value
-                } : {city: value, country: undefined, district: undefined, street: undefined, street2: undefined}))}
+                value={locationFilter?.country}
+                onChange={value => handleSelect('country', value)}
             />
         </div>
 
@@ -84,10 +90,7 @@ export default function LocationFilterComponent({stays }: { stays: Stay[] }) {
                     label: value
                 })) : []}
                 value={locationFilter.city}
-                onChange={value => dispatch(setLocationFilter({
-                    ...locationFilter,
-                    city: value
-                }))}
+                onChange={value => handleSelect('city', value)}
             />
         </div>}
 
@@ -101,10 +104,7 @@ export default function LocationFilterComponent({stays }: { stays: Stay[] }) {
                     label: value
                 })) : []}
                 value={locationFilter.district}
-                onChange={value => dispatch(setLocationFilter(locationFilter ? {
-                    ...locationFilter,
-                    district: value
-                } : {city: undefined, country: undefined, district: value, street: undefined, street2: undefined}))}
+                onChange={value => handleSelect('district', value)}
             />
         </div>}
         {locationFilter && locationFilter.district && <div>
@@ -117,10 +117,7 @@ export default function LocationFilterComponent({stays }: { stays: Stay[] }) {
                     label: value
                 })) : []}
                 value={locationFilter.street2}
-                onChange={value => dispatch(setLocationFilter(locationFilter ? {
-                    ...locationFilter,
-                    street2: value
-                } : {city: undefined, country: undefined, district: undefined, street: undefined, street2: value}))}
+                onChange={value => handleSelect('street2', value)}
             />
         </div>}
         {locationFilter && locationFilter.street2 && <div>
@@ -133,10 +130,7 @@ export default function LocationFilterComponent({stays }: { stays: Stay[] }) {
                     label: value
                 })) : []}
                 value={locationFilter.street}
-                onChange={value => dispatch(setLocationFilter(locationFilter ? {
-                    ...locationFilter,
-                    street: value
-                } : {city: undefined, country: undefined, district: undefined, street: value, street2: undefined}))}
+                onChange={value => handleSelect('street', value)}
             />
         </div>}
     </div>

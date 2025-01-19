@@ -69,8 +69,8 @@ export const fetchStaysAsync = createAsyncThunk(
     { getState, rejectWithValue }
   ) => {
     const state = (getState() as { stays: StaysState }).stays;
-    // const limit = state.limit;
-    const limit = 26;
+    const limit = state.limit;
+
     try {
       if (state.fetchedPages[type].includes(page)) {
         return { stays: [], page, type };

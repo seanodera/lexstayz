@@ -59,7 +59,7 @@ export default function SearchFilter({
 
   useEffect(() => {
 
-    const prices: number[] = collectedProperties && collectedProperties.price? collectedProperties.price as number[] :[];
+    let prices: number[] = [...(collectedProperties && collectedProperties.price? collectedProperties.price as number[] :[])];
 
     if (prices && prices.length > 0) {
       prices.sort((a, b) => a - b);
