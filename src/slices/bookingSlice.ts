@@ -1,13 +1,11 @@
 'use client';
 
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {completeBooking, generateID, getBookings, getCurrentUser} from "@/data/bookingData";
+import {getBookings, getCurrentUser} from "@/data/bookingData";
 import {RootState} from "@/data/types";
-import {verifyPayment} from "@/data/payment";
-import {arrayUnion, collection, doc, getDoc, setDoc} from "firebase/firestore";
+import {arrayUnion, doc, getDoc} from "firebase/firestore";
 import {firestore} from "@/lib/firebase";
 import {writeBatch} from "@firebase/firestore";
-import {state} from "sucrase/dist/types/parser/traverser/base";
 import {updateBookingStatusAsync} from "@/slices/bookingThunks/updateBookingStatusAsync";
 
 
@@ -40,62 +38,62 @@ export const fetchBookingsAsync = createAsyncThunk(
     }
 );
 
-export const checkUnpaidBookingAsync = createAsyncThunk('bookings/checkUnpaidBooking', async (id: string, {
-    getState,
-    rejectWithValue
-}) => {
-    try {
-        const {bookings} = getState() as RootState
-        const _booking = bookings.bookings.find((value) => value.id === id)
-        const user = getCurrentUser()
-        console.log(_booking)
-        //TODO: implement method below
-        const res = await verifyPayment(_booking.paymentReference? _booking.paymentReference: _booking.paymentData.reference,_booking.paymentData.method)
-        if (res.status === 'success' && !_booking.isConfirmed) {
-            await completeBooking({
-                userId: user.uid,
-                id: _booking.id,
-                paymentData: res.data.data,
-                isConfirmed: true,
-                status: 'Confirmed'
-            })
-            return {
-                booking: {
-                    ..._booking,
-                    paymentData: res.data.data,
-                    isConfirmed: true,
-                    status: 'Confirmed',
-                }, updated: true
-            }
-        } else if (res.status === 'success' && _booking.isConfirmed) {
-            return {booking: _booking, updated: false};
-        } else if (_booking.isConfirmed) {
-            await completeBooking({
-                userId: user.uid,
-                id: _booking.id,
-                paymentData: res.data.data,
-                isConfirmed: false,
-                status: 'Rejected',
-            })
-            return {
-                booking: {
-                    ..._booking,
-                    paymentData: res.data.data,
-                    isConfirmed: false,
-                    status: 'Rejected',
-                }, updated: true
-            }
-        } else {
-            return {booking: _booking, updated: false};
-        }
-
-    } catch (error) {
-        if (error instanceof Error) {
-            return rejectWithValue(error.message);
-        }
-        return rejectWithValue('An unknown error occurred');
-    }
-})
+// export const checkUnpaidBookingAsync = createAsyncThunk('bookings/checkUnpaidBooking', async (id: string, {
+//     getState,
+//     rejectWithValue
+// }) => {
+//     try {
+//         const {bookings} = getState() as RootState
+//         const _booking = bookings.bookings.find((value) => value.id === id)
+//         const user = getCurrentUser()
+//         console.log(_booking)
+//         //TODO: implement method below
+//         const res = await verifyPayment(_booking.paymentReference? _booking.paymentReference: _booking.paymentData.reference,_booking.paymentData.method)
+//         if (res.status === 'success' && !_booking.isConfirmed) {
+//             await completeBooking({
+//                 userId: user.uid,
+//                 id: _booking.id,
+//                 paymentData: res.data.data,
+//                 isConfirmed: true,
+//                 status: 'Confirmed'
+//             })
+//             return {
+//                 booking: {
+//                     ..._booking,
+//                     paymentData: res.data.data,
+//                     isConfirmed: true,
+//                     status: 'Confirmed',
+//                 }, updated: true
+//             }
+//         } else if (res.status === 'success' && _booking.isConfirmed) {
+//             return {booking: _booking, updated: false};
+//         } else if (_booking.isConfirmed) {
+//             await completeBooking({
+//                 userId: user.uid,
+//                 id: _booking.id,
+//                 paymentData: res.data.data,
+//                 isConfirmed: false,
+//                 status: 'Rejected',
+//             })
+//             return {
+//                 booking: {
+//                     ..._booking,
+//                     paymentData: res.data.data,
+//                     isConfirmed: false,
+//                     status: 'Rejected',
+//                 }, updated: true
+//             }
+//         } else {
+//             return {booking: _booking, updated: false};
+//         }
+//
+//     } catch (error) {
+//         if (error instanceof Error) {
+//             return rejectWithValue(error.message);
+//         }
+//         return rejectWithValue('An unknown error occurred');
+//     }
+// })
 
 export const fetchBookingAsync = createAsyncThunk('bookings/fetchBooking', async (id: string, {
         getState,
@@ -234,22 +232,24 @@ const bookingsSlice = createSlice({
                 state.isLoading = false;
                 state.hasError = true;
                 state.errorMessage = action.error.message || 'Failed to fetch bookings';
-            }).addCase(checkUnpaidBookingAsync.pending, (state, action) => {
-            // state.isLoading = true;
-        }).addCase(checkUnpaidBookingAsync.fulfilled, (state, action) => {
-            if (action.payload.updated) {
-                const pos = state.bookings.findIndex(value => value.id === action.payload.booking.id)
-                state.bookings[ pos ] = action.payload.booking;
-                if (state.currentBooking.id === action.payload.booking.id) {
-                    state.currentBooking = action.payload.booking;
-                }
-            }
-            // state.isLoading = false;
-        }).addCase(checkUnpaidBookingAsync.rejected, (state, action) => {
-            // state.isLoading = false;
-            // state.hasError = true;
-            // state.errorMessage = action.error.message || 'Failed to fetch bookings';
-        }).addCase(fetchBookingAsync.pending, (state, action) => {
+            })
+        // addCase(checkUnpaidBookingAsync.pending, (state, action) => {
+        //     // state.isLoading = true;
+        // }).addCase(checkUnpaidBookingAsync.fulfilled, (state, action) => {
+        //     if (action.payload.updated) {
+        //         const pos = state.bookings.findIndex(value => value.id === action.payload.booking.id)
+        //         state.bookings[ pos ] = action.payload.booking;
+        //         if (state.currentBooking.id === action.payload.booking.id) {
+        //             state.currentBooking = action.payload.booking;
+        //         }
+        //     }
+        //     // state.isLoading = false;
+        // }).addCase(checkUnpaidBookingAsync.rejected, (state, action) => {
+        //     // state.isLoading = false;
+        //     // state.hasError = true;
+        //     // state.errorMessage = action.error.message || 'Failed to fetch bookings';
+        // })
+            .addCase(fetchBookingAsync.pending, (state, action) => {
             state.isLoading = true
         })
             .addCase(fetchBookingAsync.fulfilled, (state, action) => {

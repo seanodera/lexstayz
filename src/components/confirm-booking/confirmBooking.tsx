@@ -1,11 +1,11 @@
 'use client'
-import {completeBooking} from "@/data/bookingData";
 import {useSearchParams} from "next/navigation";
 import {verifyPayment} from "@/data/payment";
 import {useEffect, useState} from "react";
 import {Button, message, Result, Skeleton} from "antd";
 import {savePaymentMethod} from "@/data/usersData";
 import LoadingScreen from "@/components/LoadingScreen";
+import {completeBooking} from "@/data/completeBooking";
 
 
 export default function ConfirmBooking() {
@@ -14,58 +14,36 @@ export default function ConfirmBooking() {
     const params = useSearchParams()
     const userID = params.get('userID')
     const bookingID = params.get('booking')
-    const preserve = params.get('preserve')
     const depositId = params.get('depositId')
     const reference = params.get('reference')
+    const method = params.get('method')
     const [messageApi, contextHolder] = message.useMessage();
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('')
-    const [hasRun,setHasRun] = useState(false)
 
 
-    async function runBooking(){
-        if (userID && bookingID && reference){
-            const response = await  verifyPayment( reference, depositId ? 'Pawapay' : 'Paystack');
-            if (response.status === 'success') {
-                completeBooking({
-                    userId: userID,
-                    id: bookingID,
-                    paymentData: response.data,
-                    isConfirmed: true,
-                    status: 'Pending',
-                }).then((value) => {
-                    messageApi.info('booking successfully made')
-                    setIsLoading(false)
-                })
-                if (preserve){
-                    await savePaymentMethod(response, userID)
-                }
-            } else {
-                completeBooking({
-                    userId: userID,
-                    id: bookingID,
-                    paymentData: response.data,
-                    isConfirmed: false,
-                    status: 'Failed',
-                }).then((value) => {
-                    setIsLoading(false)
-                })
+    function runBooking() {
+        if (userID && bookingID && reference) {
+            completeBooking(bookingID, reference,method? method : depositId ? 'Pawapay' : 'Paystack_KE').then(result => {
+                setIsLoading(false);
+                messageApi.info('booking successfully made')
+            }).catch(err => {
+                console.log(err)
+                setIsLoading(false)
                 messageApi.error('An error occurred with your payment')
                 setErrorMessage('An error occurred with your payment')
                 setError(true)
-            }
+            })
+
 
         }
 
     }
 
-const [savedData, setSavedData] = useState<any>()
     useEffect(() => {
         runBooking()
     }, []);
-
-
 
 
     return <div className={'h-screen w-full flex flex-col justify-center'}>

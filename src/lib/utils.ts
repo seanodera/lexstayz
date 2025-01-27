@@ -109,19 +109,32 @@ export async function getCountry() {
             };
 
         } catch (primaryError) {
-            console.warn('Primary API failed, attempting secondary API', primaryError);
+            try {
+                const response = await axios.get('http://ip-api.com/json/')
+                const code = response.data.countryCode;
+                const country = countries[code];
+                return {
+                    name: country.name,
+                    emoji: country.emoji,
+                    currency: country.currencies[0],
+                    latitude: response.data.lat,
+                    longitude: response.data.lon,
+                }
+            } catch (error) {
+                console.warn('Primary API failed, attempting secondary API', primaryError);
 
-            const backupCountryResponse = await axios.get("https://freegeoip.app/json/");
-            const backupCountryCode = backupCountryResponse.data.country_code;
+                const backupCountryResponse = await axios.get("https://freegeoip.app/json/");
+                const backupCountryCode = backupCountryResponse.data.country_code;
 
-            const backupCountry = countries[backupCountryCode];
-            return {
-                name: backupCountry.name,
-                emoji: backupCountry.emoji,
-                currency: backupCountry.currencies[0],
-                latitude: backupCountryResponse.data.latitude,
-                longitude: backupCountryResponse.data.longitude,
-            };
+                const backupCountry = countries[backupCountryCode];
+                return {
+                    name: backupCountry.name,
+                    emoji: backupCountry.emoji,
+                    currency: backupCountry.currencies[0],
+                    latitude: backupCountryResponse.data.latitude,
+                    longitude: backupCountryResponse.data.longitude,
+                };
+            }
         }
     } catch (error) {
         // console.error("Error fetching country data: ", error);
@@ -231,4 +244,14 @@ export function calculateStayLength(date1:string, date2:string){
     return Math.ceil(diffInDays);
 }
 
-
+export async function getServerTime() {
+    try {
+        const handler = process.env.NEXT_PUBLIC_HANDLER
+        const response = await fetch(`${handler}/api/utils/serverTime`);
+        const data = await response.json();
+        return new Date(data.isoDateTime);
+    } catch (error) {
+        //throw Error('Error fetching server time');
+        return new Date();
+    }
+}

@@ -12,7 +12,7 @@ export interface Stay {
     description: string;
     rating: number;
     publishedDate: string;
-    location: Location ;
+    location: Location;
     images: string[];
     name: string;
     numReviews: number;
@@ -26,6 +26,7 @@ export interface Stay {
     };
     pets: string;
     minAge: number;
+    bookedDates?: string[];
 }
 
 export interface Home extends Stay {
@@ -36,27 +37,26 @@ export interface Home extends Stay {
     price: number;
     bedrooms: number;
     homeType: string;
-    bookedDates?: string[];
+
 }
 
 export interface Hotel extends Stay {
     type: 'Hotel';
     rooms: Room[];
-    fullyBookedDates?: string[];
+
 }
 
-export interface Location
-    {
-        latitude: number;
-        longitude: number;
-        zipCode: string;
-        street2: string;
-        fullAddress: string;
-        district: string;
-        country: string;
-        street: string;
-        city: string;
-    }
+export interface Location {
+    latitude: number;
+    longitude: number;
+    zipCode: string;
+    street2: string;
+    fullAddress: string;
+    district: string;
+    country: string;
+    street: string;
+    city: string;
+}
 
 
 export interface Room {
@@ -101,7 +101,7 @@ export interface Withdraw {
     withdrawals: any[];
 }
 
-export interface Host{
+export interface Host {
     organization?: string;
     "email": string,
     "phone": string,
@@ -114,6 +114,7 @@ export interface Host{
     "wishlist": string[]
     onboarded: string[],
     joined: string,
+    balance?: Balance,
 }
 
 export interface OperationType {
@@ -132,4 +133,60 @@ export interface Correspondent {
 export interface PawaPayCountryData {
     country: string;
     correspondents: Correspondent[];
+}
+
+export interface Booking {
+    acceptedAt: string;
+    accommodationId: string;
+    accountId: string;
+    checkInDate: string;
+    checkOutDate: string;
+    createdAt: string;
+    currency: string;
+    fees: number;
+    grandTotal: number;
+    hostId: string;
+    id: string;
+    isConfirmed: boolean;
+    numGuests: number;
+    paymentCurrency: string;
+    paymentData: PaymentData;
+    paymentMethod: string;
+    paymentRate: number;
+    specialRequest: string;
+    status: string;
+    subtotal: number;
+    totalPrice: number;
+    usedRate: number;
+    user: BookingUser;
+    rooms?: BookingRoom[];
+}
+
+export interface BookingRoom {
+    roomId: string;
+    numRooms: number;
+    name: string;
+    price: number
+}
+
+interface PaymentData {
+    data: {
+        paidAt: string;
+        plan: string | null;
+        created_at: string;
+        paid_at: string;
+        createdAt: string;
+    }
+    // Add other properties that might be inside the paymentData object
+    message: string;
+    status: boolean;
+    refunded?: boolean
+}
+
+export interface BookingUser {
+    country: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
 }

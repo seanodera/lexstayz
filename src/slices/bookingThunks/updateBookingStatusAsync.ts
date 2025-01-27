@@ -7,7 +7,7 @@ import {collection, doc, getDoc} from "firebase/firestore";
 import dayjs from "dayjs";
 import {addDays} from "date-fns";
 import {RootState} from "@/data/types";
-import {getCurrentUser, refundBooking} from "@/data/bookingData";
+import {cancelBooking, getCurrentUser, refundBooking} from "@/data/bookingData";
 
 
 export const updateBookingStatusAsync = createAsyncThunk(
@@ -19,7 +19,6 @@ export const updateBookingStatusAsync = createAsyncThunk(
         const state = getState() as RootState
         const stayState = state.stays
         try {
-            console.log(booking, 'At status')
             const user = getCurrentUser()
             const batch = writeBatch(firestore);
             const bookingsDoc = doc(firestore,  'bookings', booking.id)
@@ -29,104 +28,27 @@ export const updateBookingStatusAsync = createAsyncThunk(
             const stayRef = doc(firestore, 'stays', booking.accommodationId);
             let paymentData = booking.paymentData;
             if (status === 'Rejected' || status === 'Canceled') {
-                if (booking.isConfirmed) {
-                    const staySnap = await getDoc(stayRef);
-
-                    if (!staySnap.exists()) {
-                        throw new Error("Accommodation document does not exist!");
-                    }
-                    const stay = staySnap.data()
-                    const checkIn = new Date(booking.checkInDate);
-                    const checkOut = new Date(booking.checkOutDate);
-                    console.log(stay)
-                    if (stay) {
-
-                        if (stay.type === 'Hotel') {
-                            const {updatedRooms, fullyBookedDates} = reverseProcessHotelBooking(stay, booking, checkIn, checkOut);
-                            console.log('Unavailable: ',updatedRooms, fullyBookedDates);
-                            batch.update(stayRef, {rooms: updatedRooms, fullyBookedDates});
-                        } else if (stay.type === 'Home') {
-                            const unavailableDates = reverseProcessHomeBooking(stay, checkIn, checkOut);
-                            console.log('Unavailable: ', unavailableDates)
-                            batch.update(stayRef, {bookedDates: unavailableDates});
-                        }
-
-
-
-                        if (stay.cancellation.cancellation === 'Free') {
-                            paymentData = await refundBooking(booking)
-                        } else if (stay.cancellation.cancellation === 'Other') {
-                            const cancellation = stay.cancellation
-                            let date = dayjs()
-                            console.log(cancellation)
-                            if (cancellation.preDate) {
-                                if (cancellation.timeSpace === 'Days') {
-                                    date = dayjs(booking.checkInDate).subtract(cancellation.time, 'days')
-                                } else if (cancellation.timeSpace === 'Hours') {
-                                    date = dayjs(booking.checkInDate).subtract(cancellation.time, 'hours')
-                                }
-                            } else {
-                                if (cancellation.timeSpace === 'Days') {
-                                    date = dayjs(booking.checkInDate).add(cancellation.time, 'days')
-                                } else if (cancellation.timeSpace === 'Hours') {
-                                    date = dayjs(booking.checkInDate).add(cancellation.time, 'hours')
-                                }
-                            }
-
-                            if (transactionDoc.exists()) {
-                                batch.delete(hostTransaction)
-                            }
-                            console.log(date)
-                            if (date.isBefore(dayjs())) {
-                                const amount = ((100 - cancellation.rate) / 100) * booking.paymentData.amount
-                                console.log(amount)
-                                paymentData = await refundBooking(booking, amount)
-                                if (transactionDoc.exists()) {
-                                    batch.set(doc(availableRef, booking.id), {
-                                        ...transactionDoc,
-                                        amount: (cancellation.rate / 100) * booking.totalPrice,
-                                        paymentData: paymentData,
-                                    })
-                                } else {
-                                    batch.set(doc(availableRef, booking.id), {
-                                        id: booking.id,
-                                        amount: (cancellation.rate / 100) * booking.totalPrice,
-                                        currency: stay.currency,
-                                        paymentData: paymentData,
-                                        date: booking.createdAt,
-                                        availableDate: date.toISOString(),
-                                    })
-                                }
-                            } else {
-                                console.log('full')
-                                paymentData = await refundBooking(booking)
-                            }
-                        }
-
-                    }
-                }
+                const newBooking = await cancelBooking(booking)
+                paymentData = newBooking.paymentData;
             }
 
             if (transactionDoc.exists()) {
-                if (status === 'Canceled' || status === 'Rejected') {
-                    batch.delete(hostTransaction)
-                } else {
 
-                }
             } else {
                 if (status === 'Confirmed') {
                     batch.set(hostTransaction, {
                         id: booking.id,
                         amount: booking.totalPrice,
+                        fees: booking.fees,
                         currency: 'USD',
                         paymentData: paymentData,
                         date: booking.createdAt,
                         availableDate: addDays(booking.checkOutDate, 3).toISOString(),
-                    })
+                    }, {merge: true})
                 }
             }
             batch.update(bookingsDoc, {status: status, acceptedAt: new Date().toString(), paymentData: paymentData,})
-            batch.update(bookingsDoc, {status: status, acceptedAt: new Date().toString(), paymentData: paymentData,})
+
 
             await batch.commit();
             let newBooking = {...booking};

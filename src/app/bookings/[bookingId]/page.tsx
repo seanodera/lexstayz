@@ -2,24 +2,15 @@
 import {useParams, useRouter} from "next/navigation";
 import {useEffect, useState} from "react";
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
-import {
-    checkUnpaidBookingAsync,
-    fetchBookingAsync,
-    selectBookings,
-    selectCurrentBooking,
-    updateBookingStatusAsync
-} from "@/slices/bookingSlice";
-import {selectAllStays, selectCurrentStay, setCurrentStayFromId} from "@/slices/staysSlice";
+import {fetchBookingAsync, selectCurrentBooking, updateBookingStatusAsync} from "@/slices/bookingSlice";
+import {selectCurrentStay} from "@/slices/staysSlice";
 import StayWidget from "@/components/bookings/StayWidget";
-import {Button, Col, Row, Skeleton} from "antd";
+import {Button, Skeleton} from "antd";
 import ReservationDetails from "@/components/bookings/ReservationDetails";
 import BookingUserDetails from "@/components/bookings/BookingUserDetails";
 import RoomsWidget from "@/components/bookings/RoomsWidget";
 import {startChatAsync} from "@/slices/messagingSlice";
 import ReviewDialog from "@/components/bookings/reviewDialog";
-import {verifyPayment} from "@/data/payment";
-import {completeBooking} from "@/data/bookingData";
-import {selectCurrentUser} from "@/slices/authenticationSlice";
 import dayjs from "dayjs";
 
 
@@ -27,24 +18,15 @@ export default function Page() {
     const {bookingId} = useParams();
     const booking = useAppSelector(selectCurrentBooking)
     const stay = useAppSelector(selectCurrentStay)
-    const bookings = useAppSelector(selectBookings);
     const router = useRouter()
     const dispatch = useAppDispatch();
     const [openDialog, setOpenDialog] = useState(false);
     useEffect(() => {
 
         if (!booking || booking.id !== bookingId){
-            dispatch(fetchBookingAsync(bookingId.toString())).then((value) => {
-                console.log(value)
-                if (value.meta.requestStatus === 'fulfilled') {
-                    if (value.payload.status !== 'Canceled'){
-                        dispatch(checkUnpaidBookingAsync(booking.id))
-                    }
-                    dispatch(setCurrentStayFromId(value.payload.accommodationId))
-                }
-            },)
+            dispatch(fetchBookingAsync(bookingId.toString()))
         }
-    }, [bookingId, dispatch]);
+    }, [booking, bookingId, dispatch]);
 
 
     function handleContactHost() {
