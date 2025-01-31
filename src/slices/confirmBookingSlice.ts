@@ -90,9 +90,9 @@ const recalculateCosts = (state: ConfirmBookingState) => {
     const months = differenceInMonths(checkOutDate, checkInDate);
     const weeks = differenceInWeeks(checkOutDate, checkInDate);
 
-    let isWeek = weeks > 1;
-    let isMonth = months > 1;
-    let isYear = years > 1;
+    let isWeek = weeks > 0;
+    let isMonth = months > 0;
+    let isYear = years > 0;
 
     let subTotal = 0;
 
@@ -101,7 +101,7 @@ const recalculateCosts = (state: ConfirmBookingState) => {
             const room = (state.stay as Hotel).rooms.find((room) => room.id === value.roomId);
             if (room) {
                 const {pricing} = room;
-                let price = pricing?.base || room.price;
+                let price: number;
 
                 if (isYear && pricing?.yearly) {
                     price = pricing.yearly * years + (differenceInMonths(checkOutDate, checkInDate) % 12) * pricing.yearly / 12 + differenceInDays(checkOutDate, addMonths(addYears(checkInDate, years), (differenceInMonths(checkOutDate, checkInDate) % 12)));
@@ -109,6 +109,8 @@ const recalculateCosts = (state: ConfirmBookingState) => {
                     price = pricing.monthly * months + differenceInDays(checkOutDate, addMonths(checkInDate, months)) * pricing.monthly / 30;
                 } else if (isWeek && pricing?.weekly) {
                     price = pricing.weekly * weeks + differenceInDays(checkOutDate, addWeeks(checkInDate, weeks)) * pricing.weekly / 7;
+                }  else {
+                    price = room.price * state.length;
                 }
 
                 subTotal += value.numRooms * price;
@@ -116,7 +118,7 @@ const recalculateCosts = (state: ConfirmBookingState) => {
         });
     } else {
         const {pricing} = state.stay;
-        let price = pricing?.base || state.stay.price;
+        let price: number;
         const totalDays = differenceInDays(checkOutDate, checkInDate);
 
 
@@ -126,6 +128,8 @@ const recalculateCosts = (state: ConfirmBookingState) => {
             price = pricing.monthly * months + differenceInDays(checkOutDate, addMonths(checkInDate, months)) * pricing.monthly / 30;
         } else if (isWeek && pricing?.weekly) {
             price = pricing.weekly * weeks + differenceInDays(checkOutDate, addWeeks(checkInDate, weeks)) * pricing.weekly / 7;
+        } else {
+            price = state.stay.price * state.length;
         }
 
         subTotal = price;
