@@ -251,12 +251,12 @@ export default function ReservePanel({stay}: { stay: any }) {
                 </div>
             )}
             <h4 className={'text-gray-600'}>
-                {yearlyPrice
+                {yearlyPrice && differenceInYears(endDate, startDate) > 0
                     ? `${differenceInYears(endDate, startDate)} Years ${differenceInMonths(endDate, startDate) % 12} Months`
-                    : monthPrice
-                        ? `${differenceInMonths(endDate, startDate)} Months ${differenceInDays(endDate, addMonths(startDate, differenceInMonths(endDate, startDate)))} Days`
-                        : weeklyPrice
-                            ? `${differenceInWeeks(endDate, startDate)} Weeks ${differenceInDays(endDate, addWeeks(startDate, differenceInWeeks(endDate, startDate)))} Days`
+                    : monthPrice && differenceInMonths(endDate, startDate) > 0
+                        ? `${differenceInMonths(endDate, startDate)} Months ${differenceInDays(endDate, addMonths(startDate, differenceInMonths(endDate, startDate)))} Nights`
+                        : weeklyPrice && differenceInWeeks(endDate, startDate) > 0
+                            ? `${differenceInWeeks(endDate, startDate)} Weeks ${differenceInDays(endDate, addWeeks(startDate, differenceInWeeks(endDate, startDate)))} Nights`
                             : `${booking.length} Nights`}
             </h4>
             <h4 className={'text-end'}>{globalCurrency} {toMoneyFormat(booking.subtotal)}</h4>
