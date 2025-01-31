@@ -113,10 +113,7 @@ export default function SearchComponent() {
 
   function filterStaysByDate(stays: Stay[]) {
     return [...stays].filter((stay) => {
-      const bookedDates =
-        stay.type === "Home"
-          ? (stay as Home).bookedDates
-          : (stay as Hotel).fullyBookedDates;
+      const bookedDates = stay.bookedDates
       if (!bookedDates) return true; // If no booked dates, it's available
 
       return !bookedDates.some((date: string) =>
