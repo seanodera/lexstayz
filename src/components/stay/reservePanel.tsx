@@ -10,11 +10,22 @@ import {useEffect, useState} from "react";
 import {MinusOutlined, PlusOutlined} from "@ant-design/icons";
 import Link from "next/link";
 import {RangePickerProps} from "antd/es/date-picker";
-import {addDays, isAfter, isWithinInterval, parseISO} from "date-fns";
+import {
+    addDays,
+    addMonths,
+    addWeeks,
+    addYears,
+    differenceInDays,
+    differenceInMonths, differenceInWeeks, differenceInYears,
+    isAfter,
+    isWithinInterval,
+    parseISO
+} from "date-fns";
+import {Hotel} from "@/lib/types";
 
-const { RangePicker } = DatePicker;
+const {RangePicker} = DatePicker;
 
-export default function ReservePanel({stay}: {stay: any}) {
+export default function ReservePanel({stay}: { stay: any }) {
     const globalCurrency = useAppSelector(selectGlobalCurrency)
     const exchangeRates = useAppSelector(selectExchangeRate)
     const booking = useAppSelector(selectConfirmBooking)
@@ -22,14 +33,17 @@ export default function ReservePanel({stay}: {stay: any}) {
     const [startDate, setStartDate] = useState(booking.checkInDate);
     const [endDate, setEndDate] = useState(booking.checkOutDate);
     const [numGuests, setNumGuests] = useState(booking.numGuests);
+    const [weeklyPrice, setWeeklyPrice] = useState<number>();
+    const [monthPrice, setMonthPrice] = useState<number>();
+    const [yearlyPrice, setYearlyPrice] = useState<number>();
     const dispatch = useAppDispatch()
 
-    function calculatePrice (){
+    function calculatePrice(amount: number) {
         let price;
-        if (exchangeRates[stay.currency] && stay.currency !== globalCurrency){
-            price = stay.price * 1.02 / exchangeRates[stay.currency]
+        if (exchangeRates[ stay.currency ] && stay.currency !== globalCurrency) {
+            price = amount * 1.02 / exchangeRates[ stay.currency ]
         } else {
-            price = stay.price
+            price = amount
         }
         return toMoneyFormat(price);
     }
@@ -39,7 +53,7 @@ export default function ReservePanel({stay}: {stay: any}) {
         let strDate = new Date(startDate);
         console.log(stay.bookedDates)
         // Loop to find the next available `startDate`
-        while (stay.bookedDates?.includes(strDate.toISOString().split("T")[0])) {
+        while (stay.bookedDates?.includes(strDate.toISOString().split("T")[ 0 ])) {
             console.log(strDate.toISOString())
             strDate = addDays(strDate, 1); // Add one day
         }
@@ -54,29 +68,102 @@ export default function ReservePanel({stay}: {stay: any}) {
         }
     }, []);
 
+    // const [isWeek, setIsWeek] = useState(false);
+    // const [isMonth, setIsMonth] = useState(false);
+    // const [isYear, setIsYear] = useState(false);
+    //
+    // useEffect(() => {
+    //     if (!startDate || !endDate) return;
+    //
+    //     setIsWeek(isAfter(endDate, addWeeks(startDate, 1)));
+    //     setIsMonth(isAfter(endDate, addMonths(startDate, 1)));
+    //     setIsYear(isAfter(endDate, addYears(startDate, 1)));
+    //
+    // }, [startDate, endDate]);
+
+
+
     useEffect(() => {
+        if (!stay) return;
+        let totalWeekly: number | undefined ;
+        let totalMonthly: number | undefined ;
+        let totalYearly: number | undefined ;
+        const checkOutDate = endDate;
+        const checkInDate = endDate;
+        const years = differenceInYears(checkOutDate, checkInDate);
+        const months = differenceInMonths(checkOutDate, checkInDate);
+        const weeks = differenceInWeeks(checkOutDate, checkInDate);
+        if (stay.type === 'Hotel' && booking.rooms) {
+            // Sum up room prices
+            totalWeekly = 0;
+            totalMonthly = 0;
+            totalYearly = 0;
+            booking.rooms.forEach((value) => {
+                const room = (stay as Hotel).rooms.find((room) => room.id === value.roomId);
+                if (room) {
+                    const {pricing} = room;
+                    let basePrice = pricing?.base || room.price;
+                    if (pricing?.weekly){
+                        totalWeekly! += value.numRooms * (pricing?.weekly ?? basePrice);
+                    }
+
+                    if (pricing?.monthly){
+                        totalMonthly! += value.numRooms * (pricing?.monthly ?? basePrice);
+                    }
+
+                    if (pricing?.yearly){
+                        totalYearly! += value.numRooms * pricing.yearly;
+                    }
+
+                }
+            });
+        } else if (stay.type === 'Home') {
+            // Sum up home prices
+            const {pricing} = stay;
+            let basePrice = pricing?.base || stay.price;
+            if (pricing?.weekly){
+                totalWeekly = pricing.weekly;
+            }
+            if (pricing?.monthly){
+                totalMonthly = pricing.monthly;
+            }
+            if (pricing?.yearly){
+                totalYearly = pricing.yearly;
+            }
+        }
+
+        setWeeklyPrice(totalWeekly);
+        setMonthPrice(totalMonthly);
+        setYearlyPrice(totalYearly);
+    }, [stay, booking]);
+
+
+    useEffect(() => {
+
         dispatch(updateBookingData({
             numGuests: numGuests,
             checkInDate: startDate,
             checkOutDate: endDate,
         }));
     }, [numGuests, startDate, endDate, dispatch]);
+
+
     const disabledDate: RangePickerProps['disabledDate'] = (current) => {
         const curr = current.toISOString().split('T')[ 0 ]
 
         let booked;
-        if (stay.type === 'Home'){
+        if (stay.type === 'Home') {
             booked = stay.bookedDates?.includes(curr);
-            if (booked){
-                console.log(stay.bookedDates.find((value:string) => value === curr), curr)
+            if (booked) {
+                console.log(stay.bookedDates.find((value: string) => value === curr), curr)
             }
         } else {
             booked = stay.fullyBookedDates?.includes(curr)
         }
-        return booked || current.isBefore(dayjs().subtract(1,'day'));
+        return booked || current.isBefore(dayjs().subtract(1, 'day'));
     };
 
-    function disabledButton (){
+    function disabledButton() {
         let booked: boolean;
         const checkInDate = startDate;
         const checkOutDate = endDate;
@@ -98,8 +185,10 @@ export default function ReservePanel({stay}: {stay: any}) {
         }
         return booked;
     }
+
     return <div className={'space-y-4'}>
-        <h2 className={'font-bold text-xl'}>{globalCurrency} {calculatePrice()} <span className={'text-sm font-normal'}>/ night</span>
+        <h2 className={'font-bold text-xl'}>{globalCurrency} {calculatePrice(stay.price)} <span
+            className={'text-sm font-normal'}>/ night</span>
         </h2>
         <RangePicker
             panelRender={(panelNode) => (
@@ -140,9 +229,36 @@ export default function ReservePanel({stay}: {stay: any}) {
             <Button disabled={true} type={'primary'} block size={'large'}>
                 Book Now
             </Button>
-        )}<hr/>
+        )}
+        <hr/>
         <div className={'grid grid-cols-2'}>
-            <h4 className={'text-gray-600'}>{booking.length} Nights</h4>
+            {weeklyPrice && (
+                <div className={'col-span-2 grid grid-cols-2'}>
+                    <h4 className={'text-gray-600'}>Weekly Price</h4>
+                    <h4 className={'text-end'}>{globalCurrency} {calculatePrice(weeklyPrice)}</h4>
+                </div>
+            )}
+            {monthPrice && (
+                <div className={'col-span-2 grid grid-cols-2'}>
+                    <h4 className={'text-gray-600'}>Monthly Price</h4>
+                    <h4 className={'text-end'}>{globalCurrency} {calculatePrice(monthPrice)}</h4>
+                </div>
+            )}
+            {yearlyPrice && (
+                <div className={'col-span-2 grid grid-cols-2'}>
+                    <h4 className={'text-gray-600'}>Yearly Price</h4>
+                    <h4 className={'text-end'}>{globalCurrency} {calculatePrice(yearlyPrice)}</h4>
+                </div>
+            )}
+            <h4 className={'text-gray-600'}>
+                {yearlyPrice
+                    ? `${differenceInYears(endDate, startDate)} Years ${differenceInMonths(endDate, startDate) % 12} Months`
+                    : monthPrice
+                        ? `${differenceInMonths(endDate, startDate)} Months ${differenceInDays(endDate, addMonths(startDate, differenceInMonths(endDate, startDate)))} Days`
+                        : weeklyPrice
+                            ? `${differenceInWeeks(endDate, startDate)} Weeks ${differenceInDays(endDate, addWeeks(startDate, differenceInWeeks(endDate, startDate)))} Days`
+                            : `${booking.length} Nights`}
+            </h4>
             <h4 className={'text-end'}>{globalCurrency} {toMoneyFormat(booking.subtotal)}</h4>
             <h4 className={'text-gray-600'}>LexStayz Fees</h4>
             <h4 className={'text-end'}>{globalCurrency} {toMoneyFormat(booking.fees)}</h4>

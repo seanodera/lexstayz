@@ -10,7 +10,14 @@ import {selectCurrentStay} from "@/slices/staysSlice";
 import {useRouter} from "next/navigation";
 import {useEffect, useState} from "react";
 import {getAuth} from "firebase/auth";
-import {differenceInDays} from "date-fns";
+import {
+    addMonths,
+    addWeeks,
+    differenceInDays,
+    differenceInMonths,
+    differenceInWeeks,
+    differenceInYears
+} from "date-fns";
 import PaymentMethods from "@/components/confirm-booking/paymentMethods";
 import CancellationPolicy from "@/components/booking-confirmation/cancellationPolicy";
 import {selectCart} from "@/slices/bookingSlice";
@@ -24,6 +31,9 @@ export default function BookFirmPage() {
     const [length, setLength] = useState(0);
     const dispatch = useAppDispatch();
     const [loading, setLoading] = useState(false);
+    const [weeklyPrice, setWeeklyPrice] = useState<number>();
+    const [monthPrice, setMonthPrice] = useState<number>();
+    const [yearlyPrice, setYearlyPrice] = useState<number>();
     const cart = useAppSelector(selectCart);
 
     useEffect(() => {
@@ -35,10 +45,10 @@ export default function BookFirmPage() {
             router.push('/login');
         }
 
-    },[router, stay]);
+    }, [router, stay]);
 
     useEffect(() => {
-        if (stay){
+        if (stay) {
             dispatch(setBookingStay(stay))
         }
         setLength(differenceInDays(booking.checkOutDate, booking.checkInDate));
@@ -48,6 +58,57 @@ export default function BookFirmPage() {
     useEffect(() => {
         dispatch(convertCart(cart));
     }, [cart, dispatch]);
+
+    useEffect(() => {
+        if (!stay) return;
+        let totalWeekly: number | undefined ;
+        let totalMonthly: number | undefined ;
+        let totalYearly: number | undefined ;
+
+        if (stay.type === 'Hotel' && booking.rooms) {
+            // Sum up room prices
+            totalWeekly = 0;
+            totalMonthly = 0;
+            totalYearly = 0;
+            booking.rooms.forEach((value) => {
+                const room = (stay as Hotel).rooms.find((room) => room.id === value.roomId);
+                if (room) {
+                    const {pricing} = room;
+                    let basePrice = pricing?.base || room.price;
+                    if (pricing?.weekly){
+                        totalWeekly! += value.numRooms * (pricing?.weekly ?? basePrice);
+                    }
+
+                    if (pricing?.monthly){
+                        totalMonthly! += value.numRooms * (pricing?.monthly ?? basePrice);
+                    }
+
+                    if (pricing?.yearly){
+                        totalYearly! += value.numRooms * pricing.yearly;
+                    }
+
+                }
+            });
+        } else if (stay.type === 'Home') {
+            // Sum up home prices
+            const {pricing} = stay;
+            let basePrice = pricing?.base || stay.price;
+            if (pricing?.weekly){
+                totalWeekly = pricing.weekly;
+            }
+            if (pricing?.monthly){
+                totalMonthly = pricing.monthly;
+            }
+            if (pricing?.yearly){
+                totalYearly = pricing.yearly;
+            }
+        }
+
+        setWeeklyPrice(totalWeekly);
+        setMonthPrice(totalMonthly);
+        setYearlyPrice(totalYearly);
+    }, [stay, booking]);
+
 
     if (!booking || !stay) {
         return <div></div>;
@@ -89,6 +150,8 @@ export default function BookFirmPage() {
             <div className={'loader-circle w-12'}></div>
         </div>
     }
+    const endDate = booking.checkOutDate;
+    const startDate = booking.checkInDate;
     return (
         <div>
             <div className={'grid grid-cols-1 md:grid-cols-3 gap-2 '}>
@@ -153,10 +216,16 @@ export default function BookFirmPage() {
                             <hr/>
                             <div className={'grid grid-cols-2 gap-2 '}>
                                 {stay.type !== 'Hotel' && <div className={'mb-0 text-gray-500'}>Price X <span
-                                    className={'text-dark'}>{booking.length} night</span></div>}
+                                    className={'text-dark'}>{yearlyPrice && yearlyPrice !== 0
+                                    ? `${differenceInYears(endDate, startDate)} Years ${differenceInMonths(endDate, startDate) % 12} Months`
+                                    : monthPrice && monthPrice !== 0
+                                        ? `${differenceInMonths(endDate, startDate)} Months ${differenceInDays(endDate, addMonths(startDate, differenceInMonths(endDate, startDate)))} Days`
+                                        : weeklyPrice && weeklyPrice !== 0
+                                            ? `${differenceInWeeks(endDate, startDate)} Weeks ${differenceInDays(endDate, addWeeks(startDate, differenceInWeeks(endDate, startDate)))} Days`
+                                            : `${booking.length} Nights`}</span></div>}
                                 {stay.type !== 'Hotel' && <div className={'text-end'}>
                                     <div
-                                        className={'mb-0'}>{booking.currency} {toMoneyFormat((stay as Home).price * booking.usedRate)}</div>
+                                        className={'mb-0'}>{booking.currency} {calculatePrice(yearlyPrice? yearlyPrice : monthPrice? monthPrice : weeklyPrice? weeklyPrice : stay.price)} {yearlyPrice? '/ Year' : monthPrice? '/ Month' : weeklyPrice? '/ Week' : '/ Night'}</div>
                                     <div
                                         className={'mb-0 text-primary'}>{booking.currency} {toMoneyFormat(booking.subtotal)}</div>
                                 </div>}

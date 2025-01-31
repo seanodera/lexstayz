@@ -1,6 +1,16 @@
-import {PawaPayCountryData, Stay} from "@/lib/types";
+import {BookingRoom, Home, Hotel, PawaPayCountryData, Stay} from "@/lib/types";
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {addDays, differenceInDays, endOfDay, startOfDay} from "date-fns";
+import {
+    addDays,
+    addMonths,
+    addWeeks,
+    addYears,
+    differenceInDays, differenceInMonths, differenceInWeeks,
+    differenceInYears,
+    endOfDay,
+    isAfter,
+    startOfDay
+} from "date-fns";
 import {RootState} from "@/data/types";
 import {getCountry, getFeePercentage, handler_url} from "@/lib/utils";
 import createBooking from "@/slices/confirmBookingThunks/createBooking";
@@ -11,10 +21,10 @@ import axios from "axios";
 import {payExistingBooking} from "@/slices/confirmBookingThunks/payExistingBooking";
 
 export interface ConfirmBookingState {
-    stay: Stay;
+    stay: (Home | Hotel);
     checkInDate: string;
     checkOutDate: string;
-    rooms: object[];
+    rooms: BookingRoom[];
     paymentData: any;
     contact: any;
     numGuests: number;
@@ -39,7 +49,7 @@ export interface ConfirmBookingState {
 }
 
 const initialState: ConfirmBookingState = {
-    stay: {} as Stay,
+    stay: {} as (Home | Hotel),
     checkInDate: new Date().toString(),
     checkOutDate: addDays(new Date().toString(), 1).toString(),
     rooms: [],
@@ -69,41 +79,73 @@ const initialState: ConfirmBookingState = {
     configs: []
 };
 
-const recalculateCosts = (state: any) => {
-    if (!state.stay.id){
-        return ;
+
+const recalculateCosts = (state: ConfirmBookingState) => {
+    if (!state.stay.id) {
+        return;
     }
-    //calculate totals
+    const {checkInDate, checkOutDate} = state;
+
+    const years = differenceInYears(checkOutDate, checkInDate);
+    const months = differenceInMonths(checkOutDate, checkInDate);
+    const weeks = differenceInWeeks(checkOutDate, checkInDate);
+
+    let isWeek = weeks > 1;
+    let isMonth = months > 1;
+    let isYear = years > 1;
+
     let subTotal = 0;
 
-    if (state.stay.type === 'Hotel'){
-        state.rooms.forEach((value: any) => {
-            subTotal += value.numRooms * state.stay.rooms.find((stay: any) => stay.id === value.roomId).price * state.length ;
+    if (state.stay.type === 'Hotel') {
+        state.rooms.forEach((value) => {
+            const room = (state.stay as Hotel).rooms.find((room) => room.id === value.roomId);
+            if (room) {
+                const {pricing} = room;
+                let price = pricing?.base || room.price;
+
+                if (isYear && pricing?.yearly) {
+                    price = pricing.yearly * years + (differenceInMonths(checkOutDate, checkInDate) % 12) * pricing.yearly / 12 + differenceInDays(checkOutDate, addMonths(addYears(checkInDate, years), (differenceInMonths(checkOutDate, checkInDate) % 12)));
+                } else if (isMonth && pricing?.monthly) {
+                    price = pricing.monthly * months + differenceInDays(checkOutDate, addMonths(checkInDate, months)) * pricing.monthly / 30;
+                } else if (isWeek && pricing?.weekly) {
+                    price = pricing.weekly * weeks + differenceInDays(checkOutDate, addWeeks(checkInDate, weeks)) * pricing.weekly / 7;
+                }
+
+                subTotal += value.numRooms * price;
+            }
         });
     } else {
-        subTotal = state.stay.price * state.length
+        const {pricing} = state.stay;
+        let price = pricing?.base || state.stay.price;
+        const totalDays = differenceInDays(checkOutDate, checkInDate);
+
+
+        if (isYear && pricing?.yearly) {
+            price = pricing.yearly * years + (differenceInMonths(checkOutDate, checkInDate) % 12) * pricing.yearly / 12 + differenceInDays(checkOutDate, addMonths(addYears(checkInDate, years), (differenceInMonths(checkOutDate, checkInDate) % 12)));
+        } else if (isMonth && pricing?.monthly) {
+            price = pricing.monthly * months + differenceInDays(checkOutDate, addMonths(checkInDate, months)) * pricing.monthly / 30;
+        } else if (isWeek && pricing?.weekly) {
+            price = pricing.weekly * weeks + differenceInDays(checkOutDate, addWeeks(checkInDate, weeks)) * pricing.weekly / 7;
+        }
+
+        subTotal = price;
     }
 
-    // Convert the total price to USD for fee calculation
     let totalPriceInUSD = subTotal;
     state.totalPrice = subTotal;
-    if (state.stay.currency !== 'USD') {
 
-        totalPriceInUSD = (subTotal * 1.02 / state.exchangeRates[state.stay.currency]) * state.exchangeRates['USD']
+    if (state.stay.currency !== 'USD') {
+        totalPriceInUSD = (subTotal * 1.02 / state.exchangeRates[ state.stay.currency ]) * state.exchangeRates[ 'USD' ];
     }
 
-    // Calculate fees using the fee percentage function based on the USD equivalent of totalPrice
     const feePercentage = getFeePercentage(totalPriceInUSD) / 100;
     const fees = subTotal * feePercentage;
 
-    // Convert the total price to the stay's currency if necessary
     if (state.stay.currency && state.stay.currency !== state.currency) {
-
-        const exchangeRate = 1.02 / state.exchangeRates[state.stay.currency];
-        state.usedRate = exchangeRate ;
+        const exchangeRate = 1.02 / state.exchangeRates[ state.stay.currency ];
+        state.usedRate = exchangeRate;
         state.fees = fees * exchangeRate;
         state.subtotal = subTotal * exchangeRate;
-
         state.grandTotal = state.fees + state.subtotal;
     } else {
         state.subtotal = subTotal;
@@ -114,14 +156,10 @@ const recalculateCosts = (state: any) => {
 };
 
 
-
-
-
-
 export const fetchExchangeRates = createAsyncThunk(
     'confirmBooking/fetchExchangeRates',
-    async (_, { getState,dispatch,rejectWithValue }) => {
-        const { confirmBooking} = getState() as RootState;
+    async (_, {getState, dispatch, rejectWithValue}) => {
+        const {confirmBooking} = getState() as RootState;
         try {
             const country = await getCountry()
             let fromCurrency = country?.currency || confirmBooking.currency;
@@ -182,21 +220,21 @@ const ConfirmBookingSlice = createSlice({
             recalculateCosts(state); // Recalculate costs when booking dates or number of guests change
         },
         setBookingStay: (state, action: PayloadAction<Stay>) => {
-            state.stay = action.payload;
-            if (action.payload && action.payload.location && action.payload.location.country === 'Kenya'){
+            state.stay = action.payload as (Home | Hotel);
+            if (action.payload && action.payload.location && action.payload.location.country === 'Kenya') {
                 state.paymentCurrency = 'KES';
-                if (state.exchangeRates){
-                    state.paymentRate = state.exchangeRates['KES'];
+                if (state.exchangeRates) {
+                    state.paymentRate = state.exchangeRates[ 'KES' ];
                 }
 
             }
             recalculateCosts(state); // Recalculate costs when the stay changes
         },
-        convertCart: (state, action: PayloadAction<object[]>) => {
+        convertCart: (state, action: PayloadAction<any[]>) => {
             state.rooms = action.payload;
             recalculateCosts(state)
         },
-        setPaymentMethod: (state,action: PayloadAction<string>) => {
+        setPaymentMethod: (state, action: PayloadAction<string>) => {
             state.paymentMethod = action.payload;
         },
         resetConfirmBookingError: (state) => {
@@ -205,8 +243,8 @@ const ConfirmBookingSlice = createSlice({
         },
         setPaymentCurrency: (state, action: PayloadAction<string>) => {
             state.paymentCurrency = action.payload;
-            if (state.exchangeRates){
-                state.paymentRate = state.exchangeRates[action.payload];
+            if (state.exchangeRates) {
+                state.paymentRate = state.exchangeRates[ action.payload ];
             }
         }
     },
@@ -237,17 +275,17 @@ const ConfirmBookingSlice = createSlice({
                 state.error = action.payload;
             })
             .addCase(fetchExchangeRates.fulfilled, (state, action) => {
-                console.log('Fetching Rates',action.payload)
+                console.log('Fetching Rates', action.payload)
                 state.exchangeRates = action.payload?.rates;
                 state.currency = action.payload?.currency || 'GHS';
                 state.country = action.payload?.country || 'Kenya';
-                if (action.payload && (action.payload.currency === 'KES' || action.payload.currency === 'GHS') ) {
+                if (action.payload && (action.payload.currency === 'KES' || action.payload.currency === 'GHS')) {
                     state.paymentCurrency = action.payload.currency;
-                    state.paymentRate = action.payload?.rates[action.payload.currency];
+                    state.paymentRate = action.payload?.rates[ action.payload.currency ];
                 } else {
-                    state.paymentRate = action.payload?.rates[state.paymentCurrency] * 1.035
+                    state.paymentRate = action.payload?.rates[ state.paymentCurrency ] * 1.035
                 }
-                state.usedRate = action.payload?.rates[state.currency] * 1.02;
+                state.usedRate = action.payload?.rates[ state.currency ] * 1.02;
 
                 recalculateCosts(state);
                 state.status = 'idle';
@@ -255,8 +293,8 @@ const ConfirmBookingSlice = createSlice({
             .addCase(fetchExchangeRates.pending, (state) => {
                 state.status = 'loading'
             }).addCase(fetchExchangeRates.rejected, (state, action) => {
-                state.status = 'failed';
-                state.error = action.payload as string || 'An error occurred';
+            state.status = 'failed';
+            state.error = action.payload as string || 'An error occurred';
         })
 
             .addCase(fetchPawaPayConfigs.pending, (state) => {
@@ -279,7 +317,7 @@ const ConfirmBookingSlice = createSlice({
                 state.status = 'succeeded';
                 state.bookingStatus = 'Pending';
             })
-            .addCase(payExistingBooking.rejected, (state,action: PayloadAction<any>) => {
+            .addCase(payExistingBooking.rejected, (state, action: PayloadAction<any>) => {
                 state.status = 'failed';
                 state.error = action.payload;
             })
@@ -291,7 +329,6 @@ const ConfirmBookingSlice = createSlice({
 export const {
     updateContact,
     updateSpecialRequest,
-    updateCostData,
     updateBookingData,
     setBookingStay,
     convertCart,

@@ -12,7 +12,6 @@ import MobileCartSummary from "@/components/stay/MobileCartSummary";
 import CartSummary from "@/components/stay/cartSummary";
 import AvailableRooms from "@/components/stay/availableRooms";
 import {selectCurrentStay, setCurrentStayFromId} from "@/slices/staysSlice";
-import {selectCart} from "@/slices/bookingSlice";
 import HouseRules from "@/components/stay/houseRules";
 import {Calendar, Card} from "antd";
 import dayjs from "dayjs";
@@ -71,7 +70,7 @@ export default function StayPage() {
                             fullscreen={false}
                             disabledDate={(date) => {
                                 const curr = date.toISOString().split('T')[ 0 ]
-                                const  booked = stay.fullyBookedDates?.includes(curr) ?? false;
+                                const  booked = stay.bookedDates?.includes(curr) ?? false;
 
                                 return date.isBefore(dayjs()) || booked;
                             }}
@@ -103,7 +102,10 @@ export default function StayPage() {
                             <Calendar
                                 fullscreen={false}
                                 disabledDate={(date) => {
-                                    return date.isBefore(dayjs());
+                                    const curr = date.toISOString().split('T')[ 0 ]
+                                    const  booked = stay.bookedDates?.includes(curr) ?? false;
+
+                                    return date.isBefore(dayjs()) || booked;
                                 }}
                                 fullCellRender={(date) => {
                                     const isCheckIn = date.isSame(checkInDate, 'date');
