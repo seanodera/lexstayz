@@ -105,8 +105,13 @@ export const fetchStaysAsync = createAsyncThunk(
 );
 
 export const fetchStayById = createAsyncThunk(
-    'stays/fetchStayById', async (id:string,{rejectWithValue}) => {
+    'stays/fetchStayById', async (id:string,{rejectWithValue,getState}) => {
       try {
+        const state = (getState() as { stays: StaysState }).stays;
+        const stay = state.stays.find((stay) => stay.id === id)
+        if (stay){
+          return stay;
+        }
         const staysRef = collection(firestore, "stays");
         const snapshot = await getDoc(doc(staysRef, id));
         return snapshot.data() as (Home | Hotel);
@@ -333,7 +338,9 @@ const staysSlice = createSlice({
     })
         .addCase(fetchStayById.pending, (state) => {})
         .addCase(fetchStayById.fulfilled, (state, action) => {
-          state.stays = [action.payload, ...state.stays];
+          if (!state.stays.some((stay) => stay.id === action.payload.id)) {
+            state.stays = [action.payload, ...state.stays];
+          }
         })
         .addCase(fetchStayById.rejected, (state, action) => {
           state.isLoading = false;

@@ -1,14 +1,13 @@
 'use client'
 
 import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
-import {Card, Divider, Image} from "antd";
+import {Divider, Image} from "antd";
 import {getTag} from "@/components/common";
-import dayjs from "dayjs";
-import {differenceInDays} from "date-fns";
 import {calculateStayLength, dateReader} from "@/lib/utils";
 import {fetchStayById, selectStayById} from "@/slices/staysSlice";
 import Link from "next/link";
 import {useEffect} from "react";
+
 
 export default function BookingItem({booking}: { booking: any }) {
     const stay = useAppSelector((state: any) => selectStayById(state, booking.accommodationId));
