@@ -1,20 +1,27 @@
 'use client'
 
-import {useAppSelector} from "@/hooks/hooks";
+import {useAppDispatch, useAppSelector} from "@/hooks/hooks";
 import {Card, Divider, Image} from "antd";
 import {getTag} from "@/components/common";
 import dayjs from "dayjs";
 import {differenceInDays} from "date-fns";
 import {calculateStayLength, dateReader} from "@/lib/utils";
-import {selectStayById} from "@/slices/staysSlice";
+import {fetchStayById, selectStayById} from "@/slices/staysSlice";
 import Link from "next/link";
+import {useEffect} from "react";
 
-export default function BookingItem({booking}: {booking: any}){
-    const stay = useAppSelector((state: any) => selectStayById(state, booking.accommodationId))
+export default function BookingItem({booking}: { booking: any }) {
+    const stay = useAppSelector((state: any) => selectStayById(state, booking.accommodationId));
+    const dispatch = useAppDispatch();
+    useEffect(() => {
+        if (!stay) {
+            dispatch(fetchStayById(booking.accommodationId))
+        }
+    }, [booking.accommodationId, dispatch, stay]);
     return <Link href={`/bookings/${booking.id}`} className={'block md:space-y-4 gap-2 bg-white rounded-xl p-4'}>
         <Image src={stay?.poster} alt={''} className={'rounded-xl h-full object-cover aspect-video'}/>
         <div className={'mt-2'}>
-            <h4 className={'font-semibold'}>{booking.id.slice(0,8).toUpperCase()}</h4>
+            <h4 className={'font-semibold'}>{booking.id.slice(0, 8).toUpperCase()}</h4>
             <div className={'flex flex-col md:flex-row justify-between items-center gap-2'}>
 
                 <h3 className={'mb-0'}>{stay?.name}</h3>

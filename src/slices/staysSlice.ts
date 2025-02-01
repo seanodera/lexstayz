@@ -1,18 +1,11 @@
 "use client";
 
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { RootState } from "@/data/types";
-import {arrayUnion, collection, doc, getDoc, getDocs, setDoc, updateDoc} from "firebase/firestore";
-import { firestore } from "@/lib/firebase";
-import {
-  query,
-  where,
-  limit as fbLimit,
-  orderBy,
-  startAfter,
-  getCountFromServer,
-} from "@firebase/firestore";
-import { setBookingStay } from "@/slices/confirmBookingSlice";
+import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
+import {RootState} from "@/data/types";
+import {collection, doc, getDoc, getDocs} from "firebase/firestore";
+import {firestore} from "@/lib/firebase";
+import {getCountFromServer, limit as fbLimit, orderBy, query, startAfter, where,} from "@firebase/firestore";
+import {setBookingStay} from "@/slices/confirmBookingSlice";
 import {Home, Host, Hotel, Stay} from "@/lib/types";
 
 
@@ -111,7 +104,20 @@ export const fetchStaysAsync = createAsyncThunk(
   }
 );
 
-
+export const fetchStayById = createAsyncThunk(
+    'stays/fetchStayById', async (id:string,{rejectWithValue}) => {
+      try {
+        const staysRef = collection(firestore, "stays");
+        const snapshot = await getDoc(doc(staysRef, id));
+        return snapshot.data() as (Home | Hotel);
+      } catch (error) {
+        if (error instanceof Error) {
+          return rejectWithValue(error.message);
+        }
+        return rejectWithValue("An unknown error occurred");
+      }
+    }
+)
 
 export const getStayCountsAsync = createAsyncThunk(
   "stays/getStayCounts",
@@ -157,7 +163,7 @@ export const setCurrentStayFromId = createAsyncThunk(
         const snapshot = await getDoc(doc(staysRef, id));
         const data = snapshot.data() as Stay;
         console.log("Gotten from firebase: ", data);
-        dispatch(setAllStays([...stays.stays, data]));
+        dispatch(setAllStays([data,...stays.stays]));
         dispatch(setBookingStay(data));
         return data;
       }
@@ -325,7 +331,17 @@ const staysSlice = createSlice({
         state.errorMessage =
             (action.payload as string) || "Failed to get stay counts";
     })
-      ;
+        .addCase(fetchStayById.pending, (state) => {})
+        .addCase(fetchStayById.fulfilled, (state, action) => {
+          state.stays = [action.payload, ...state.stays];
+        })
+        .addCase(fetchStayById.rejected, (state, action) => {
+          state.isLoading = false;
+          state.hasError = true;
+          state.errorMessage =
+              (action.payload as string) || "Failed to fetch stay";
+        })
+    ;
   },
 });
 
