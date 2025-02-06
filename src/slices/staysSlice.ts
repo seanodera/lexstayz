@@ -70,7 +70,7 @@ export const fetchStaysAsync = createAsyncThunk(
       }
 
       const staysRef = collection(firestore, "stays");
-      const baseQuery = query(staysRef, where("published", "==", true), orderBy('publishedDate'));
+      const baseQuery = query(staysRef, where("published", "==", true), orderBy('publishedDate','desc'));
 
       const filteredQuery =
         type === "All"
