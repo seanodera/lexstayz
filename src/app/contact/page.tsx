@@ -16,7 +16,7 @@ export default function ContactUsPage() {
             <h3 className={'text-gray-400 font-medium text-xl'}>Let us know how we can help</h3>
         </div>
 
-        <div className={'grid md:grid-cols-2 lg:grid-cols-4 gap-4 lg:px-24 px-7 mb-16'}>
+        <div className={'grid md:grid-cols-2 lg:grid-cols-3 gap-4 lg:px-24 px-7 mb-16'}>
             <Card className={'aspect-square'} classNames={{body: 'h-full'}}>
                 <div className={'flex flex-col justify-between h-full'}>
                     <div className={'rounded-lg p-2 text-2xl border-solid border-gray-200 w-max aspect-square text-center'}>
@@ -25,22 +25,22 @@ export default function ContactUsPage() {
                     <div className={''}>
                         <h3 className={'text-xl font-semibold mb-0'}>Chat To Support</h3>
                         <h4 className={'text-gray-400 mb-3'}>We are here to help</h4>
-                        <Link className={'underline font-bold text-dark'} href={'mailto:support@lexstayz.com'}>support@lexstayz.com</Link>
+                        <Link className={'underline font-bold text-dark'} href={'mailto:hello@fadorteclimited.com'}>hello@fadorteclimited.com</Link>
                     </div>
                 </div>
             </Card>
-            <Card className={'aspect-square'} classNames={{body: 'h-full'}}>
-                <div className={'flex flex-col justify-between h-full'}>
-                    <div className={'rounded-lg p-2 text-2xl border-solid border-gray-200 w-max aspect-square text-center'}>
-                        <FaHandshake/>
-                    </div>
-                    <div className={''}>
-                        <h3 className={'text-xl font-semibold mb-0'}>Partnerships and Advertising</h3>
-                        <h4 className={'text-gray-400 mb-3'}>For partnering and advertising </h4>
-                        <Link className={'underline font-bold text-dark'} href={'mailto:affilliates@lexstayz.com'}>affilliate@lexstayz.com</Link>
-                    </div>
-                </div>
-            </Card>
+            {/*<Card className={'aspect-square'} classNames={{body: 'h-full'}}>*/}
+            {/*    <div className={'flex flex-col justify-between h-full'}>*/}
+            {/*        <div className={'rounded-lg p-2 text-2xl border-solid border-gray-200 w-max aspect-square text-center'}>*/}
+            {/*            <FaHandshake/>*/}
+            {/*        </div>*/}
+            {/*        <div className={''}>*/}
+            {/*            <h3 className={'text-xl font-semibold mb-0'}>Partnerships and Advertising</h3>*/}
+            {/*            <h4 className={'text-gray-400 mb-3'}>For partnering and advertising </h4>*/}
+            {/*            <Link className={'underline font-bold text-dark'} href={'mailto:affilliates@lexstayz.com'}>affilliate@lexstayz.com</Link>*/}
+            {/*        </div>*/}
+            {/*    </div>*/}
+            {/*</Card>*/}
             <Card className={'aspect-square'} classNames={{body: 'h-full'}}>
                 <div className={'flex flex-col justify-between h-full'}>
                     <div className={'rounded-lg p-2 text-2xl border-solid border-gray-200 w-max aspect-square text-center'}>
@@ -49,7 +49,7 @@ export default function ContactUsPage() {
                     <div className={''}>
 
                         <h3 className={'text-xl font-semibold mb-0'}>General Inquiries</h3>
-                        <h4 className={'text-gray-400 mb-3'}>+44333837758</h4>
+                        <h4 className={'text-gray-400 mb-3'}>+447438549761</h4>
                         <Link className={'underline font-bold text-dark'} href={'mailto:hello@fadorteclimited.com'}>hello@fadorteclimited.com</Link>
                     </div>
                 </div>
@@ -63,7 +63,7 @@ export default function ContactUsPage() {
 
                         <h3 className={'text-xl font-semibold mb-0'}>Call us</h3>
                         <h4 className={'text-gray-400 mb-3'}>Mon-Fri from 9 AM to 5 PM (GMT)</h4>
-                        <Link className={'underline font-bold text-dark'} href={'tel:h+44333837758'}>+44333837758</Link>
+                        <Link className={'underline font-bold text-dark'} href={'tel:h+447438549761'}>+447438549761</Link>
                     </div>
                 </div>
             </Card>
